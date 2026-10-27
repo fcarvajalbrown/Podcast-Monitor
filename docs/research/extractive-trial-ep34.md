@@ -119,3 +119,7 @@ Option 3, glossary names as whisper's initial prompt (`--glossary-prompt`, the 2
 Sentences and eligible counts are from `tools/extractive_pick/pick.py` on the fixed transcripts.
 
 The earlier `whisper-cli` prompt run (`name-correction.md`) did fragment after minute 20, so the prompt's effect is not consistent across builds; here one run per arm, no repeat to show the noise.
+
+## Repeat of option 3
+
+Same command a second time (`--chunk-minutes 0 --glossary-prompt`, context carried). The transcript is identical to the first run: 1,399 segments, the same per-ten-minute table, Kast 17, Boric 9, Squella 1, 774 sentences and 384 eligible. Only the compute time differs (400 s against 384 s). So whisper.cpp decoding is deterministic here, and a repeat on the same episode shows no run-to-run noise. It does not show whether the prompt holds on other episodes; the glossary is also built from this episode, a best case. Not tested.
