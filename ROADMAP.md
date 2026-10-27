@@ -46,7 +46,7 @@ Episode figures decided with Felipe, built at the end of phase 2 so the phase 3 
 
 ## Phase 3: PDF report in the escritorio layout
 
-Layout reference: `felipe_skill_voice/scripts/gen_pdf_desk.py` (A4, 2.5 cm margins, Latin Modern Roman with its GUST licence, grey italic header line over a thin rule, justified body, booktabs-style tables, centred page number). Items approved by Felipe in this order.
+Layout reference: `felipe_skill_voice/scripts/gen_pdf_desk.py` (A4, 2.5 cm margins, Latin Modern Roman with its GUST licence, grey italic header line over a thin rule, which Felipe chose to draw in the logo red #B70002 instead of grey, justified body, booktabs-style tables, centred page number). Items approved by Felipe in this order.
 
 | # | Item | Status |
 |---|---|---|
