@@ -2,6 +2,7 @@
 
 Finished roadmap items, newest first. Git dates each entry.
 
+- Phase 2, item 7: `Summary::merged` joins the part summaries in order with a blank line, concatenates topic spans and quotes, and keeps each person once in first-seen order; unit test on two parts. `summarize` now looks up quotes from the merged record: rerun on copies of both saved replies made no assistant call and found the same 10 of 10 quotes. Neither saved episode splits, so no real two-part episode was merged.
 - Phase 2, item 4: an assistant failure whose text holds a limit marker ("hit your", usage, spend or rate limit, 429, low credit balance) stops `summarize` with exit code 2, finished parts kept. Markers from the Claude Code errors page (code.claude.com/docs/en/errors) and Codex user reports ("You've hit your usage limit", "429 Too Many Requests"); neither CLI documents a limit exit code. Checked with a fake `claude.cmd` returning a session-limit reply: stopped at part 1 of 3, exit 2. Not yet seen against a real limit (item 6).
 - Phase 2, item 5: extractive picker on both context-off transcripts; Felipe judged the Ep. 34 picks readable and kept it as the limit-error fallback; two ad picks on Nada Personal (`docs/research/extractive-trial-ep34.md`).
 - Phase 2, item 3: quote lookup in `src/quotes.rs`; on Ep. 34 (claude) and Nada Personal (codex) 10 of 10 quotes found, none dropped; one model minute (31:12) corrected to the transcript's 31:10.

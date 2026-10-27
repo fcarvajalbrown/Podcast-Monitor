@@ -40,6 +40,6 @@ Episode figures decided with Felipe, built at the end of phase 2 so the phase 3 
 | 4 | Limit-error pause: stop cleanly, keep finished episodes | Done |
 | 6 | Limit text seen from a real limit on either CLI, matched by the markers | Not Started |
 | 5 | Extractive picker on `noctx-fixed.json` and `np-noctx-fixed.json` as the fallback check, read by Felipe | Done |
-| 7 | Merge the parts of a split episode into one record | Not Started |
+| 7 | Merge the parts of a split episode into one record | Done |
 | 8 | Airtime per topic from the summed spans, ranked | Not Started |
 | 9 | People counts by surname in the corrected transcript, ranked, zeros kept | Not Started |
