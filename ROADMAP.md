@@ -14,7 +14,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 | 2 | Summarizer through her assistant CLI, quote matching, limit-error pause | Not Started |
 | 3 | PDF report in the escritorio layout | Not Started |
 | 4 | Desktop window in Spanish | Not Started |
-| 5 | macOS build with Metal, reference episodes, first weekly run | Not Started |
+| 5 | macOS build with Metal, reference episodes, first on-demand report | Not Started |
 
 ## Phase 1: Pipeline as a Windows CLI
 

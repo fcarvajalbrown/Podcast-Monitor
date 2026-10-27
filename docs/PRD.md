@@ -38,7 +38,7 @@ Non-goals:
 | Must | PDF output in the "Desde el escritorio de Felipe Carvajal Brown" layout (`felipe_skill_voice/scripts/gen_pdf_desk.py` is the reference) |
 | Must | Names glossary with phonetic post-correction of transcripts at similarity 0.85; the same glossary is sent to the summarizer with each chunk so summaries and people lists use the right names where the transcript stays wrong; quotes keep the transcript's words; glossary built from an editable hand list, names in each show's episode titles and descriptions, and Chamber of Deputies and Senate open data, with a per-show exception list |
 
-Out of v1: Whisper initial-prompt glossary (no gain on two episodes, see `docs/research/name-correction.md`), the YouTube fallback (no v1 show needs it; it returns with the three no-feed shows), hand-picked episode or date-range runs, publisher transcripts (every episode is transcribed locally, even when the feed carries a transcript), and the three pilot shows with no official feed (Cómo te lo explico, Contracorriente, Comentarios de Tomás Mosciatti).
+Out of v1: the latest-week report across the saved show list (on-demand episodes cover the request; it can return once the RTX 3060 speed is measured), Whisper initial-prompt glossary (no gain on two episodes, see `docs/research/name-correction.md`), the YouTube fallback (no v1 show needs it; it returns with the three no-feed shows), date-range runs, publisher transcripts (every episode is transcribed locally, even when the feed carries a transcript), and the three pilot shows with no official feed (Cómo te lo explico, Contracorriente, Comentarios de Tomás Mosciatti).
 
 ## 6. Technical Architecture
 
@@ -88,7 +88,7 @@ v1 is ready to hand over when:
 - On both, correct name counts are at least the 0.85 results recorded in that file.
 - Every quote in each PDF is found in the transcript at the printed minute.
 - Each PDF follows the escritorio layout of `gen_pdf_desk.py`.
-- The reader then runs one latest-week report on her Mac.
+- The reader receives one on-demand episode report.
 
 ## 11. Phases and Milestones
 
@@ -98,11 +98,10 @@ Ordered dependency first, each phase building on the one before.
 2. Summarizer through her assistant CLI (`claude -p` and `codex exec` behind one interface), glossary sent with each chunk, quote matching, limit-error pause.
 3. PDF report in the escritorio layout.
 4. Desktop window in Spanish: show list, search with confirm, the two run modes, progress, Open PDF.
-5. macOS build with Metal on a free GitHub Actions macOS runner; the two reference episodes pass; her first weekly run.
+5. macOS build with Metal on a free GitHub Actions macOS runner; the two reference episodes pass; her first on-demand report.
 
 ## 12. Open Questions
 
 - Which assistant subscription the reader has (decides which CLI is tested first).
-- Whether the latest-week report across the saved show list stays in v1 now that runs are one episode per show on demand.
 - Whether the macOS build (phase 5) is still needed now that Felipe runs the transcription, and whether the summarizer runs on his machine or hers.
 - Transcription speed on the RTX 3060: not measured.
