@@ -96,3 +96,26 @@ Summary of the four Ep. 34 runs on the RTX 2050, beam 5 unless noted:
 | Context 0, one pass | 326 | none | 16 | 6 |
 
 Only context 0 meets Kast at least 16 and avoids fragmentation, and it misses Boric at least 7 by one mention.
+
+## Benchmark of the three options (beam 5, one pass, RTX 2050, one run each)
+
+Option 1, context off: the `--text-context 0` run above.
+
+Option 2, keep context and repair afterwards: the default run (395 s, Kast 17, Boric 9). The simplest repair, cutting sentences at pauses, cannot work: in minutes 35-75 of that run 2,341 of 2,342 gaps between segments are exactly 0 s (segment times are contiguous), against 333 of 383 in minutes 0-25. No punctuation-restoration model was tried, so a repair that works is not shown.
+
+Option 3, glossary names as whisper's initial prompt (`--glossary-prompt`, the 21 names of `glossary-ap-ep34.txt` comma-separated):
+
+- With context carried: compute 384 s, 1,399 segments, no replacement characters. Fragmentation is much milder than the default run: segments average 5.5 to 5.8 words in minutes 40-60 (default 2.4) and about 30 % end in punctuation there (default under 1 %); minutes 0-40 and 60-78 look like the first half of the default run. Kast 17, Boric 9, Squella 1. Text from minute 45 reads as comma-separated clauses.
+- With context off: identical to option 1 (same segments, same counts). Whisper.cpp only uses the prompt when the text context is above 0, so the prompt does nothing with context off.
+
+| Arm | compute_s | Segments | Sentences / eligible (picker) | Kast | Boric | Squella |
+|---|---|---|---|---|---|---|
+| Default (context, no prompt) | 395 | 1,999* | 438 / 205 | 17 | 9 | 0 |
+| 1. Context off | 326 | 1,503 | 485 / 257 | 16 | 6 | 3 |
+| 2. Repair afterwards | 395 | 1,999* | 438 / 205 | 17 | 9 | 0 |
+| 3. Prompt, context on | 384 | 1,399 | 774 / 384 | 17 | 9 | 1 |
+| 3b. Prompt, context off | 332 | 1,503 | same as 1 | 16 | 6 | 3 |
+
+*The default run's segment count is 3,226 in `pipeline-ep34-check.md`; the 1,999 above is the chunked run, kept here only for the chunk comparison. Sentences and eligible counts are from `tools/extractive_pick/pick.py` on the fixed transcripts.
+
+The earlier `whisper-cli` prompt run (`name-correction.md`) did fragment after minute 20, so the prompt's effect is not consistent across builds; here one run per arm, no repeat to show the noise.
