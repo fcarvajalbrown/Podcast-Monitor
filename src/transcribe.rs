@@ -19,7 +19,7 @@ pub struct Segment {
 pub struct Decoding {
     pub beam_size: usize,
     pub chunk_minutes: usize,
-    pub text_context: Option<i32>,
+    pub text_context: i32,
     pub prompt: Option<String>,
 }
 
@@ -58,9 +58,7 @@ impl Transcriber {
         };
         let mut params = FullParams::new(strategy);
         params.set_language(Some(language));
-        if let Some(tokens) = decoding.text_context {
-            params.set_n_max_text_ctx(tokens);
-        }
+        params.set_n_max_text_ctx(decoding.text_context);
         if let Some(prompt) = decoding.prompt.as_deref() {
             params.set_initial_prompt(prompt);
         }

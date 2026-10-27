@@ -43,11 +43,11 @@ enum Command {
         beam_size: usize,
         #[arg(long, help = "greedy decoding, same as --beam-size 1")]
         greedy: bool,
-        #[arg(long, default_value_t = run::DEFAULT_CHUNK_MINUTES, help = "transcribe in chunks of this many minutes, each with fresh context; 0 is one pass")]
+        #[arg(long, default_value_t = run::DEFAULT_CHUNK_MINUTES, help = "transcribe in chunks of this many minutes, each in a fresh state; 0 is one pass")]
         chunk_minutes: usize,
-        #[arg(long, help = "most tokens of earlier text fed to each 30 s window; 0 turns the carried context off")]
-        text_context: Option<i32>,
-        #[arg(long, help = "feed the glossary names to whisper as its initial prompt")]
+        #[arg(long, default_value_t = run::DEFAULT_TEXT_CONTEXT, help = "most tokens of earlier text fed to each 30 s window; 0 turns it off, 16384 is whisper.cpp's own default")]
+        text_context: i32,
+        #[arg(long, help = "feed the glossary names to whisper as its initial prompt; has no effect while --text-context is 0")]
         glossary_prompt: bool,
     },
 }

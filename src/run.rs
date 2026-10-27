@@ -13,7 +13,8 @@ use crate::transcribe::{Decoding, Segment, Transcriber};
 
 const LANGUAGE: &str = "es";
 pub const DEFAULT_BEAM_SIZE: usize = 5;
-pub const DEFAULT_CHUNK_MINUTES: usize = 10;
+pub const DEFAULT_CHUNK_MINUTES: usize = 0;
+pub const DEFAULT_TEXT_CONTEXT: i32 = 0;
 
 pub struct Options {
     pub feed: String,
@@ -25,7 +26,7 @@ pub struct Options {
     pub title: Option<String>,
     pub beam_size: usize,
     pub chunk_minutes: usize,
-    pub text_context: Option<i32>,
+    pub text_context: i32,
     pub glossary_prompt: bool,
 }
 
