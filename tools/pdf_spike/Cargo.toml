@@ -1,0 +1,17 @@
+[package]
+name = "pdf-spike"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+[workspace]
+
+[dependencies]
+krilla = "0.8.2"
+printpdf = "0.12.8"
+rustybuzz = "0.20.1"
+typst = "0.15.1"
+typst-as-lib = "0.17.0"
+typst-layout = "0.15.1"
+typst-pdf = "0.15.1"
