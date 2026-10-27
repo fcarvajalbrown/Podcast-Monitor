@@ -19,7 +19,9 @@ pub struct Transcriber {
 impl Transcriber {
     pub fn load(model: &Path) -> Result<Self> {
         let path = model.to_str().ok_or_else(|| anyhow!("model path is not valid UTF-8"))?;
-        let context = WhisperContext::new_with_params(path, WhisperContextParameters::default())
+        let mut params = WhisperContextParameters::default();
+        params.use_gpu(true);
+        let context = WhisperContext::new_with_params(path, params)
             .with_context(|| format!("loading model {}", model.display()))?;
         Ok(Self { context })
     }
