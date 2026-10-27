@@ -1,8 +1,9 @@
 # Session notes
 
-Current state: phase 1 done; Ep. 34 checked end to end on the GPU (`docs/research/pipeline-ep34-check.md`). Phase 2 not started. See `ROADMAP.md`.
+Current state: phase 1 done; Ep. 34 checked end to end on the GPU (`docs/research/pipeline-ep34-check.md`). PRD rescoped: Felipe runs transcription on his RTX 3060 PC or RTX 2050 laptop, one episode per show on demand, summarizer through his own CLI login; the reader runs it herself on her M1 from phase 5. Phase 2 not started. See `ROADMAP.md`.
 
 Open flags:
-- PRD open questions: the reader's assistant subscription; turbo speed on her M1.
-- whisper-rs on Vulkan took 424 s on Ep. 34 against 354 s for `whisper-cli` on the same GPU; not investigated.
-- No CPU-only or integrated-GPU speed for turbo has been measured; Felipe chose to leave it, since her M1 with Metal is the target (Phase 5).
+- Transcription speed on the RTX 3060 not measured; next job is Ep. 34 there, beam 5 against greedy, names counted on both.
+- whisper-rs 424 s against whisper-cli 354 s on the RTX 2050, not investigated.
+- No CPU-only or integrated-GPU speed measured; left by Felipe's choice.
+- PRD open question: which assistant subscription the reader has.

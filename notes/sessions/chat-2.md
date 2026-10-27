@@ -11,3 +11,10 @@ Flags opened:
 
 Flags closed:
 - Ep. 34 GPU rerun; Rust against Python name fix comparison.
+
+Later in the session:
+- Full back catalogue of the 23-show list estimated at 27.5 days (RTX 2050) to 78-117 days (M1); rejected.
+- PRD: Felipe operates on the 3060 PC or laptop, one episode per show on demand, latest-week report dropped from v1, macOS build kept for phase 5, summarizer on Felipe's CLI login until then.
+
+Flags opened:
+- RTX 3060 speed, beam against greedy.
