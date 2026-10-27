@@ -43,6 +43,8 @@ enum Command {
         beam_size: usize,
         #[arg(long, help = "greedy decoding, same as --beam-size 1")]
         greedy: bool,
+        #[arg(long, default_value_t = run::DEFAULT_CHUNK_MINUTES, help = "transcribe in chunks of this many minutes, each with fresh context; 0 is one pass")]
+        chunk_minutes: usize,
     },
 }
 
@@ -56,9 +58,9 @@ fn main() -> Result<()> {
             }
             Ok(())
         }
-        Command::Run { feed, model, glossary, work, latest, threshold, title, beam_size, greedy } => {
+        Command::Run { feed, model, glossary, work, latest, threshold, title, beam_size, greedy, chunk_minutes } => {
             let beam_size = if greedy { 1 } else { beam_size };
-            run::run(&run::Options { feed, model, glossary, work, latest, threshold, title, beam_size })
+            run::run(&run::Options { feed, model, glossary, work, latest, threshold, title, beam_size, chunk_minutes })
         }
     }
 }

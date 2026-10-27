@@ -13,6 +13,7 @@ use crate::transcribe::{Segment, Transcriber};
 
 const LANGUAGE: &str = "es";
 pub const DEFAULT_BEAM_SIZE: usize = 5;
+pub const DEFAULT_CHUNK_MINUTES: usize = 10;
 
 pub struct Options {
     pub feed: String,
@@ -23,6 +24,7 @@ pub struct Options {
     pub threshold: f64,
     pub title: Option<String>,
     pub beam_size: usize,
+    pub chunk_minutes: usize,
 }
 
 fn default_beam_size() -> usize {
@@ -87,7 +89,7 @@ fn process(episode: &Episode, folder: &Path, options: &Options, glossary: Option
                 *transcriber = Some(Transcriber::load(&options.model)?);
             }
             let started = Instant::now();
-            let segments = transcriber.as_ref().map(|t| t.transcribe(&samples, LANGUAGE, options.beam_size)).transpose()?.unwrap_or_default();
+            let segments = transcriber.as_ref().map(|t| t.transcribe(&samples, LANGUAGE, options.beam_size, options.chunk_minutes)).transpose()?.unwrap_or_default();
             let transcript = Transcript {
                 model: options.model.file_name().map(|name| name.to_string_lossy().into_owned()).unwrap_or_default(),
                 beam_size: options.beam_size,
