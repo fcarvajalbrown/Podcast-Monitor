@@ -26,6 +26,8 @@ All items done; see `docs/ROADMAP-HISTORY.md`.
 
 Chunking decided with Felipe: the whole episode goes in one call when it is under a size cap, split at segment boundaries into equal parts only above it; each line is sent as `[mm:ss] text`. With the minute prefix Ep. 34 is 80,402 characters and Nada Personal 64,535, both one chunk at the 120,000 cap.
 
+Reply shape decided with Felipe, enforced by a JSON schema (`claude -p --json-schema`, `codex exec --output-schema`): a Spanish summary, topics as name with `[mm:ss]` start and end spans, people named (names only), quotes as verbatim text with an approximate minute. The app sums spans for airtime, counts people in the corrected transcript and looks up every quote.
+
 | # | Item | Status |
 |---|---|---|
 | 1 | Transcript chunking: one chunk under the cap, equal parts at segment boundaries above it | Done |
