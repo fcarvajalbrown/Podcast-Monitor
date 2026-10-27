@@ -1,6 +1,6 @@
 # Podcast Monitor PRD
 
-Status: interview in progress. Sections 1-6 hold decisions Felipe made; everything not yet asked is in Open Questions.
+Status: interview complete. Every section holds decisions Felipe made; what is still unknown is in Open Questions.
 
 ## 1. Summary
 
@@ -79,9 +79,26 @@ Not applicable: a tool for one reader, no revenue.
 | A publisher changes or removes a feed | Feed URL is saved per show and can be replaced by search or paste |
 | The public repo ties the tool to a political side | Project rule 1; transcripts, reports and episode audio stay in the git-ignored `work/` |
 
-## 10-11
+## 10. Testing and Acceptance Criteria
 
-Not yet interviewed: Testing and acceptance criteria, Phases and milestones.
+Repo tests: `cargo test` on the pure parts (feed parsing, phonetic fix, quote matching, resume state) with small text fixtures. The assistant CLI is replaced by a fake that returns canned replies. Fixtures hold no names that tie the tool to a side (rule 1); audio and full transcripts stay out of git.
+
+v1 is ready to hand over when:
+- Animales Políticos Ep. 34 and the Nada Personal episode in `docs/research/name-correction.md` run end to end in the app.
+- On both, correct name counts are at least the 0.85 results recorded in that file.
+- Every quote in each PDF is found in the transcript at the printed minute.
+- Each PDF follows the escritorio layout of `gen_pdf_desk.py`.
+- The reader then runs one latest-week report on her Mac.
+
+## 11. Phases and Milestones
+
+Ordered dependency first, each phase building on the one before.
+
+1. Pipeline as a Windows CLI: feed fetch, transcription through whisper-rs on Vulkan, name fix at 0.85, per-episode resume.
+2. Summarizer through her assistant CLI (`claude -p` and `codex exec` behind one interface), glossary sent with each chunk, quote matching, limit-error pause.
+3. PDF report in the escritorio layout.
+4. Desktop window in Spanish: show list, search with confirm, the two run modes, progress, Open PDF.
+5. macOS build with Metal on a free GitHub Actions macOS runner; the two reference episodes pass; her first weekly run.
 
 ## 12. Open Questions
 
