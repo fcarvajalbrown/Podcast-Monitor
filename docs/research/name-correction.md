@@ -57,3 +57,29 @@ Two steps, usable together:
 - https://git.hoyer.xyz/harald/wyoming-whisper-rs/commit/e33cc3eb2206df53a533bba0b177f0f5036f9fa7
 - https://www.opensanctions.org/datasets/cl_chamber_deputies/
 - https://www.opensanctions.org/datasets/cl_senate/
+
+## Measured: phonetic correction on Ep. 34
+
+`tools/stt_compare/phonetic_fix.py` with `tools/stt_compare/glossary-ap-ep34.txt` (21 names picked by hand from the episode, so this is a best case: a real glossary would come from feed text and lists). Phonetic key is a simple Spanish rule set plus a similarity ratio.
+
+| Setting | Result |
+|---|---|
+| All words, 0.75 | unusable: "hacer" to Kaiser x25, "hasta" to Kast x14, "primera" to Piñera x13 |
+| Capitalized only, 0.85 | 17 changes on turbo, all correct; misses Boris/Borich on small |
+| Capitalized only, 0.75 | wrong on sentence-starters ("Hasta", "Casa" to Kast) |
+| Capitalized only, 0.75, skip words seen twice in lowercase in the same text | 20 changes each on turbo and small, no wrong change found on review |
+
+Correct spellings counted before and after (last setting):
+
+| Name | turbo | turbo + fix | small | small + fix |
+|---|---|---|---|---|
+| Kast | 7 | 19 | 0 | 1 |
+| Boric | 8 | 8 | 1 | 7 |
+| Squella | 0 | 3 | 0 | 0 |
+| Bellolio | 0 | 2 | 0 | 2 |
+| Contardo | 1 | 2 | 1 | 2 |
+| Arenas | 2 | 3 | 1 | 4 |
+| Larraín | 2 | 2 | 2 | 4 |
+| Parisi | 2 | 3 | 0 | 3 |
+
+Findings: the fix lifts turbo close to complete on these names. It cannot fix small's lowercase "cast" and "caz" without touching ordinary words, so small still loses Kast almost entirely. "Castro" to Kast was right in this episode but would be wrong for a real Castro; the glossary step needs a per-show exception list.
