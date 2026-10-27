@@ -5,6 +5,7 @@ mod names;
 mod quotes;
 mod run;
 mod summarize;
+mod tally;
 mod transcribe;
 
 use std::path::PathBuf;
@@ -108,6 +109,9 @@ fn main() -> Result<()> {
             };
             eprintln!("{} part(s) saved to {}", summary.chunks.len(), out.display());
             let episode = summary.merged();
+            for topic in tally::airtime(&episode.topics) {
+                println!("{}  {}", chunk::clock(topic.seconds), topic.name);
+            }
             let index = quotes::Index::new(&segments);
             for quote in &episode.quotes {
                 match index.find(&quote.text, &quote.minute) {

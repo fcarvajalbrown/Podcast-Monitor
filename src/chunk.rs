@@ -29,6 +29,11 @@ pub fn clock(seconds: f64) -> String {
     format!("{:02}:{:02}", whole / 60, whole % 60)
 }
 
+pub fn seconds(minute: &str) -> Option<f64> {
+    let (m, s) = minute.trim().trim_matches(['[', ']']).split_once(':')?;
+    Some(m.trim().parse::<f64>().ok()? * 60.0 + s.trim().parse::<f64>().ok()?)
+}
+
 pub fn split(segments: &[Segment], max_chars: usize) -> Vec<Chunk> {
     let lines: Vec<(&Segment, String)> = segments
         .iter()
