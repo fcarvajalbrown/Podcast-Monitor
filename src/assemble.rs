@@ -86,7 +86,7 @@ pub fn ordered(mut sections: Vec<EpisodeSection>) -> Vec<EpisodeSection> {
 }
 
 pub fn blocks(sections: &[EpisodeSection]) -> Vec<Block> {
-    sections.iter().flat_map(|section| std::iter::once(Block::PageBreak).chain(section.blocks())).collect()
+    sections.iter().enumerate().flat_map(|(index, section)| (index > 0).then_some(Block::PageBreak).into_iter().chain(section.blocks())).collect()
 }
 
 pub fn build(root: &Path, out: &Path) -> Result<usize> {
@@ -140,10 +140,10 @@ mod tests {
     }
 
     #[test]
-    fn every_episode_opens_with_a_page_break() {
-        let blocks = blocks(&[section("Alfa", None), section("Beta", None)]);
+    fn later_episodes_open_on_a_new_page_and_the_first_shares_the_header_page() {
+        let blocks = blocks(&[section("Alfa", None), section("Beta", None), section("Gama", None)]);
         assert_eq!(blocks.iter().filter(|block| **block == Block::PageBreak).count(), 2);
-        assert_eq!(blocks[0], Block::PageBreak);
+        assert_eq!(blocks[0], Block::Heading { level: 1, text: "Alfa".into() });
     }
 
     #[test]
