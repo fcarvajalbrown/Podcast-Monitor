@@ -15,6 +15,14 @@ pub struct Segment {
     pub text: String,
 }
 
+#[derive(Debug, Clone)]
+pub struct Decoding {
+    pub beam_size: usize,
+    pub chunk_minutes: usize,
+    pub text_context: Option<i32>,
+    pub prompt: Option<String>,
+}
+
 pub struct Transcriber {
     context: WhisperContext,
 }
@@ -29,29 +37,32 @@ impl Transcriber {
         Ok(Self { context })
     }
 
-    pub fn transcribe(&self, audio: &[f32], language: &str, beam_size: usize, chunk_minutes: usize, text_context: Option<i32>) -> Result<Vec<Segment>> {
-        let cuts = boundaries(audio, chunk_minutes * 60 * SAMPLE_RATE);
+    pub fn transcribe(&self, audio: &[f32], language: &str, decoding: &Decoding) -> Result<Vec<Segment>> {
+        let cuts = boundaries(audio, decoding.chunk_minutes * 60 * SAMPLE_RATE);
         let mut segments = Vec::new();
         for (index, pair) in cuts.windows(2).enumerate() {
             eprintln!("  chunk {}/{}", index + 1, cuts.len() - 1);
             let offset_s = pair[0] as f64 / SAMPLE_RATE as f64;
-            let part = self.transcribe_chunk(&audio[pair[0]..pair[1]], language, beam_size, text_context)?;
+            let part = self.transcribe_chunk(&audio[pair[0]..pair[1]], language, decoding)?;
             segments.extend(part.into_iter().map(|segment| Segment { start_s: segment.start_s + offset_s, end_s: segment.end_s + offset_s, text: segment.text }));
         }
         Ok(segments)
     }
 
-    fn transcribe_chunk(&self, audio: &[f32], language: &str, beam_size: usize, text_context: Option<i32>) -> Result<Vec<Segment>> {
+    fn transcribe_chunk(&self, audio: &[f32], language: &str, decoding: &Decoding) -> Result<Vec<Segment>> {
         let mut state = self.context.create_state().context("creating whisper state")?;
-        let strategy = if beam_size <= 1 {
+        let strategy = if decoding.beam_size <= 1 {
             SamplingStrategy::Greedy { best_of: 1 }
         } else {
-            SamplingStrategy::BeamSearch { beam_size: beam_size as i32, patience: -1.0 }
+            SamplingStrategy::BeamSearch { beam_size: decoding.beam_size as i32, patience: -1.0 }
         };
         let mut params = FullParams::new(strategy);
         params.set_language(Some(language));
-        if let Some(tokens) = text_context {
+        if let Some(tokens) = decoding.text_context {
             params.set_n_max_text_ctx(tokens);
+        }
+        if let Some(prompt) = decoding.prompt.as_deref() {
+            params.set_initial_prompt(prompt);
         }
         params.set_n_threads(threads());
         params.set_print_special(false);

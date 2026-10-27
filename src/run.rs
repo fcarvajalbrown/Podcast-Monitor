@@ -9,7 +9,7 @@ use serde::de::DeserializeOwned;
 use crate::audio;
 use crate::feed::{self, Episode};
 use crate::names::{self, Glossary, Replacements};
-use crate::transcribe::{Segment, Transcriber};
+use crate::transcribe::{Decoding, Segment, Transcriber};
 
 const LANGUAGE: &str = "es";
 pub const DEFAULT_BEAM_SIZE: usize = 5;
@@ -26,6 +26,7 @@ pub struct Options {
     pub beam_size: usize,
     pub chunk_minutes: usize,
     pub text_context: Option<i32>,
+    pub glossary_prompt: bool,
 }
 
 fn default_beam_size() -> usize {
@@ -89,8 +90,14 @@ fn process(episode: &Episode, folder: &Path, options: &Options, glossary: Option
             if transcriber.is_none() {
                 *transcriber = Some(Transcriber::load(&options.model)?);
             }
+            let decoding = Decoding {
+                beam_size: options.beam_size,
+                chunk_minutes: options.chunk_minutes,
+                text_context: options.text_context,
+                prompt: glossary.filter(|_| options.glossary_prompt).map(Glossary::prompt),
+            };
             let started = Instant::now();
-            let segments = transcriber.as_ref().map(|t| t.transcribe(&samples, LANGUAGE, options.beam_size, options.chunk_minutes, options.text_context)).transpose()?.unwrap_or_default();
+            let segments = transcriber.as_ref().map(|t| t.transcribe(&samples, LANGUAGE, &decoding)).transpose()?.unwrap_or_default();
             let transcript = Transcript {
                 model: options.model.file_name().map(|name| name.to_string_lossy().into_owned()).unwrap_or_default(),
                 beam_size: options.beam_size,

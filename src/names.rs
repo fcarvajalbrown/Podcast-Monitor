@@ -36,6 +36,10 @@ impl Glossary {
         Self { names, keep }
     }
 
+    pub fn prompt(&self) -> String {
+        self.names.iter().map(|(name, _)| name.as_str()).collect::<Vec<_>>().join(", ")
+    }
+
     fn best_match(&self, word: &str, threshold: f64) -> Option<&str> {
         let key = phonetic_key(word);
         let (score, name) = self

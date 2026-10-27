@@ -47,6 +47,8 @@ enum Command {
         chunk_minutes: usize,
         #[arg(long, help = "most tokens of earlier text fed to each 30 s window; 0 turns the carried context off")]
         text_context: Option<i32>,
+        #[arg(long, help = "feed the glossary names to whisper as its initial prompt")]
+        glossary_prompt: bool,
     },
 }
 
@@ -60,9 +62,9 @@ fn main() -> Result<()> {
             }
             Ok(())
         }
-        Command::Run { feed, model, glossary, work, latest, threshold, title, beam_size, greedy, chunk_minutes, text_context } => {
+        Command::Run { feed, model, glossary, work, latest, threshold, title, beam_size, greedy, chunk_minutes, text_context, glossary_prompt } => {
             let beam_size = if greedy { 1 } else { beam_size };
-            run::run(&run::Options { feed, model, glossary, work, latest, threshold, title, beam_size, chunk_minutes, text_context })
+            run::run(&run::Options { feed, model, glossary, work, latest, threshold, title, beam_size, chunk_minutes, text_context, glossary_prompt })
         }
     }
 }
