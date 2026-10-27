@@ -2,6 +2,7 @@ mod audio;
 mod chunk;
 mod feed;
 mod names;
+mod quotes;
 mod run;
 mod summarize;
 mod transcribe;
@@ -94,10 +95,18 @@ fn main() -> Result<()> {
         }
         Command::Summarize { transcript, glossary, provider, max_chars, out } => {
             let glossary = glossary.as_deref().map(names::Glossary::load).transpose()?;
-            let chunks = chunk::split(&chunk::load_segments(&transcript)?, max_chars);
+            let segments = chunk::load_segments(&transcript)?;
+            let chunks = chunk::split(&segments, max_chars);
             let out = out.unwrap_or_else(|| transcript.with_file_name("summary.json"));
             let summary = summarize::summarize(&chunks, glossary.as_ref(), provider, &summarize::Cli { provider }, &out)?;
             eprintln!("{} part(s) saved to {}", summary.chunks.len(), out.display());
+            let index = quotes::Index::new(&segments);
+            for quote in summary.chunks.iter().flat_map(|part| &part.quotes) {
+                match index.find(&quote.text, &quote.minute) {
+                    Some(found) => println!("{}  {}", chunk::clock(found.start_s), found.text),
+                    None => println!("dropped  {}  {}", quote.minute, quote.text),
+                }
+            }
             Ok(())
         }
     }

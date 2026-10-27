@@ -85,7 +85,7 @@ fn common_lowercase_words<'a>(texts: impl Iterator<Item = &'a str>) -> HashSet<S
     counts.into_iter().filter(|(_, count)| *count >= COMMON_MIN).map(|(word, _)| word).collect()
 }
 
-fn is_word_char(c: char) -> bool {
+pub(crate) fn is_word_char(c: char) -> bool {
     c.is_alphanumeric() || c == '_'
 }
 
@@ -138,7 +138,7 @@ pub fn phonetic_key(word: &str) -> Vec<char> {
     collapse_pairs(&key)
 }
 
-fn strip_accent(c: char) -> char {
+pub(crate) fn strip_accent(c: char) -> char {
     match c {
         'á' | 'à' | 'â' | 'ä' => 'a',
         'é' | 'è' | 'ê' | 'ë' => 'e',
