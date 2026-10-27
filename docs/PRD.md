@@ -13,7 +13,7 @@ The report's reader needs to know what specialized political podcasts are puttin
 ## 3. Users
 
 - **Reader:** asks Felipe for an episode of a show when she wants it covered and reads the PDF on phone or PC.
-- **Operator and maintainer:** Felipe runs the transcription on his RTX 3060 (12 GB) PC or his RTX 2050 laptop, builds the app, and keeps the show list and glossary seeds. This replaced the reader running everything on her 8 GB M1: a full back catalogue of the 23-show list (7,303 h of audio in the 20 shows with a feed) came to an estimated 78-117 days of compute on the M1 and 27.5 days on the RTX 2050. From phase 5 the reader runs it herself on her M1 through the macOS build, still one episode per show on demand.
+- **Operator and maintainer:** Felipe runs the transcription on his RTX 3060 (12 GB) PC or his RTX 2050 laptop, builds the app, and keeps the show list and glossary seeds. This replaced the reader running everything on her 8 GB M1: a full back catalogue of the 23-show list (7,303 h of audio in the 20 shows with a feed) came to an estimated 78-117 days of compute on the M1 and 27.5 days on the RTX 2050. Until then the summarizer uses Felipe's own assistant CLI login on his machine. From phase 5 the reader runs it herself on her M1 through the macOS build, still one episode per show on demand.
 
 ## 4. Goals and Non-goals
 
@@ -103,5 +103,4 @@ Ordered dependency first, each phase building on the one before.
 ## 12. Open Questions
 
 - Which assistant subscription the reader has (decides which CLI is tested first).
-- Whose assistant CLI login the summarizer uses while Felipe is the operator, before phase 5.
 - Transcription speed on the RTX 3060: not measured.
