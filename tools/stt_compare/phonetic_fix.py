@@ -75,7 +75,7 @@ def correct(text, glossary, threshold, capitalized_only, common_min):
 
 def main():
     parser = argparse.ArgumentParser(description="Replace transcript words that sound like a glossary name with that name")
-    parser.add_argument("record", help="stt_bench record to correct")
+    parser.add_argument("record", help="stt_bench record or podcast-monitor transcript to correct")
     parser.add_argument("glossary", help="text file, one name per line")
     parser.add_argument("--threshold", type=float, default=0.75)
     parser.add_argument("--all-words", action="store_true", help="also consider lowercase words")
@@ -85,7 +85,8 @@ def main():
     sys.stdout.reconfigure(encoding="utf-8")
     record = json.loads(Path(args.record).read_text(encoding="utf-8"))
     glossary = [line.strip() for line in Path(args.glossary).read_text(encoding="utf-8").splitlines() if line.strip()]
-    text, replacements = correct(record["text"], glossary, args.threshold, not args.all_words, args.common_min)
+    source = record["text"] if "text" in record else " ".join(segment["text"] for segment in record["segments"])
+    text, replacements = correct(source, glossary, args.threshold, not args.all_words, args.common_min)
     for (word, name), count in replacements.most_common():
         print(f"{word:20} -> {name:15} x{count}")
     print(f"{sum(replacements.values())} replacements")
