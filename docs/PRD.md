@@ -12,8 +12,8 @@ The report's reader needs to know what specialized political podcasts are puttin
 
 ## 3. Users
 
-- **Reader and operator:** the report's reader runs the app herself on her M1 Mac with 8 GB of memory and reads the PDF on phone or PC.
-- **Maintainer:** Felipe builds the app, keeps the show list and glossary seeds, and runs it on Windows for testing.
+- **Reader:** asks Felipe for an episode of a show when she wants it covered and reads the PDF on phone or PC.
+- **Operator and maintainer:** Felipe runs the transcription on his RTX 3060 (12 GB) PC or his RTX 2050 laptop, builds the app, and keeps the show list and glossary seeds. This replaced the reader running everything on her 8 GB M1: a full back catalogue of the 23-show list (7,303 h of audio in the 20 shows with a feed) came to an estimated 78-117 days of compute on the M1 and 27.5 days on the RTX 2050.
 
 ## 4. Goals and Non-goals
 
@@ -29,7 +29,7 @@ Non-goals:
 
 | Priority | Feature |
 |---|---|
-| Must | Two run modes: back-catalogue brief (every episode of a show) and latest-week report across the saved show list; on demand only, no schedule in v1 |
+| Must | One episode per show on demand, at the reader's request; no full back catalogue and no schedule in v1 |
 | Must | Add a show by name search in Apple's public podcast directory with a confirm step, or by pasting a feed URL; saved show list |
 | Must | Audio from the show's RSS feed |
 | Must | Report sections: topics ranked by airtime, short summary per episode, people and parties named, verbatim quotes with timestamps |
@@ -103,4 +103,6 @@ Ordered dependency first, each phase building on the one before.
 ## 12. Open Questions
 
 - Which assistant subscription the reader has (decides which CLI is tested first).
-- Whisper turbo speed on the 8 GB M1 with Metal: estimated, not measured.
+- Whether the latest-week report across the saved show list stays in v1 now that runs are one episode per show on demand.
+- Whether the macOS build (phase 5) is still needed now that Felipe runs the transcription, and whether the summarizer runs on his machine or hers.
+- Transcription speed on the RTX 3060: not measured.
