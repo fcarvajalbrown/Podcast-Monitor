@@ -1,8 +1,9 @@
 # Session notes
 
-Current state: phases 1 and 3 done; phase 2 done except item 6 (text of a real usage-limit message, blocked until a real limit is hit). `podcast-monitor report [run-folder]` builds the Spanish PDF in the escritorio layout through Typst (`src/report.rs`, `src/report.typ`, `src/section.rs`, `src/assemble.rs`); checks in `tools/pdf_check/` (`measure.py` positions, `quotes.py` quotes at their minute). Saved replies: `work/summary-ep34-claude.json`, `work/summary-np-codex.json`. Next: phase 4, the desktop window in Spanish (not planned yet). See `ROADMAP.md` and `docs/ROADMAP-HISTORY.md`.
+Current state: phases 1 and 3 done; phase 2 done except item 6 (text of a real usage-limit message, blocked until a real limit is hit). `podcast-monitor report [run-folder]` builds the Spanish PDF in the escritorio layout through Typst (`src/report.rs`, `src/report.typ`, `src/section.rs`, `src/assemble.rs`); checks in `tools/pdf_check/` (`measure.py` positions, `quotes.py` quotes at their minute). Saved replies: `work/summary-ep34-claude.json`, `work/summary-np-codex.json`. Next: phase 4 item 1 (GUI crate pick); phase 4 items approved in chat 6 and in ROADMAP.md. See `ROADMAP.md` and `docs/ROADMAP-HISTORY.md`.
 
 Open flags:
+- Phase 4: ask Felipe which run modes the window offers before item 4 (PRD says one button per run mode; v1 has only on-demand runs).
 - Phase 2 item 6: limit markers not yet checked against a real limit message from either CLI.
 - Ads rank as a topic: "Publicidad y mensajes de patrocinadores" is the top airtime topic on Nada Personal (5:52); no ad filter.
 - Merge of parts tested only by unit test; no saved episode splits.

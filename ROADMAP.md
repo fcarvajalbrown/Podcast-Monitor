@@ -13,7 +13,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 | 1 | Pipeline as a Windows CLI | Done |
 | 2 | Summarizer through her assistant CLI, quote matching, limit-error pause | In Progress |
 | 3 | PDF report in the escritorio layout | Done |
-| 4 | Desktop window in Spanish | Not Started |
+| 4 | Desktop window in Spanish | In Progress |
 | 5 | macOS build with Metal, reference episodes, first on-demand report | Not Started |
 
 ## Phase 1: Pipeline as a Windows CLI
@@ -43,6 +43,19 @@ Episode figures decided with Felipe, built at the end of phase 2 so the phase 3 
 | 7 | Merge the parts of a split episode into one record | Done |
 | 8 | Airtime per topic from the summed spans, ranked | Done |
 | 9 | People counts by surname in the corrected transcript, ranked, zeros kept | Done |
+
+## Phase 4: Desktop window in Spanish
+
+Native Rust window, Spanish UI strings, code and logs in English (`docs/PRD.md` sections 5 to 7). Items approved by Felipe in this order. The PRD's "one button per run mode" is unresolved while v1 has only on-demand runs; ask Felipe which run modes the window offers before item 4.
+
+| # | Item | Status |
+|---|---|---|
+| 1 | GUI crate pick: one test window per open-source native Rust candidate (egui, iced, Slint) with Spanish text, a list, buttons, a progress bar and an Open PDF action; Felipe picks from screenshots | Not Started |
+| 2 | Saved show list: add by pasted feed URL, remove, kept on disk | Not Started |
+| 3 | Add by name search in Apple's directory, confirm step showing the publisher | Not Started |
+| 4 | On-demand episode run in the background: transcribe, summarize, report; progress per episode; resume after a closed app; limit-error stop explained in Spanish | Not Started |
+| 5 | Open PDF at the end of a run | Not Started |
+| 6 | Acceptance on Ep. 34 and Nada Personal driven from the window | Not Started |
 
 ## Phase 3: PDF report in the escritorio layout
 
