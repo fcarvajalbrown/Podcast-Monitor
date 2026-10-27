@@ -5,3 +5,4 @@ Current state: phase 1 done; Ep. 34 checked end to end on the GPU (`docs/researc
 Open flags:
 - PRD open questions: the reader's assistant subscription; turbo speed on her M1.
 - whisper-rs on Vulkan took 424 s on Ep. 34 against 354 s for `whisper-cli` on the same GPU; not investigated.
+- No CPU-only or integrated-GPU speed for turbo has been measured; Felipe chose to leave it, since her M1 with Metal is the target (Phase 5).
