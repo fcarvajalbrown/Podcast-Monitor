@@ -17,6 +17,12 @@ pub struct Episode {
     pub description: String,
 }
 
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct Feed {
+    pub title: String,
+    pub episodes: Vec<Episode>,
+}
+
 impl Episode {
     pub fn id(&self) -> String {
         let date = self.published.map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "undated".into());
@@ -24,7 +30,7 @@ impl Episode {
     }
 }
 
-pub fn fetch(url: &str) -> Result<Vec<Episode>> {
+pub fn fetch(url: &str) -> Result<Feed> {
     let body = ureq::get(url)
         .header("User-Agent", USER_AGENT)
         .call()
@@ -43,10 +49,11 @@ pub fn newest(mut episodes: Vec<Episode>, count: usize) -> Vec<Episode> {
     episodes
 }
 
-pub fn parse(xml: &str) -> Result<Vec<Episode>> {
+pub fn parse(xml: &str) -> Result<Feed> {
     let mut reader = Reader::from_str(xml);
     let mut episodes = Vec::new();
     let mut current: Option<Episode> = None;
+    let mut show_title = String::new();
     let mut field = String::new();
     let mut text = String::new();
     loop {
@@ -55,7 +62,7 @@ pub fn parse(xml: &str) -> Result<Vec<Episode>> {
                 let name = tag.name().as_ref().to_string();
                 if name == "item" {
                     current = Some(Episode::default());
-                } else if current.is_some() {
+                } else if current.is_some() || (name == "title" && show_title.is_empty()) {
                     field = name;
                     text.clear();
                 }
@@ -72,17 +79,17 @@ pub fn parse(xml: &str) -> Result<Vec<Episode>> {
                 }
             }
             Event::Text(content) => {
-                if current.is_some() && !field.is_empty() {
+                if !field.is_empty() {
                     text.push_str(&content.xml10_content());
                 }
             }
             Event::CData(content) => {
-                if current.is_some() && !field.is_empty() {
+                if !field.is_empty() {
                     text.push_str(&content);
                 }
             }
             Event::GeneralRef(reference) => {
-                if current.is_some() && !field.is_empty() {
+                if !field.is_empty() {
                     text.push_str(&resolve_entity(&reference));
                 }
             }
@@ -99,13 +106,16 @@ pub fn parse(xml: &str) -> Result<Vec<Episode>> {
                 {
                     assign(episode, &field, text.trim());
                     field.clear();
+                } else if current.is_none() && name == "title" && field == "title" {
+                    show_title = text.trim().to_string();
+                    field.clear();
                 }
             }
             Event::Eof => break,
             _ => {}
         }
     }
-    Ok(episodes)
+    Ok(Feed { title: show_title, episodes })
 }
 
 fn assign(episode: &mut Episode, field: &str, value: &str) {
@@ -195,7 +205,9 @@ mod tests {
 
     #[test]
     fn parses_items_with_audio() {
-        let episodes = parse(FEED).unwrap();
+        let feed = parse(FEED).unwrap();
+        assert_eq!(feed.title, "Example Show");
+        let episodes = feed.episodes;
         assert_eq!(episodes.len(), 2);
         let first = &episodes[0];
         assert_eq!(first.title, "Ep. 2 - Lluvia & sol");
@@ -209,13 +221,13 @@ mod tests {
 
     #[test]
     fn newest_sorts_by_date() {
-        let episodes = newest(parse(FEED).unwrap(), 1);
+        let episodes = newest(parse(FEED).unwrap().episodes, 1);
         assert_eq!(episodes[0].guid, "ep-2");
     }
 
     #[test]
     fn id_is_date_and_slug() {
-        let episodes = parse(FEED).unwrap();
+        let episodes = parse(FEED).unwrap().episodes;
         assert_eq!(episodes[0].id(), "2026-10-26-ep-2-lluvia-sol");
     }
 }

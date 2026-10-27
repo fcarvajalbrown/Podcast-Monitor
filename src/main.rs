@@ -1,4 +1,8 @@
+mod audio;
 mod feed;
+mod names;
+mod run;
+mod transcribe;
 
 use std::path::PathBuf;
 
@@ -31,17 +35,23 @@ enum Command {
         work: PathBuf,
         #[arg(long, default_value_t = 1)]
         latest: usize,
+        #[arg(long, default_value_t = names::DEFAULT_THRESHOLD)]
+        threshold: f64,
+        #[arg(long, help = "only episodes whose title contains this text")]
+        title: Option<String>,
     },
 }
 
 fn main() -> Result<()> {
     match Cli::parse().command {
         Command::Episodes { feed, limit } => {
-            for episode in feed::newest(feed::fetch(&feed)?, limit) {
+            let show = feed::fetch(&feed)?;
+            println!("{}", show.title);
+            for episode in feed::newest(show.episodes, limit) {
                 println!("{}  {:>4} min  {}", episode.id(), episode.duration_s / 60, episode.title);
             }
             Ok(())
         }
-        Command::Run { .. } => anyhow::bail!("run is not implemented yet"),
+        Command::Run { feed, model, glossary, work, latest, threshold, title } => run::run(&run::Options { feed, model, glossary, work, latest, threshold, title }),
     }
 }
