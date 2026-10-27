@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/brand/podcast-monitor-icon.svg" alt="Podcast-Monitor logo" width="128"></p>
+
 # Local Political Podcast Monitor
 
 A local RSS-to-briefing proof of concept. It does **not** call Claude or paid inference APIs.
