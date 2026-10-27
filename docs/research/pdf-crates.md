@@ -27,3 +27,5 @@ Fonts on the reader's Mac: all three crates embed a subset of Latin Modern in th
 Size: release test-page exe 39.5 MB with Typst against 5.1 MB with krilla (Windows, same package), so Typst adds roughly 35 MB to the app; the current `podcast-monitor.exe` is 63.2 MB, most of it whisper.cpp.
 
 Decision: Felipe picked Typst after viewing the four test PDFs.
+
+Page frame (item 2), measured with `tools/pdf_check/measure.py` on the `writes_sample` test output against `gen_pdf_desk.py`: header baseline 86.4 pt, rule 91.4 pt (red #B70002 instead of grey), text column 76.9 to 518.4 pt, first body baseline on later pages 87.4 pt, page number baseline 802.2 pt centred at x 295.4 to 299.9; all equal to the reference. The frame is 2.5 cm plus reportlab's 6 pt frame padding. Typst's hanging punctuation is off (`overhang: false`) because the reference has none.

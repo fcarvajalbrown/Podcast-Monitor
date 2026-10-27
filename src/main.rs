@@ -3,6 +3,7 @@ mod chunk;
 mod feed;
 mod names;
 mod quotes;
+mod report;
 mod run;
 mod summarize;
 mod tally;
