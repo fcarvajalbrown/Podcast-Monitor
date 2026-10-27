@@ -89,7 +89,7 @@ pub(crate) fn is_word_char(c: char) -> bool {
     c.is_alphanumeric() || c == '_'
 }
 
-fn words(text: &str) -> impl Iterator<Item = &str> {
+pub(crate) fn words(text: &str) -> impl Iterator<Item = &str> {
     text.split(|c: char| !is_word_char(c)).filter(|word| !word.is_empty())
 }
 

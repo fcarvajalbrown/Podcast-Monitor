@@ -112,6 +112,9 @@ fn main() -> Result<()> {
             for topic in tally::airtime(&episode.topics) {
                 println!("{}  {}", chunk::clock(topic.seconds), topic.name);
             }
+            for person in tally::mentions(&episode.people, &segments) {
+                println!("{:>4}  {}", person.count, person.name);
+            }
             let index = quotes::Index::new(&segments);
             for quote in &episode.quotes {
                 match index.find(&quote.text, &quote.minute) {

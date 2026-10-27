@@ -1,5 +1,9 @@
+use std::collections::HashMap;
+
 use crate::chunk::seconds;
+use crate::names::words;
 use crate::summarize::TopicSpan;
+use crate::transcribe::Segment;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Airtime {
@@ -27,6 +31,25 @@ pub fn airtime(topics: &[TopicSpan]) -> Vec<Airtime> {
     totals
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct Mentions {
+    pub name: String,
+    pub count: usize,
+}
+
+pub fn mentions(people: &[String], segments: &[Segment]) -> Vec<Mentions> {
+    let mut seen: HashMap<&str, usize> = HashMap::new();
+    for word in segments.iter().flat_map(|segment| words(&segment.text)) {
+        *seen.entry(word).or_default() += 1;
+    }
+    let mut counted: Vec<Mentions> = people
+        .iter()
+        .map(|name| Mentions { name: name.clone(), count: words(name).last().and_then(|surname| seen.get(surname)).copied().unwrap_or(0) })
+        .collect();
+    counted.sort_by(|a, b| b.count.cmp(&a.count));
+    counted
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -52,5 +75,19 @@ mod tests {
         let ranked = airtime(&topics);
         assert_eq!(ranked[0], Airtime { name: "Dos".into(), seconds: 10.0 });
         assert_eq!(ranked[1], Airtime { name: "Uno".into(), seconds: 0.0 });
+    }
+
+    #[test]
+    fn people_are_counted_by_exact_surname_and_zeros_kept() {
+        let segment = |text: &str| Segment { start_s: 0.0, end_s: 1.0, text: text.into() };
+        let segments = [segment(" Ana Pérez y Pérez."), segment("pérez, Soto, Soto; Soto")];
+        let people = ["Eva Ríos", "Ana Pérez", "Luis Soto", "Rosa Pérez"].map(String::from);
+        let counted = mentions(&people, &segments);
+        assert_eq!(counted.iter().map(|person| (person.name.as_str(), person.count)).collect::<Vec<_>>(), vec![
+            ("Luis Soto", 3),
+            ("Ana Pérez", 2),
+            ("Rosa Pérez", 2),
+            ("Eva Ríos", 0),
+        ]);
     }
 }
