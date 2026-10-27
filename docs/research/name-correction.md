@@ -83,3 +83,26 @@ Correct spellings counted before and after (last setting):
 | Parisi | 2 | 3 | 0 | 3 |
 
 Findings: the fix lifts turbo close to complete on these names. It cannot fix small's lowercase "cast" and "caz" without touching ordinary words, so small still loses Kast almost entirely. "Castro" to Kast was right in this episode but would be wrong for a real Castro; the glossary step needs a per-show exception list.
+
+## Measured: initial-prompt glossary on Ep. 34
+
+whisper.cpp built from source (commit 231638a) with Vulkan (Vulkan SDK 1.4.363.0) on the RTX 2050; the log confirms the Vulkan0 backend. Two `whisper-cli` passes on `work/pool/ap-ep34/audio.wav`, `-l es`, large-v3-turbo, one with `--prompt` set to the 21 glossary names comma-separated. Converted with `tools/stt_compare/ffmpeg_whisper_to_bench.py` (now reads `whisper-cli -oj` JSON) and counted with `tools/stt_compare/count_names.py`.
+
+| Name | FFmpeg filter | cli, no prompt | cli, prompt | cli no prompt + fix | cli prompt + fix |
+|---|---|---|---|---|---|
+| Kast | 7 | 8 | 8 | 19 | 18 |
+| Boric | 8 | 7 | 9 | 9 | 9 |
+| Squella | 0 | 0 | 0 | 0 | 1 |
+| Bellolio | 0 | 0 | 0 | 2 | 2 |
+| Contardo | 1 | 1 | 2 | 2 | 2 |
+| Rabat | 4 | 5 | 3 | - | - |
+| Parisi | 2 | 0 | 0 | - | - |
+| Bachelet | 2 | 2 | 1 | - | - |
+
+Wrong spellings of Kast: no prompt Cass 6, Cast 2; with prompt Kass 4, Cass 6.
+
+Findings:
+- The prompt brought no measurable gain on these names: Kast stayed at 8, Boric rose by 2, Rabat and Bachelet fell. Phonetic post-correction does the work either way.
+- With the prompt, `whisper-cli` split the episode into 4,173 segments instead of 2,544 (similar word count, 12,444 against 12,427).
+- Speed: `whisper-cli` on Vulkan took 354 s without the prompt and 335 s with it, against 257 s for the FFmpeg filter run in `stt-bench-ap-ep34.md`. Both are well above real time.
+- One episode and a hand-picked glossary; not a general result.

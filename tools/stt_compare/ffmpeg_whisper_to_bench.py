@@ -4,8 +4,14 @@ from pathlib import Path
 
 
 def segments(jsonl_path):
+    content = Path(jsonl_path).read_text(encoding='utf-8')
+    if content.lstrip().startswith('{') and '"transcription"' in content[:200000]:
+        try:
+            return json.loads(content)['transcription']
+        except json.JSONDecodeError:
+            pass
     rows = []
-    for line in Path(jsonl_path).read_text(encoding='utf-8').splitlines():
+    for line in content.splitlines():
         line = line.strip()
         if line:
             rows.append(json.loads(line))
@@ -13,8 +19,8 @@ def segments(jsonl_path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Turn an FFmpeg whisper JSON-lines transcript into a Cuña-Cutter stt_bench record")
-    parser.add_argument('transcript', help='JSON-lines file written by the FFmpeg whisper filter')
+    parser = argparse.ArgumentParser(description="Turn an FFmpeg whisper JSON-lines transcript or a whisper-cli -oj JSON file into a Cuña-Cutter stt_bench record")
+    parser.add_argument('transcript', help='JSON-lines file from the FFmpeg whisper filter, or JSON from whisper-cli -oj')
     parser.add_argument('--id', required=True, help='episode id, used as the record file name')
     parser.add_argument('--engine', required=True, help='engine folder name, such as whisper-turbo-ffmpeg')
     parser.add_argument('--compute-s', type=float, required=True, help='wall-clock seconds the transcription took')
