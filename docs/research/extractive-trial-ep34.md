@@ -154,6 +154,7 @@ Across the two episodes, context off is the only setting that removed the fragme
 `pick.py` at its defaults (15 picks, trade-off 0.7, 12 to 60 words) on `noctx-fixed.json` (Ep. 34) and `np-noctx-fixed.json` (Nada Personal).
 
 - Ep. 34: 485 sentences, 257 eligible, picks from 07:49 to 77:14. One pick is speech-recognition garble (41:08, "mi ley ... mi ley dando más material", likely "Milei").
+- Ep. 34, 23:44: "con el ministro de Justicia a su diestra". Felipe is 80 to 90 % sure the speaker said "a su derecha": nobody in a Chilean podcast, even a formal one, says "diestra". Not checked against the audio. All eight Ep. 34 runs write "diestra", but they share one model, so that is not independent support.
 - Nada Personal: 300 sentences, 120 eligible, picks from 03:27 to 57:36. Two of the 15 are ads (40:44 and 41:07); the picker has no ad filter.
 
 Felipe read the 15 Ep. 34 picks and judged them readable enough to keep the picker as the fallback for the limit-error pause.
