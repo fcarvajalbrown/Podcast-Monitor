@@ -30,6 +30,8 @@ Reply shape decided with Felipe, enforced by a JSON schema (`claude -p --json-sc
 
 Quote rule decided with Felipe: exact match after folding case, accents and punctuation, across segment lines; the hit nearest the model's minute wins; the transcript's words and first segment's minute are printed; anything else is dropped.
 
+Episode figures decided with Felipe, built at the end of phase 2 so the phase 3 report only lays them out: parts of a split episode merge first (summary paragraphs joined in order, no extra call; topics, people and quotes concatenated), then airtime per topic is the sum of its spans, ranked longest first, then each person is counted by the last word of their name as an exact, case-sensitive word in the corrected transcript (as `count_names.py` does; people sharing a surname are both credited), ranked by count, people with 0 mentions kept at the bottom.
+
 | # | Item | Status |
 |---|---|---|
 | 1 | Transcript chunking: one chunk under the cap, equal parts at segment boundaries above it | Done |
@@ -38,3 +40,6 @@ Quote rule decided with Felipe: exact match after folding case, accents and punc
 | 4 | Limit-error pause: stop cleanly, keep finished episodes | Done |
 | 6 | Limit text seen from a real limit on either CLI, matched by the markers | Not Started |
 | 5 | Extractive picker on `noctx-fixed.json` and `np-noctx-fixed.json` as the fallback check, read by Felipe | Done |
+| 7 | Merge the parts of a split episode into one record | Not Started |
+| 8 | Airtime per topic from the summed spans, ranked | Not Started |
+| 9 | People counts by surname in the corrected transcript, ranked, zeros kept | Not Started |
