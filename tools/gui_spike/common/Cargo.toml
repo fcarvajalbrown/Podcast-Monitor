@@ -1,0 +1,10 @@
+[package]
+name = "gui-spike-common"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+[dependencies]
+open = "5.4.5"
+png = "0.18.1"

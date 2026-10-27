@@ -1,0 +1,12 @@
+[package]
+name = "gui-spike-egui"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+[workspace]
+
+[dependencies]
+eframe = "0.37.0"
+gui-spike-common = { path = "../common" }
