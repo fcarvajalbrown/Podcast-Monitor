@@ -31,14 +31,14 @@ Non-goals:
 |---|---|
 | Must | Two run modes: back-catalogue brief (every episode of a show) and latest-week report across the saved show list; on demand only, no schedule in v1 |
 | Must | Add a show by name search in Apple's public podcast directory with a confirm step, or by pasting a feed URL; saved show list |
-| Must | Audio from RSS first; YouTube fallback when a show has no feed |
+| Must | Audio from the show's RSS feed |
 | Must | Report sections: topics ranked by airtime, short summary per episode, people and parties named, verbatim quotes with timestamps |
 | Must | Small native desktop window in Spanish: show list with add and remove, one button per run mode, progress per episode, Open PDF at the end |
 | Must | Resumable runs: each episode's transcript and summary is saved as soon as it is done; running again continues where it stopped, and the PDF is built from what is finished |
 | Must | PDF output in the "Desde el escritorio de Felipe Carvajal Brown" layout (`felipe_skill_voice/scripts/gen_pdf_desk.py` is the reference) |
 | Must | Names glossary with phonetic post-correction of transcripts at similarity 0.85; the same glossary is sent to the summarizer with each chunk so summaries and people lists use the right names where the transcript stays wrong; quotes keep the transcript's words; glossary built from an editable hand list, names in each show's episode titles and descriptions, and Chamber of Deputies and Senate open data, with a per-show exception list |
 
-Out of v1: Whisper initial-prompt glossary (no gain on two episodes, see `docs/research/name-correction.md`), hand-picked episode or date-range runs, publisher transcripts (every episode is transcribed locally, even when the feed carries a transcript), and the three pilot shows with no official feed (Cómo te lo explico, Contracorriente, Comentarios de Tomás Mosciatti).
+Out of v1: Whisper initial-prompt glossary (no gain on two episodes, see `docs/research/name-correction.md`), the YouTube fallback (no v1 show needs it; it returns with the three no-feed shows), hand-picked episode or date-range runs, publisher transcripts (every episode is transcribed locally, even when the feed carries a transcript), and the three pilot shows with no official feed (Cómo te lo explico, Contracorriente, Comentarios de Tomás Mosciatti).
 
 ## 6. Technical Architecture
 
@@ -47,7 +47,8 @@ Out of v1: Whisper initial-prompt glossary (no gain on two episodes, see `docs/r
 - **Name correction:** glossary plus Spanish phonetic key and similarity threshold 0.85, on capitalized words only, skipping words that also appear in lowercase in the same transcript. At 0.75 it turned María into Arias 27 times on a Nada Personal episode.
 - **Interface:** native Rust window (egui or similar, no web stack), Spanish UI strings; code, identifiers and logs in English.
 - **Summaries, topics and quote picks:** the app calls the official command-line tool of the assistant subscription the reader already pays for, logged in once on her Mac (`claude -p` or `codex exec`), sends it transcript chunks and reads the reply. The app never reads or stores her login token. v1 supports both behind one interface, chosen in settings. People counts and quote timestamps come straight from the corrected transcript.
-- **Sources:** RSS (all 17 chart shows and 20 of the 23 pilot shows have one), YouTube via yt-dlp as fallback.
+- **Sources:** RSS only in v1 (all 17 chart shows and the 20 remaining pilot shows have one).
+- **Quotes:** the summarizer only points to passages; the app finds each one in the timestamped transcript and prints the transcript's own text and minute, dropping any it cannot find.
 
 Evidence:
 - `docs/research/stt-bench-ap-ep34.md`: turbo on the RTX 2050 took 4 min 17 s for a 78 min episode (18x real time); faster-whisper small on CPU took 35 min and mangled Kast and Boric.
@@ -62,11 +63,27 @@ Evidence:
 - Adding a show: search by name, confirm the match with its publisher shown, or paste a feed URL.
 - Long runs show progress per episode and survive a closed app or lid: finished episodes are kept and the next run continues.
 
-## 8-11
+## 8. Business case
 
-Not yet interviewed: Risks, Testing and acceptance criteria, Phases and milestones.
+Not applicable: a tool for one reader, no revenue.
+
+## 9. Risks and Mitigations
+
+| Risk | Mitigation |
+|---|---|
+| Scripted use of her assistant CLI draws from a capped allowance; a back-catalogue run can hit it | Run stops cleanly on a limit error, keeps finished episodes and tells her in Spanish to run again later; one summary call per episode where it fits |
+| Provider terms on subscription logins are written for their own apps; scripted use through the official CLI on her own Mac is not stated either way, and the terms can change | The app only calls the official CLI and never handles her token; supporting two providers means one can replace the other |
+| The summarizer returns a quote that is not in the audio, or a wrong minute | Every quote is looked up in the transcript; text and minute come from the transcript, unmatched quotes are dropped |
+| The name fix changes a correct word into a glossary name | Threshold 0.85, capitalized words only, skip words common in lowercase, per-show exception list; at 0.75 a second show produced 27 wrong changes |
+| Whisper turbo on the 8 GB M1 is slower than estimated | Estimate from published numbers is a few times real time (`docs/research/stt-speed-m1.md`); runs are resumable, so a long catalogue can span several sessions |
+| A publisher changes or removes a feed | Feed URL is saved per show and can be replaced by search or paste |
+| The public repo ties the tool to a political side | Project rule 1; transcripts, reports and episode audio stay in the git-ignored `work/` |
+
+## 10-11
+
+Not yet interviewed: Testing and acceptance criteria, Phases and milestones.
 
 ## 12. Open Questions
 
 - Which assistant subscription the reader has (decides which CLI is tested first).
-- Whisper turbo speed on the 8 GB M1 with Metal, unmeasured.
+- Whisper turbo speed on the 8 GB M1 with Metal: estimated, not measured.
