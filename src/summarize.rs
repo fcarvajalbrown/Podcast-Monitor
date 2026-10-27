@@ -73,6 +73,23 @@ pub struct Summary {
     pub chunks: Vec<ChunkReply>,
 }
 
+impl Summary {
+    pub fn merged(&self) -> ChunkReply {
+        let mut people: Vec<String> = Vec::new();
+        for name in self.chunks.iter().flat_map(|part| &part.people) {
+            if !people.contains(name) {
+                people.push(name.clone());
+            }
+        }
+        ChunkReply {
+            summary: self.chunks.iter().map(|part| part.summary.trim()).filter(|text| !text.is_empty()).collect::<Vec<_>>().join("\n\n"),
+            topics: self.chunks.iter().flat_map(|part| part.topics.iter().cloned()).collect(),
+            people,
+            quotes: self.chunks.iter().flat_map(|part| part.quotes.iter().cloned()).collect(),
+        }
+    }
+}
+
 pub fn schema() -> Value {
     let text = json!({ "type": "string" });
     let object = |properties: Value, required: &[&str]| json!({ "type": "object", "properties": properties, "required": required, "additionalProperties": false });
@@ -254,6 +271,26 @@ mod tests {
         summarize(&chunks[..], None, Provider::Codex, &fake, &path).unwrap();
         assert_eq!(fake.prompts.borrow().len(), 4);
         fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn parts_merge_into_one_episode() {
+        let part = |summary: &str, topic: &str, people: &[&str], quote: &str| ChunkReply {
+            summary: summary.into(),
+            topics: vec![TopicSpan { name: topic.into(), start: "00:00".into(), end: "01:00".into() }],
+            people: people.iter().map(|&name| name.into()).collect(),
+            quotes: vec![QuoteRef { text: quote.into(), minute: "00:00".into() }],
+        };
+        let summary = Summary {
+            provider: Provider::Claude,
+            chunk_count: 2,
+            chunks: vec![part(" Primera parte. ", "Tema", &["Ana Pérez", "Luis Soto"], "uno"), part("Segunda parte.", "Tema", &["Luis Soto", "Eva Ríos"], "dos")],
+        };
+        let merged = summary.merged();
+        assert_eq!(merged.summary, "Primera parte.\n\nSegunda parte.");
+        assert_eq!(merged.topics.len(), 2);
+        assert_eq!(merged.people, vec!["Ana Pérez", "Luis Soto", "Eva Ríos"]);
+        assert_eq!(merged.quotes.iter().map(|quote| quote.text.as_str()).collect::<Vec<_>>(), vec!["uno", "dos"]);
     }
 
     #[test]

@@ -107,8 +107,9 @@ fn main() -> Result<()> {
                 other => other?,
             };
             eprintln!("{} part(s) saved to {}", summary.chunks.len(), out.display());
+            let episode = summary.merged();
             let index = quotes::Index::new(&segments);
-            for quote in summary.chunks.iter().flat_map(|part| &part.quotes) {
+            for quote in &episode.quotes {
                 match index.find(&quote.text, &quote.minute) {
                     Some(found) => println!("{}  {}", chunk::clock(found.start_s), found.text),
                     None => println!("dropped  {}  {}", quote.minute, quote.text),
