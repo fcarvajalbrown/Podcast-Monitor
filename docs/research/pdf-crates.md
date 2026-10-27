@@ -23,3 +23,5 @@ Measured against the reference: body baseline-to-baseline 15.0 pt in the referen
 Result: printpdf fails the table and the rules. Typst and krilla both pass; Typst does wrapping, justification, tables, page breaks and keep-with-next itself, krilla needs all of that written and tested in this repo.
 
 Fonts on the reader's Mac: all three crates embed a subset of Latin Modern in the PDF itself (checked by PyMuPDF font listing), so the PDF reads the same on any machine without the font installed. The spike reads the TTFs from `assets/fonts/` at run time through a source-tree path, which would not exist on her Mac; the report code must compile the four TTFs into the binary (`include_bytes!`, about 850 KB) so the app needs nothing installed. Not yet checked on a Mac build (phase 5).
+
+Size: release test-page exe 39.5 MB with Typst against 5.1 MB with krilla (Windows, same package), so Typst adds roughly 35 MB to the app; the current `podcast-monitor.exe` is 63.2 MB, most of it whisper.cpp.
