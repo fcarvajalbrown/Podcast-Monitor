@@ -52,7 +52,7 @@ Layout reference: `felipe_skill_voice/scripts/gen_pdf_desk.py` (A4, 2.5 cm margi
 |---|---|---|
 | 1 | PDF crate pick: one test page per open-source Rust candidate (Latin Modern embedded, Spanish accents, justified text, a table, page numbers); Felipe picked Typst (`docs/research/pdf-crates.md`) | Done |
 | 2 | Page frame: A4, 2.5 cm margins, grey italic header line with thin rule, centred page number | Done |
-| 3 | Text blocks: headings, paragraphs wrapping across pages, heading kept with the next block, booktabs table | Not Started |
+| 3 | Text blocks: headings, paragraphs wrapping across pages, heading kept with the next block, booktabs table | Done |
 | 4 | Episode section in Spanish: show, episode, date, duration, summary, topics with airtime, people with counts (zeros last), quotes with [mm:ss] | Not Started |
 | 5 | `report` command: one PDF from every finished summary in a run folder | Not Started |
 | 6 | Acceptance on Ep. 34 and Nada Personal from the saved replies: every printed quote found at its minute, layout checked against `gen_pdf_desk.py` output | Not Started |
