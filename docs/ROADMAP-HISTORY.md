@@ -2,6 +2,7 @@
 
 Finished roadmap items, newest first. Git dates each entry.
 
+- Phase 2, item 3: quote lookup in `src/quotes.rs`; on Ep. 34 (claude) and Nada Personal (codex) 10 of 10 quotes found, none dropped; one model minute (31:12) corrected to the transcript's 31:10.
 - Phase 2, item 2: `podcast-monitor summarize` sends each chunk with the glossary to `claude -p --json-schema` or `codex exec --output-schema` and saves each reply as it arrives (rerun resumes). Ep. 34 through claude: one call, 47 s, 27 topic spans from 00:00 to 78:05, 43 people, 5 quotes. Nada Personal through codex: one call, 25 s, 22 spans, 22 people, 5 quotes. Quotes not yet checked against the transcript (item 3).
 - Phase 2, item 1: `podcast-monitor chunks` splits a transcript into `[mm:ss] text` chunks under a 120,000 character cap; Ep. 34 and Nada Personal are one chunk each, three even parts at a 30,000 cap.
 - Phase 1, item 7: Ep. 34 end to end on the GPU, Kast 17 and Boric 9 after the fix, above the 0.85 targets of 16 and 7 (`docs/research/pipeline-ep34-check.md`).
