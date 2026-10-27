@@ -1,9 +1,9 @@
 # Session notes
 
-Current state: phase 1 done; phase 2 items 1 to 5 and 7 to 9 done (chunking, `summarize` through claude or codex, quote matching, limit-error pause with exit code 2, extractive picker kept as fallback, merge of parts, airtime per topic, people counts by surname); only item 6 is open. See `ROADMAP.md` and `docs/ROADMAP-HISTORY.md`. Saved replies: `work/summary-ep34-claude.json`, `work/summary-np-codex.json`. Phase 3 not started: item list proposed in chat 5, not approved, not in ROADMAP.md. Brand assets in `assets/brand/`.
+Current state: phase 1 done; phase 2 items 1 to 5 and 7 to 9 done (chunking, `summarize` through claude or codex, quote matching, limit-error pause with exit code 2, extractive picker kept as fallback, merge of parts, airtime per topic, people counts by surname); only item 6 is open. See `ROADMAP.md` and `docs/ROADMAP-HISTORY.md`. Saved replies: `work/summary-ep34-claude.json`, `work/summary-np-codex.json`. Phase 3 items approved in chat 6 and written to ROADMAP.md. Brand assets in `assets/brand/`.
 
 Open flags:
-- Phase 3 item list awaiting Felipe's approval (see `notes/sessions/chat-5.md`).
+- Phase 3 items approved and in ROADMAP.md; item 1 (crate pick) next.
 - Phase 2 item 6: limit markers not yet checked against a real limit message from either CLI.
 - Ads rank as a topic: "Publicidad y mensajes de patrocinadores" is the top airtime topic on Nada Personal (5:52); no ad filter.
 - Merge of parts tested only by unit test; no saved episode splits.

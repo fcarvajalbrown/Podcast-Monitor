@@ -12,7 +12,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 |---|---|---|
 | 1 | Pipeline as a Windows CLI | Done |
 | 2 | Summarizer through her assistant CLI, quote matching, limit-error pause | In Progress |
-| 3 | PDF report in the escritorio layout | Not Started |
+| 3 | PDF report in the escritorio layout | In Progress |
 | 4 | Desktop window in Spanish | Not Started |
 | 5 | macOS build with Metal, reference episodes, first on-demand report | Not Started |
 
@@ -43,3 +43,16 @@ Episode figures decided with Felipe, built at the end of phase 2 so the phase 3 
 | 7 | Merge the parts of a split episode into one record | Done |
 | 8 | Airtime per topic from the summed spans, ranked | Done |
 | 9 | People counts by surname in the corrected transcript, ranked, zeros kept | Done |
+
+## Phase 3: PDF report in the escritorio layout
+
+Layout reference: `felipe_skill_voice/scripts/gen_pdf_desk.py` (A4, 2.5 cm margins, Latin Modern Roman with its GUST licence, grey italic header line over a thin rule, justified body, booktabs-style tables, centred page number). Items approved by Felipe in this order.
+
+| # | Item | Status |
+|---|---|---|
+| 1 | PDF crate pick: one test page per open-source Rust candidate (Latin Modern embedded, Spanish accents, justified text, a table, page numbers); Felipe picks | Not Started |
+| 2 | Page frame: A4, 2.5 cm margins, grey italic header line with thin rule, centred page number | Not Started |
+| 3 | Text blocks: headings, paragraphs wrapping across pages, heading kept with the next block, booktabs table | Not Started |
+| 4 | Episode section in Spanish: show, episode, date, duration, summary, topics with airtime, people with counts (zeros last), quotes with [mm:ss] | Not Started |
+| 5 | `report` command: one PDF from every finished summary in a run folder | Not Started |
+| 6 | Acceptance on Ep. 34 and Nada Personal from the saved replies: every printed quote found at its minute, layout checked against `gen_pdf_desk.py` output | Not Started |
