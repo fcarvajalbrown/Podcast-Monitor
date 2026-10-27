@@ -26,7 +26,7 @@ podcast-monitor report [run-folder] [--out <file.pdf>]
 - `episodes` lists the newest episodes of a feed.
 - `run` downloads, transcribes and name-fixes the newest episodes into `work/runs`. Finished steps are kept, so running it again picks up where it stopped.
 - `summarize` sends the transcript to an assistant CLI you are logged into, saves each part as it finishes, then prints the topics, people and quotes.
-- `report` builds one PDF from every finished summary under the run folder (`work/runs` by default), one episode per page group, in an A4 layout set in Latin Modern Roman.
+- `report` builds one PDF from every finished summary under the run folder (`work/runs` by default), each episode starting on a new page, in an A4 layout set in Latin Modern Roman.
 
 Every command takes `--help` for the rest of its options.
 

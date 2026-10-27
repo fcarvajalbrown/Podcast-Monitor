@@ -1,9 +1,8 @@
 # Session notes
 
-Current state: phase 1 done; phase 2 items 1 to 5 and 7 to 9 done (chunking, `summarize` through claude or codex, quote matching, limit-error pause with exit code 2, extractive picker kept as fallback, merge of parts, airtime per topic, people counts by surname); only item 6 is open. See `ROADMAP.md` and `docs/ROADMAP-HISTORY.md`. Saved replies: `work/summary-ep34-claude.json`, `work/summary-np-codex.json`. Phase 3 items approved in chat 6 and written to ROADMAP.md. Brand assets in `assets/brand/`.
+Current state: phases 1 and 3 done; phase 2 done except item 6 (text of a real usage-limit message, blocked until a real limit is hit). `podcast-monitor report [run-folder]` builds the Spanish PDF in the escritorio layout through Typst (`src/report.rs`, `src/report.typ`, `src/section.rs`, `src/assemble.rs`); checks in `tools/pdf_check/` (`measure.py` positions, `quotes.py` quotes at their minute). Saved replies: `work/summary-ep34-claude.json`, `work/summary-np-codex.json`. Next: phase 4, the desktop window in Spanish (not planned yet). See `ROADMAP.md` and `docs/ROADMAP-HISTORY.md`.
 
 Open flags:
-- Phase 3 item 1 done: Typst picked. Header rule in logo red #B70002 (Felipe), rest as gen_pdf_desk.py. Item 2 (page frame) next.
 - Phase 2 item 6: limit markers not yet checked against a real limit message from either CLI.
 - Ads rank as a topic: "Publicidad y mensajes de patrocinadores" is the top airtime topic on Nada Personal (5:52); no ad filter.
 - Merge of parts tested only by unit test; no saved episode splits.
@@ -12,4 +11,6 @@ Open flags:
 - Open: with context off Boric is 6 on Ep. 34 (target 7); Kast 16. Do not change the target; ask Felipe if it comes up.
 - whisper-rs 424 s against whisper-cli 354 s on the RTX 2050, not investigated.
 - No CPU-only or integrated-GPU speed measured; left by Felipe's choice.
+- App size: Windows release exe 103.3 MB with the report (63.2 MB before); no macOS build measured.
+- Older run folders have no `show.json`; `report` falls back to the folder name until `run` is rerun on that feed.
 - PRD open question: which assistant subscription the reader has.
