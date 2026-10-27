@@ -3,7 +3,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-use anyhow::{Context, Result, anyhow, bail};
+use anyhow::{Context, Result, anyhow};
 use clap::ValueEnum;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -17,6 +17,28 @@ use crate::run::{read_json, write_json};
 pub enum Provider {
     Claude,
     Codex,
+}
+
+const LIMIT_MARKERS: [&str; 7] = ["hit your", "usage limit", "spend limit", "rate limit", "rate_limit", "429", "credit balance is too low"];
+
+#[derive(Debug)]
+pub struct LimitReached(pub String);
+
+impl std::fmt::Display for LimitReached {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "assistant limit reached: {}", self.0)
+    }
+}
+
+impl std::error::Error for LimitReached {}
+
+fn failure(message: String) -> anyhow::Error {
+    let lowered = message.to_lowercase().replace('\u{2019}', "'");
+    if LIMIT_MARKERS.iter().any(|marker| lowered.contains(marker)) {
+        LimitReached(message).into()
+    } else {
+        anyhow!(message)
+    }
 }
 
 pub trait Assistant {
@@ -135,7 +157,7 @@ impl Cli {
         let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            bail!("{} exited with {}: {}", self.program(), output.status, tail(&format!("{stdout}\n{stderr}"), 800));
+            return Err(failure(format!("{} exited with {}: {}", self.program(), output.status, tail(&format!("{stdout}\n{stderr}"), 800))));
         }
         Ok(stdout)
     }
@@ -170,7 +192,7 @@ impl Assistant for Cli {
 fn claude_reply(stdout: &str) -> Result<Value> {
     let envelope: Value = serde_json::from_str(stdout).context("parsing claude output")?;
     if envelope["is_error"].as_bool().unwrap_or(false) {
-        bail!("claude returned an error: {}", envelope["result"].as_str().unwrap_or("no message"));
+        return Err(failure(format!("claude returned an error: {}", envelope["result"].as_str().unwrap_or("no message"))));
     }
     envelope.get("structured_output").cloned().ok_or_else(|| anyhow!("claude output has no structured_output"))
 }
@@ -239,5 +261,14 @@ mod tests {
         assert_eq!(claude_reply(r#"{"is_error":false,"structured_output":{"a":1}}"#).unwrap(), json!({ "a": 1 }));
         assert!(claude_reply(r#"{"is_error":true,"result":"limit"}"#).unwrap_err().to_string().contains("limit"));
         assert!(claude_reply(r#"{"is_error":false,"result":"x"}"#).is_err());
+    }
+
+    #[test]
+    fn limit_messages_are_told_apart() {
+        let limited = |error: anyhow::Error| error.downcast_ref::<LimitReached>().is_some();
+        assert!(limited(claude_reply(r#"{"is_error":true,"result":"You’ve hit your session limit · resets 5pm"}"#).unwrap_err()));
+        assert!(limited(failure("codex exited with 1: You've hit your usage limit. Try again in 2 days".into())));
+        assert!(limited(failure("exceeded retry limit, last status: 429 Too Many Requests".into())));
+        assert!(!limited(claude_reply(r#"{"is_error":true,"result":"API Error: 500 Internal server error"}"#).unwrap_err()));
     }
 }

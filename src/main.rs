@@ -98,7 +98,14 @@ fn main() -> Result<()> {
             let segments = chunk::load_segments(&transcript)?;
             let chunks = chunk::split(&segments, max_chars);
             let out = out.unwrap_or_else(|| transcript.with_file_name("summary.json"));
-            let summary = summarize::summarize(&chunks, glossary.as_ref(), provider, &summarize::Cli { provider }, &out)?;
+            let summary = match summarize::summarize(&chunks, glossary.as_ref(), provider, &summarize::Cli { provider }, &out) {
+                Err(error) if error.downcast_ref::<summarize::LimitReached>().is_some() => {
+                    eprintln!("{error}");
+                    eprintln!("finished parts are saved in {}; run the same command again later to continue", out.display());
+                    std::process::exit(2);
+                }
+                other => other?,
+            };
             eprintln!("{} part(s) saved to {}", summary.chunks.len(), out.display());
             let index = quotes::Index::new(&segments);
             for quote in summary.chunks.iter().flat_map(|part| &part.quotes) {
