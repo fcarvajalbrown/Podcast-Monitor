@@ -31,7 +31,7 @@ Reply shape decided with Felipe, enforced by a JSON schema (`claude -p --json-sc
 | # | Item | Status |
 |---|---|---|
 | 1 | Transcript chunking: one chunk under the cap, equal parts at segment boundaries above it | Done |
-| 2 | CLI wrapper: `claude -p` and `codex exec` behind one interface, glossary sent with each chunk | In Progress |
+| 2 | CLI wrapper: `claude -p` and `codex exec` behind one interface, glossary sent with each chunk | Done |
 | 3 | Quote matching: find each quote in the transcript, print its text and minute, drop unmatched | Not Started |
 | 4 | Limit-error pause: stop cleanly, keep finished episodes | Not Started |
 | 5 | Extractive picker on `noctx-fixed.json` and `np-noctx-fixed.json` as the fallback check, read by Felipe | Not Started |
