@@ -42,4 +42,4 @@ Episode figures decided with Felipe, built at the end of phase 2 so the phase 3 
 | 5 | Extractive picker on `noctx-fixed.json` and `np-noctx-fixed.json` as the fallback check, read by Felipe | Done |
 | 7 | Merge the parts of a split episode into one record | Done |
 | 8 | Airtime per topic from the summed spans, ranked | Done |
-| 9 | People counts by surname in the corrected transcript, ranked, zeros kept | Not Started |
+| 9 | People counts by surname in the corrected transcript, ranked, zeros kept | Done |
