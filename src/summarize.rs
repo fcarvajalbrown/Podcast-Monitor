@@ -1,0 +1,243 @@
+use std::fs;
+use std::io::Write;
+use std::path::{Path, PathBuf};
+use std::process::{Command, Stdio};
+
+use anyhow::{Context, Result, anyhow, bail};
+use clap::ValueEnum;
+use serde::{Deserialize, Serialize};
+use serde_json::{Value, json};
+
+use crate::chunk::{self, Chunk};
+use crate::names::Glossary;
+use crate::run::{read_json, write_json};
+
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize, ValueEnum)]
+#[serde(rename_all = "lowercase")]
+pub enum Provider {
+    Claude,
+    Codex,
+}
+
+pub trait Assistant {
+    fn ask(&self, prompt: &str, schema: &Value) -> Result<Value>;
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TopicSpan {
+    pub name: String,
+    pub start: String,
+    pub end: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct QuoteRef {
+    pub text: String,
+    pub minute: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ChunkReply {
+    pub summary: String,
+    pub topics: Vec<TopicSpan>,
+    pub people: Vec<String>,
+    pub quotes: Vec<QuoteRef>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Summary {
+    pub provider: Provider,
+    pub chunk_count: usize,
+    pub chunks: Vec<ChunkReply>,
+}
+
+pub fn schema() -> Value {
+    let text = json!({ "type": "string" });
+    let object = |properties: Value, required: &[&str]| json!({ "type": "object", "properties": properties, "required": required, "additionalProperties": false });
+    object(
+        json!({
+            "summary": text,
+            "topics": { "type": "array", "items": object(json!({ "name": text, "start": text, "end": text }), &["name", "start", "end"]) },
+            "people": { "type": "array", "items": text },
+            "quotes": { "type": "array", "items": object(json!({ "text": text, "minute": text }), &["text", "minute"]) },
+        }),
+        &["summary", "topics", "people", "quotes"],
+    )
+}
+
+pub fn prompt(part: &Chunk, index: usize, count: usize, glossary: Option<&Glossary>) -> String {
+    let names = glossary.map(Glossary::prompt).filter(|names| !names.is_empty()).unwrap_or_else(|| "(none)".into());
+    format!(
+        "You are reading part {part} of {count} of a Spanish-language podcast transcript, from {start} to {end}. Every line starts with its time as [mm:ss].\n\
+         \n\
+         Return:\n\
+         - summary: one paragraph in Spanish on what this part covers. Describe what was said and who said it, without judging it.\n\
+         - topics: every topic discussed, with a short Spanish name and the [mm:ss] start and end of each stretch where it is discussed. A topic that comes back later gets one entry per stretch, with the same name.\n\
+         - people: every person named in this part, spelled as in the names list below when they appear in it.\n\
+         - quotes: up to five short passages worth quoting, each copied word for word from the transcript lines, 8 to 40 words, with the mm:ss of the line where it starts. Do not correct the transcript's spelling inside a quote.\n\
+         \n\
+         The transcript comes from speech recognition and misspells names. The correct spellings are: {names}. Use them in the summary, topics and people even where the transcript has them wrong.\n\
+         \n\
+         Transcript:\n\
+         {text}",
+        part = index + 1,
+        start = chunk::clock(part.start_s),
+        end = chunk::clock(part.end_s),
+        text = part.text,
+    )
+}
+
+pub fn summarize(chunks: &[Chunk], glossary: Option<&Glossary>, provider: Provider, assistant: &dyn Assistant, path: &Path) -> Result<Summary> {
+    let mut summary = read_json::<Summary>(path)?
+        .filter(|done| done.provider == provider && done.chunk_count == chunks.len())
+        .unwrap_or(Summary { provider, chunk_count: chunks.len(), chunks: Vec::new() });
+    let schema = schema();
+    for (index, part) in chunks.iter().enumerate().skip(summary.chunks.len()) {
+        eprintln!("  summarizing part {} of {} ({} to {})", index + 1, chunks.len(), chunk::clock(part.start_s), chunk::clock(part.end_s));
+        let reply = assistant.ask(&prompt(part, index, chunks.len(), glossary), &schema)?;
+        summary.chunks.push(serde_json::from_value(reply).context("reading the assistant's reply")?);
+        write_json(path, &summary)?;
+    }
+    Ok(summary)
+}
+
+pub struct Cli {
+    pub provider: Provider,
+}
+
+impl Cli {
+    fn program(&self) -> &'static str {
+        match (self.provider, cfg!(windows)) {
+            (Provider::Claude, true) => "claude.cmd",
+            (Provider::Claude, false) => "claude",
+            (Provider::Codex, true) => "codex.cmd",
+            (Provider::Codex, false) => "codex",
+        }
+    }
+
+    fn scratch(&self) -> Result<PathBuf> {
+        let dir = std::env::temp_dir().join(format!("podcast-monitor-{}", std::process::id()));
+        fs::create_dir_all(&dir).with_context(|| format!("creating {}", dir.display()))?;
+        Ok(dir)
+    }
+
+    fn call(&self, args: &[String], dir: &Path, prompt: &str) -> Result<String> {
+        let mut child = Command::new(self.program())
+            .args(args)
+            .current_dir(dir)
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .with_context(|| format!("starting {}", self.program()))?;
+        child.stdin.take().ok_or_else(|| anyhow!("no stdin"))?.write_all(prompt.as_bytes())?;
+        let output = child.wait_with_output()?;
+        let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            bail!("{} exited with {}: {}", self.program(), output.status, tail(&format!("{stdout}\n{stderr}"), 800));
+        }
+        Ok(stdout)
+    }
+}
+
+impl Assistant for Cli {
+    fn ask(&self, prompt: &str, schema: &Value) -> Result<Value> {
+        let dir = self.scratch()?;
+        let reply = match self.provider {
+            Provider::Claude => {
+                let args = ["-p", "--output-format", "json", "--json-schema", &schema.to_string(), "--no-session-persistence", "--tools", ""].map(String::from);
+                claude_reply(&self.call(&args, &dir, prompt)?)
+            }
+            Provider::Codex => {
+                let schema_path = dir.join("schema.json");
+                let reply_path = dir.join("reply.json");
+                fs::write(&schema_path, schema.to_string())?;
+                let _ = fs::remove_file(&reply_path);
+                let args = ["exec", "--ephemeral", "--skip-git-repo-check", "-s", "read-only", "--output-schema"].map(String::from).into_iter()
+                    .chain([schema_path.display().to_string(), "-o".into(), reply_path.display().to_string(), "-".into()])
+                    .collect::<Vec<_>>();
+                self.call(&args, &dir, prompt)?;
+                let text = fs::read_to_string(&reply_path).with_context(|| format!("reading {}", reply_path.display()))?;
+                serde_json::from_str(&text).context("parsing codex reply")
+            }
+        };
+        let _ = fs::remove_dir_all(&dir);
+        reply
+    }
+}
+
+fn claude_reply(stdout: &str) -> Result<Value> {
+    let envelope: Value = serde_json::from_str(stdout).context("parsing claude output")?;
+    if envelope["is_error"].as_bool().unwrap_or(false) {
+        bail!("claude returned an error: {}", envelope["result"].as_str().unwrap_or("no message"));
+    }
+    envelope.get("structured_output").cloned().ok_or_else(|| anyhow!("claude output has no structured_output"))
+}
+
+fn tail(text: &str, chars: usize) -> String {
+    let count = text.chars().count();
+    text.chars().skip(count.saturating_sub(chars)).collect::<String>().trim().to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use std::cell::RefCell;
+
+    use super::*;
+
+    struct Fake {
+        prompts: RefCell<Vec<String>>,
+    }
+
+    impl Assistant for Fake {
+        fn ask(&self, prompt: &str, _schema: &Value) -> Result<Value> {
+            self.prompts.borrow_mut().push(prompt.into());
+            Ok(json!({
+                "summary": "Resumen.",
+                "topics": [{ "name": "Tema", "start": "00:00", "end": "01:00" }],
+                "people": ["Ana Pérez"],
+                "quotes": [{ "text": "hola a todos", "minute": "00:00" }],
+            }))
+        }
+    }
+
+    fn chunk(start_s: f64, text: &str) -> Chunk {
+        Chunk { start_s, end_s: start_s + 60.0, text: text.into() }
+    }
+
+    #[test]
+    fn prompt_carries_glossary_and_transcript() {
+        let glossary = Glossary::parse("Ana Pérez\nLuis Soto\n");
+        let text = prompt(&chunk(60.0, "[01:00] hola\n"), 1, 3, Some(&glossary));
+        assert!(text.contains("part 2 of 3"));
+        assert!(text.contains("from 01:00 to 02:00"));
+        assert!(text.contains("Ana Pérez, Luis Soto"));
+        assert!(text.ends_with("[01:00] hola\n"));
+    }
+
+    #[test]
+    fn summary_saves_each_part_and_resumes() {
+        let dir = std::env::temp_dir().join(format!("podcast-monitor-summary-test-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("summary.json");
+        let chunks = [chunk(0.0, "[00:00] hola a todos\n"), chunk(60.0, "[01:00] chao\n")];
+        let fake = Fake { prompts: RefCell::new(Vec::new()) };
+        let first = summarize(&chunks[..], None, Provider::Claude, &fake, &path).unwrap();
+        assert_eq!(first.chunks.len(), 2);
+        assert_eq!(first.chunks[0].people, vec!["Ana Pérez"]);
+        assert!(fake.prompts.borrow()[0].contains("(none)"));
+        summarize(&chunks[..], None, Provider::Claude, &fake, &path).unwrap();
+        assert_eq!(fake.prompts.borrow().len(), 2);
+        summarize(&chunks[..], None, Provider::Codex, &fake, &path).unwrap();
+        assert_eq!(fake.prompts.borrow().len(), 4);
+        fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn claude_envelope_errors_and_replies() {
+        assert_eq!(claude_reply(r#"{"is_error":false,"structured_output":{"a":1}}"#).unwrap(), json!({ "a": 1 }));
+        assert!(claude_reply(r#"{"is_error":true,"result":"limit"}"#).unwrap_err().to_string().contains("limit"));
+        assert!(claude_reply(r#"{"is_error":false,"result":"x"}"#).is_err());
+    }
+}

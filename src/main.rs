@@ -3,6 +3,7 @@ mod chunk;
 mod feed;
 mod names;
 mod run;
+mod summarize;
 mod transcribe;
 
 use std::path::PathBuf;
@@ -57,6 +58,18 @@ enum Command {
         #[arg(long, default_value_t = chunk::DEFAULT_MAX_CHARS)]
         max_chars: usize,
     },
+    #[command(about = "Summarize a transcript through the assistant CLI, saving each part as it finishes")]
+    Summarize {
+        transcript: PathBuf,
+        #[arg(long)]
+        glossary: Option<PathBuf>,
+        #[arg(long, value_enum, default_value = "claude")]
+        provider: summarize::Provider,
+        #[arg(long, default_value_t = chunk::DEFAULT_MAX_CHARS)]
+        max_chars: usize,
+        #[arg(long, help = "where the summary is saved; defaults to summary.json next to the transcript")]
+        out: Option<PathBuf>,
+    },
 }
 
 fn main() -> Result<()> {
@@ -77,6 +90,14 @@ fn main() -> Result<()> {
             for (index, part) in chunk::split(&chunk::load_segments(&transcript)?, max_chars).iter().enumerate() {
                 println!("{}  {} to {}  {} chars  {} lines", index + 1, chunk::clock(part.start_s), chunk::clock(part.end_s), part.text.chars().count(), part.text.lines().count());
             }
+            Ok(())
+        }
+        Command::Summarize { transcript, glossary, provider, max_chars, out } => {
+            let glossary = glossary.as_deref().map(names::Glossary::load).transpose()?;
+            let chunks = chunk::split(&chunk::load_segments(&transcript)?, max_chars);
+            let out = out.unwrap_or_else(|| transcript.with_file_name("summary.json"));
+            let summary = summarize::summarize(&chunks, glossary.as_ref(), provider, &summarize::Cli { provider }, &out)?;
+            eprintln!("{} part(s) saved to {}", summary.chunks.len(), out.display());
             Ok(())
         }
     }
