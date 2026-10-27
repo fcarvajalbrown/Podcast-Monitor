@@ -4,7 +4,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 
 ## Open items
 
-- Phase 1, item 1: Cargo crate and CLI skeleton (In Progress)
+- Phase 1, item 3: audio download and decode (In Progress)
 
 ## Phases
 
@@ -20,9 +20,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 
 | # | Item | Status |
 |---|---|---|
-| 1 | Cargo crate and CLI skeleton | In Progress |
-| 2 | Feed fetch and parse: episodes with title, date, duration, audio URL, description | Not Started |
-| 3 | Audio download and decode to 16 kHz mono in Rust, no FFmpeg at run time | Not Started |
+| 3 | Audio download and decode to 16 kHz mono in Rust, no FFmpeg at run time | In Progress |
 | 4 | Transcription through whisper-rs on Vulkan, timestamped segments | Not Started |
 | 5 | Name fix at 0.85 on segments, glossary file and per-show exceptions | Not Started |
 | 6 | Per-episode resume: each finished step saved to disk and skipped on rerun | Not Started |
