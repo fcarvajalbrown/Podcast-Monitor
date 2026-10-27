@@ -148,3 +148,12 @@ The prompt does not prevent the fragmentation here: with it the text breaks from
 Names after the fix, against the default run: Machado 10 and 10, Kast 7 against 4, Lula 23 against 26, Ríos 2 against 3, everything else equal.
 
 Across the two episodes, context off is the only setting that removed the fragmentation and it was also the fastest on both (Ep. 34 326 s against 395 s; Nada Personal 248 s against 319 s). The glossary prompt helped on Ep. 34 and made the fragmentation start earlier on Nada Personal. Names: Ep. 34 loses Boric (6 against 9, target 7); Nada Personal gains Kast and loses a few Lula. Two episodes, one run each (the Ep. 34 repeat was identical).
+
+## Fallback check on the fixed default (context off), read by Felipe
+
+`pick.py` at its defaults (15 picks, trade-off 0.7, 12 to 60 words) on `noctx-fixed.json` (Ep. 34) and `np-noctx-fixed.json` (Nada Personal).
+
+- Ep. 34: 485 sentences, 257 eligible, picks from 07:49 to 77:14. One pick is speech-recognition garble (41:08, "mi ley ... mi ley dando más material", likely "Milei").
+- Nada Personal: 300 sentences, 120 eligible, picks from 03:27 to 57:36. Two of the 15 are ads (40:44 and 41:07); the picker has no ad filter.
+
+Felipe read the 15 Ep. 34 picks and judged them readable enough to keep the picker as the fallback for the limit-error pause.

@@ -36,4 +36,4 @@ Quote rule decided with Felipe: exact match after folding case, accents and punc
 | 2 | CLI wrapper: `claude -p` and `codex exec` behind one interface, glossary sent with each chunk | Done |
 | 3 | Quote matching: find each quote in the transcript, print its text and minute, drop unmatched | Done |
 | 4 | Limit-error pause: stop cleanly, keep finished episodes | Not Started |
-| 5 | Extractive picker on `noctx-fixed.json` and `np-noctx-fixed.json` as the fallback check, read by Felipe | Not Started |
+| 5 | Extractive picker on `noctx-fixed.json` and `np-noctx-fixed.json` as the fallback check, read by Felipe | Done |
