@@ -28,3 +28,22 @@ Not investigated: why. The earlier `whisper-cli` run of the same episode (`name-
 ## What the first 30 minutes show
 
 Fifteen sentences picked at trade-off 0.7 are readable Spanish and cover the Brazilian election, the Kast comparison and the prison-benefits decree. Whether they are the passages a reader wants is for Felipe to judge; not measured.
+
+## Cause search: chunking, 10 minutes (beam 5, RTX 2050)
+
+Hypothesis from the whisper.cpp source in the cargo registry: inside one `whisper_full` call the decoded text of each 30 s window is carried into the next as context (`prompt_past1`, up to 224 tokens), so one drifted window can feed the following ones; each new call starts clean. `run` now takes `--chunk-minutes` (default 10), cutting at the quietest second within 20 s of each boundary, each chunk in a fresh state. Searches found the same mechanism discussed for Whisper generally ([WhisperX paper](https://arxiv.org/pdf/2303.00747), [faster-whisper guide](https://localaimaster.com/blog/whisper-hallucination-fix)) but nothing that matches this exact symptom.
+
+Result, Ep. 34, 8 chunks, compute 395 s, no replacement characters:
+
+| Minutes | Segments | ending in . ! ? | Words per segment |
+|---|---|---|---|
+| 0-10 | 157 | 146 | 12.3 |
+| 10-20 | 587 | 6 | 3.2 |
+| 20-30 | 150 | 104 | 12.5 |
+| 30-40 | 560 | 5 | 2.6 |
+| 40-50 | 237 | 62 | 5.7 |
+| 50-60 | 114 | 93 | 12.3 |
+| 60-70 | 107 | 99 | 13.4 |
+| 70-78 | 87 | 66 | 12.9 |
+
+Chunking recovers minutes 20-30 and 50-78 but not 10-20, 30-40 and 40-50. So cross-chunk context is not the whole cause: a chunk can still break within its own ten minutes. Names unchanged (Kast 17, Boric 9; Squella 4 as in greedy). The picker's 15 picks now spread over the episode (01:00 to 77:14).
