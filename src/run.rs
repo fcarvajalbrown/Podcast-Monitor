@@ -12,6 +12,7 @@ use crate::names::{self, Glossary, Replacements};
 use crate::transcribe::{Segment, Transcriber};
 
 const LANGUAGE: &str = "es";
+pub const DEFAULT_BEAM_SIZE: usize = 5;
 
 pub struct Options {
     pub feed: String,
@@ -21,11 +22,18 @@ pub struct Options {
     pub latest: usize,
     pub threshold: f64,
     pub title: Option<String>,
+    pub beam_size: usize,
+}
+
+fn default_beam_size() -> usize {
+    DEFAULT_BEAM_SIZE
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Transcript {
     pub model: String,
+    #[serde(default = "default_beam_size")]
+    pub beam_size: usize,
     pub language: String,
     pub audio_s: f64,
     pub compute_s: f64,
@@ -79,9 +87,10 @@ fn process(episode: &Episode, folder: &Path, options: &Options, glossary: Option
                 *transcriber = Some(Transcriber::load(&options.model)?);
             }
             let started = Instant::now();
-            let segments = transcriber.as_ref().map(|t| t.transcribe(&samples, LANGUAGE)).transpose()?.unwrap_or_default();
+            let segments = transcriber.as_ref().map(|t| t.transcribe(&samples, LANGUAGE, options.beam_size)).transpose()?.unwrap_or_default();
             let transcript = Transcript {
                 model: options.model.file_name().map(|name| name.to_string_lossy().into_owned()).unwrap_or_default(),
+                beam_size: options.beam_size,
                 language: LANGUAGE.into(),
                 audio_s: samples.len() as f64 / audio::WHISPER_RATE as f64,
                 compute_s: started.elapsed().as_secs_f64(),

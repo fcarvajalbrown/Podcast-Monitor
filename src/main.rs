@@ -39,6 +39,10 @@ enum Command {
         threshold: f64,
         #[arg(long, help = "only episodes whose title contains this text")]
         title: Option<String>,
+        #[arg(long, default_value_t = run::DEFAULT_BEAM_SIZE, conflicts_with = "greedy", help = "beam search width; 1 is greedy")]
+        beam_size: usize,
+        #[arg(long, help = "greedy decoding, same as --beam-size 1")]
+        greedy: bool,
     },
 }
 
@@ -52,6 +56,9 @@ fn main() -> Result<()> {
             }
             Ok(())
         }
-        Command::Run { feed, model, glossary, work, latest, threshold, title } => run::run(&run::Options { feed, model, glossary, work, latest, threshold, title }),
+        Command::Run { feed, model, glossary, work, latest, threshold, title, beam_size, greedy } => {
+            let beam_size = if greedy { 1 } else { beam_size };
+            run::run(&run::Options { feed, model, glossary, work, latest, threshold, title, beam_size })
+        }
     }
 }

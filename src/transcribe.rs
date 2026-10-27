@@ -26,9 +26,14 @@ impl Transcriber {
         Ok(Self { context })
     }
 
-    pub fn transcribe(&self, audio: &[f32], language: &str) -> Result<Vec<Segment>> {
+    pub fn transcribe(&self, audio: &[f32], language: &str, beam_size: usize) -> Result<Vec<Segment>> {
         let mut state = self.context.create_state().context("creating whisper state")?;
-        let mut params = FullParams::new(SamplingStrategy::BeamSearch { beam_size: 5, patience: -1.0 });
+        let strategy = if beam_size <= 1 {
+            SamplingStrategy::Greedy { best_of: 1 }
+        } else {
+            SamplingStrategy::BeamSearch { beam_size: beam_size as i32, patience: -1.0 }
+        };
+        let mut params = FullParams::new(strategy);
         params.set_language(Some(language));
         params.set_n_threads(threads());
         params.set_print_special(false);
