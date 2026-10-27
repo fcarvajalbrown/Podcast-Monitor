@@ -49,4 +49,5 @@
   if block.kind == "heading" { heading(level: block.level, block.text) }
   if block.kind == "paragraph" { par(block.text) }
   if block.kind == "table" { booktabs(block.rows, block.weights) }
+  if block.kind == "pagebreak" { pagebreak(weak: true) }
 }

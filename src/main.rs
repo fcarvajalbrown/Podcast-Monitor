@@ -1,3 +1,4 @@
+mod assemble;
 mod audio;
 mod chunk;
 mod feed;
@@ -74,6 +75,13 @@ enum Command {
         #[arg(long, help = "where the summary is saved; defaults to summary.json next to the transcript")]
         out: Option<PathBuf>,
     },
+    #[command(about = "Build one PDF report from every finished summary under a run folder")]
+    Report {
+        #[arg(default_value = "work/runs")]
+        folder: PathBuf,
+        #[arg(long, help = "where the PDF is saved; defaults to informe.pdf in the run folder")]
+        out: Option<PathBuf>,
+    },
 }
 
 fn main() -> Result<()> {
@@ -124,6 +132,12 @@ fn main() -> Result<()> {
                     None => println!("dropped  {}  {}", quote.minute, quote.text),
                 }
             }
+            Ok(())
+        }
+        Command::Report { folder, out } => {
+            let out = out.unwrap_or_else(|| folder.join("informe.pdf"));
+            let count = assemble::build(&folder, &out)?;
+            eprintln!("{count} episode(s) in {}", out.display());
             Ok(())
         }
     }

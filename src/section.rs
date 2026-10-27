@@ -1,16 +1,11 @@
 use chrono::{DateTime, Datelike, FixedOffset, Local, NaiveDate};
 
 use crate::chunk::clock;
+use crate::quotes::Quote;
 use crate::report::Block;
 use crate::tally::{Airtime, Mentions};
 
 const MONTHS: [&str; 12] = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct Quote {
-    pub start_s: f64,
-    pub text: String,
-}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct EpisodeSection {

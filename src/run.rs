@@ -46,6 +46,11 @@ pub struct Transcript {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct ShowInfo {
+    pub title: String,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct FixedTranscript {
     pub threshold: f64,
     pub replacements: Vec<Replacement>,
@@ -66,6 +71,8 @@ pub fn run(options: &Options) -> Result<()> {
     let mut transcriber = None;
     let matching = show.episodes.into_iter().filter(|episode| options.title.as_deref().is_none_or(|title| episode.title.contains(title))).collect();
     let episodes = feed::newest(matching, options.latest);
+    fs::create_dir_all(&show_dir)?;
+    write_json(&show_dir.join("show.json"), &ShowInfo { title: show.title.clone() })?;
     eprintln!("{}: {} episode(s) into {}", show.title, episodes.len(), show_dir.display());
     for episode in &episodes {
         let folder = show_dir.join(episode.id());

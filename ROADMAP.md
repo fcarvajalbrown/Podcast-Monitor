@@ -50,11 +50,13 @@ Layout reference: `felipe_skill_voice/scripts/gen_pdf_desk.py` (A4, 2.5 cm margi
 
 Episode section layout chosen by Felipe (layout A): show title as the level-1 heading, episode title as level 2, one line "Publicado el 26 de octubre de 2026. Duración: 1 h 18 min." (date in the reader's local time), then level-3 headings Resumen, Temas por tiempo al aire (table Tema, Tiempo al aire), Personas mencionadas (table Persona, Menciones) and Citas (one paragraph per quote, `[mm:ss] «text»`); an empty part is left out.
 
+Report order chosen by Felipe: shows alphabetically, newest episode first within a show, each episode on a new page. `run` now saves the feed's title as `show.json` in the show folder; an older folder without it falls back to the folder name with a warning.
+
 | # | Item | Status |
 |---|---|---|
 | 1 | PDF crate pick: one test page per open-source Rust candidate (Latin Modern embedded, Spanish accents, justified text, a table, page numbers); Felipe picked Typst (`docs/research/pdf-crates.md`) | Done |
 | 2 | Page frame: A4, 2.5 cm margins, grey italic header line with thin rule, centred page number | Done |
 | 3 | Text blocks: headings, paragraphs wrapping across pages, heading kept with the next block, booktabs table | Done |
 | 4 | Episode section in Spanish: show, episode, date, duration, summary, topics with airtime, people with counts (zeros last), quotes with [mm:ss] | Done |
-| 5 | `report` command: one PDF from every finished summary in a run folder | Not Started |
+| 5 | `report` command: one PDF from every finished summary in a run folder | Done |
 | 6 | Acceptance on Ep. 34 and Nada Personal from the saved replies: every printed quote found at its minute, layout checked against `gen_pdf_desk.py` output | Not Started |

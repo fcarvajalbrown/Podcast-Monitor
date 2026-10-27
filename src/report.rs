@@ -17,6 +17,7 @@ pub enum Block {
     Heading { level: usize, text: String },
     Paragraph(String),
     Table(Vec<Vec<String>>),
+    PageBreak,
 }
 
 fn strings(items: &[String]) -> Value {
@@ -42,6 +43,9 @@ impl Block {
             Block::Paragraph(text) => {
                 dict.insert("kind".into(), "paragraph".into_value());
                 dict.insert("text".into(), text.into_value());
+            }
+            Block::PageBreak => {
+                dict.insert("kind".into(), "pagebreak".into_value());
             }
             Block::Table(rows) => {
                 let width = rows.iter().map(Vec::len).max().unwrap_or(0);
