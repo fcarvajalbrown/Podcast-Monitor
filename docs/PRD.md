@@ -33,32 +33,40 @@ Non-goals:
 | Must | Add a show by name search in Apple's public podcast directory with a confirm step, or by pasting a feed URL; saved show list |
 | Must | Audio from RSS first; YouTube fallback when a show has no feed |
 | Must | Report sections: topics ranked by airtime, short summary per episode, people and parties named, verbatim quotes with timestamps |
+| Must | Small native desktop window in Spanish: show list with add and remove, one button per run mode, progress per episode, Open PDF at the end |
+| Must | Resumable runs: each episode's transcript and summary is saved as soon as it is done; running again continues where it stopped, and the PDF is built from what is finished |
 | Must | PDF output in the "Desde el escritorio de Felipe Carvajal Brown" layout (`felipe_skill_voice/scripts/gen_pdf_desk.py` is the reference) |
-| Must | Names glossary with phonetic post-correction of transcripts; glossary built from an editable hand list, names in each show's episode titles and descriptions, and Chamber of Deputies and Senate open data, with a per-show exception list |
-| Should | Glossary passed to Whisper as initial prompt (measurement pending) |
+| Must | Names glossary with phonetic post-correction of transcripts at similarity 0.85; the same glossary is sent to the summarizer with each chunk so summaries and people lists use the right names where the transcript stays wrong; quotes keep the transcript's words; glossary built from an editable hand list, names in each show's episode titles and descriptions, and Chamber of Deputies and Senate open data, with a per-show exception list |
 
-Out of v1: hand-picked episode or date-range runs, publisher transcripts (every episode is transcribed locally, even when the feed carries a transcript), and the three pilot shows with no official feed (Cómo te lo explico, Contracorriente, Comentarios de Tomás Mosciatti).
+Out of v1: Whisper initial-prompt glossary (no gain on two episodes, see `docs/research/name-correction.md`), hand-picked episode or date-range runs, publisher transcripts (every episode is transcribed locally, even when the feed carries a transcript), and the three pilot shows with no official feed (Cómo te lo explico, Contracorriente, Comentarios de Tomás Mosciatti).
 
 ## 6. Technical Architecture
 
 - **Language and packaging:** Rust. macOS on Apple Silicon is the primary target (the reader's 8 GB M1); Windows portable exe for Felipe's testing.
 - **Speech-to-text:** Whisper large-v3-turbo through whisper.cpp (whisper-rs). GPU on Vulkan for Windows and Metal for Mac. Voxtral Mini was dropped from consideration.
-- **Name correction:** glossary plus Spanish phonetic key and similarity threshold, on capitalized words only, skipping words that also appear in lowercase in the same transcript.
+- **Name correction:** glossary plus Spanish phonetic key and similarity threshold 0.85, on capitalized words only, skipping words that also appear in lowercase in the same transcript. At 0.75 it turned María into Arias 27 times on a Nada Personal episode.
+- **Interface:** native Rust window (egui or similar, no web stack), Spanish UI strings; code, identifiers and logs in English.
 - **Summaries, topics and quote picks:** the app calls the official command-line tool of the assistant subscription the reader already pays for, logged in once on her Mac (`claude -p` or `codex exec`), sends it transcript chunks and reads the reply. The app never reads or stores her login token. v1 supports both behind one interface, chosen in settings. People counts and quote timestamps come straight from the corrected transcript.
 - **Sources:** RSS (all 17 chart shows and 20 of the 23 pilot shows have one), YouTube via yt-dlp as fallback.
 
 Evidence:
 - `docs/research/stt-bench-ap-ep34.md`: turbo on the RTX 2050 took 4 min 17 s for a 78 min episode (18x real time); faster-whisper small on CPU took 35 min and mangled Kast and Boric.
-- `docs/research/name-correction.md`: phonetic correction raised correct "Kast" from 7 to 19 on turbo with no wrong change found.
+- `docs/research/name-correction.md`: phonetic correction raised correct "Kast" from 7 to 19 on turbo; on a second show the 0.75 setting made mostly wrong changes and 0.85 made only correct ones; the initial prompt gave no gain on either episode.
 - `docs/research/feeds-chile.md`, `docs/research/feeds-test-list.md`: feed availability.
 - `docs/research/stt-alternatives.md`: other speech-to-text engines.
 
-## 7-11
+## 7. UX
 
-Not yet interviewed: UX, Risks, Testing and acceptance criteria, Phases and milestones.
+- The reader runs everything from one small window; the only Terminal step is the one-time login to her assistant CLI.
+- Interface text in Spanish only.
+- Adding a show: search by name, confirm the match with its publisher shown, or paste a feed URL.
+- Long runs show progress per episode and survive a closed app or lid: finished episodes are kept and the next run continues.
+
+## 8-11
+
+Not yet interviewed: Risks, Testing and acceptance criteria, Phases and milestones.
 
 ## 12. Open Questions
 
 - Which assistant subscription the reader has (decides which CLI is tested first).
 - Whisper turbo speed on the 8 GB M1 with Metal, unmeasured.
-- Initial-prompt glossary: measure on Ep. 34 once whisper.cpp can be built (Vulkan SDK install was cancelled at the administrator prompt).
