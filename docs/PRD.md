@@ -12,8 +12,8 @@ The report's reader needs to know what specialized political podcasts are puttin
 
 ## 3. Users
 
-- **Operator:** Felipe runs the app and sends the report.
-- **Reader:** the report's reader, who reads the PDF on phone or PC. She uses an M1 Mac.
+- **Reader and operator:** the report's reader runs the app herself on her M1 Mac with 8 GB of memory and reads the PDF on phone or PC.
+- **Maintainer:** Felipe builds the app, keeps the show list and glossary seeds, and runs it on Windows for testing.
 
 ## 4. Goals and Non-goals
 
@@ -29,21 +29,22 @@ Non-goals:
 
 | Priority | Feature |
 |---|---|
-| Must | Two run modes: back-catalogue brief (every episode of a show) and latest-week report across the saved show list; runs on demand |
+| Must | Two run modes: back-catalogue brief (every episode of a show) and latest-week report across the saved show list; on demand only, no schedule in v1 |
 | Must | Add a show by name search in Apple's public podcast directory with a confirm step, or by pasting a feed URL; saved show list |
 | Must | Audio from RSS first; YouTube fallback when a show has no feed |
 | Must | Report sections: topics ranked by airtime, short summary per episode, people and parties named, verbatim quotes with timestamps |
 | Must | PDF output in the "Desde el escritorio de Felipe Carvajal Brown" layout (`felipe_skill_voice/scripts/gen_pdf_desk.py` is the reference) |
-| Must | Names glossary with phonetic post-correction of transcripts |
+| Must | Names glossary with phonetic post-correction of transcripts; glossary built from an editable hand list, names in each show's episode titles and descriptions, and Chamber of Deputies and Senate open data, with a per-show exception list |
 | Should | Glossary passed to Whisper as initial prompt (measurement pending) |
 
-Hand-picked episode or date-range runs are out of v1.
+Out of v1: hand-picked episode or date-range runs, publisher transcripts (every episode is transcribed locally, even when the feed carries a transcript), and the three pilot shows with no official feed (Cómo te lo explico, Contracorriente, Comentarios de Tomás Mosciatti).
 
 ## 6. Technical Architecture
 
-- **Language and packaging:** Rust. Windows portable exe and macOS on Apple Silicon.
+- **Language and packaging:** Rust. macOS on Apple Silicon is the primary target (the reader's 8 GB M1); Windows portable exe for Felipe's testing.
 - **Speech-to-text:** Whisper large-v3-turbo through whisper.cpp (whisper-rs). GPU on Vulkan for Windows and Metal for Mac. Voxtral Mini was dropped from consideration.
 - **Name correction:** glossary plus Spanish phonetic key and similarity threshold, on capitalized words only, skipping words that also appear in lowercase in the same transcript.
+- **Summaries, topics and quote picks:** the app calls the official command-line tool of the assistant subscription the reader already pays for, logged in once on her Mac (`claude -p` or `codex exec`), sends it transcript chunks and reads the reply. The app never reads or stores her login token. v1 supports both behind one interface, chosen in settings. People counts and quote timestamps come straight from the corrected transcript.
 - **Sources:** RSS (all 17 chart shows and 20 of the 23 pilot shows have one), YouTube via yt-dlp as fallback.
 
 Evidence:
@@ -58,10 +59,6 @@ Not yet interviewed: UX, Risks, Testing and acceptance criteria, Phases and mile
 
 ## 12. Open Questions
 
-- Who runs the app on the Mac: does the reader run it herself on her M1, or does Felipe still run everything?
-- Which model writes the summaries, topics and people lists? No local LLM is installed; the Ep. 34 demo was written by hand from the transcript.
-- Use publisher transcripts (Spreaker shows) when present, or always transcribe?
+- Which assistant subscription the reader has (decides which CLI is tested first).
+- Whisper turbo speed on the 8 GB M1 with Metal, unmeasured.
 - Initial-prompt glossary: measure on Ep. 34 once whisper.cpp can be built (Vulkan SDK install was cancelled at the administrator prompt).
-- Where the glossary comes from: feed text, Congress open data, a hand-kept list.
-- Where Cómo te lo explico, Contracorriente and Comentarios de Tomás Mosciatti are published.
-- Weekly cadence in addition to on demand.
