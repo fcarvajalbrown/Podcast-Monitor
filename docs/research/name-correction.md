@@ -106,3 +106,27 @@ Findings:
 - With the prompt, `whisper-cli` split the episode into 4,173 segments instead of 2,544 (similar word count, 12,444 against 12,427).
 - Speed: `whisper-cli` on Vulkan took 354 s without the prompt and 335 s with it, against 257 s for the FFmpeg filter run in `stt-bench-ap-ep34.md`. Both are well above real time.
 - One episode and a hand-picked glossary; not a general result.
+
+## Measured: second episode, Nada Personal
+
+"La sorpresa detrás de la vuelta de María Corina Machado a Venezuela", Radio Duna, 2026-10-26, 3,563 s (59 min). Fetched with `tools/feed_check/fetch_episode.py`. Glossary `tools/stt_compare/glossary-np-latest.txt`: 16 surnames from the episode description and the no-prompt transcript, so again a best case. Same `whisper-cli` build and settings as above; fix is `phonetic_fix.py` at its defaults (capitalized only, 0.75, skip words seen twice in lowercase).
+
+| Name | no prompt | prompt | no prompt + fix | prompt + fix |
+|---|---|---|---|---|
+| Machado | 10 | 10 | 10 | 10 |
+| Kast | 2 | 3 | 5 | 3 |
+| Lula | 24 | 24 | 24 | 26 |
+| Milei | 0 | 0 | 0 | 0 |
+| Faúndez | 2 | 2 | 7 | 7 |
+| Arias | 3 | 3 | 33 | 33 |
+| Ríos | 3 | 3 | 6 | 5 |
+| Rabat | 3 | 2 | 3 | 2 |
+| Sheinbaum | 0 | 0 | 0 | 0 |
+
+Changes the fix made on the no-prompt transcript: María to Arias x27, Andrés to Faúndez x4, Kass to Kast x3, Arica to Arias x3, Dios to Ríos x1, Faundes to Faúndez x1, Pros to Ríos x1, Urroz to Ríos x1. With the prompt it also changed Luna to Lula x2.
+
+Findings:
+- The prompt again brought no gain: Milei ("Milley" x3) and Sheinbaum ("Shinjaps" x3) stayed wrong with both names in the prompt, Kast rose by one. Segment count moved the other way this time (861 with the prompt against 3,104 without), so the prompt's effect on segmentation is not consistent.
+- The phonetic fix is not safe on a new show at these settings. Most of its changes here were wrong: first names (María, Andrés), a city (Arica) and ordinary words (Dios, Pros) became glossary surnames. Only Kass to Kast and Faundes to Faúndez were right. The Ep. 34 result ("no wrong change found") does not generalize.
+- The fix also missed what was needed: "Milley" and "Shinjaps" were not matched to Milei and Sheinbaum.
+- Speed: 412 s without the prompt and 422 s with it, for 59 min of audio.
