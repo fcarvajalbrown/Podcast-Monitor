@@ -1,52 +1,36 @@
 <p align="center"><img src="assets/brand/podcast-monitor-icon.svg" alt="Podcast-Monitor logo" width="128"></p>
 
-# Local Political Podcast Monitor
+# Podcast-Monitor
 
-A local RSS-to-briefing proof of concept. It does **not** call Claude or paid inference APIs.
+A Rust desktop tool that turns Chilean podcast episodes into a report you can read instead of listening: what each show talked about and for how long, who was named, and verbatim quotes you can check by minute. Transcription runs locally with whisper.cpp.
 
-## Install
+Status: a Windows command-line tool. It transcribes an episode from its RSS feed, fixes names against a glossary, and summarizes the transcript with topics ranked by airtime, people ranked by mentions and quotes found in the transcript. The PDF report, the desktop window in Spanish and the macOS build come next. Scope is in `docs/PRD.md`, phases and open items in `ROADMAP.md`, measured findings in `docs/research/`.
 
-1. Install Python 3.10+ and Ollama. In a PowerShell shell with Ollama available:
+## Build (Windows)
 
-```powershell
-ollama pull qwen3:8b
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+Needs Rust, Visual Studio with the C++ tools, Ninja and the Vulkan SDK. The wrapper sets up the build environment and a short target folder:
+
+```
+tools/build/cargo-windows.cmd build --release
 ```
 
-2. Run:
+## Use
 
-```powershell
-python monitor.py "https://EXAMPLE.COM/podcast/rss.xml" --days 7 --max-per-feed 2
+```
+podcast-monitor episodes <feed-url>
+podcast-monitor run <feed-url> --model <ggml-model.bin> [--glossary <names.txt>] [--latest 1]
+podcast-monitor summarize <transcript.json> [--glossary <names.txt>] [--provider <cli>]
 ```
 
-Or pass multiple feed URLs in one invocation. Reports go to `agenda_output/boletin.md`; transcripts, per-episode reports and extracted items are saved under hashed episode IDs. Re-running reuses completed reports.
+- `episodes` lists the newest episodes of a feed.
+- `run` downloads, transcribes and name-fixes the newest episodes into `work/runs`. Finished steps are kept, so running it again picks up where it stopped.
+- `summarize` sends the transcript to an assistant CLI you are logged into, saves each part as it finishes, then prints the topics, people and quotes.
 
-## Options
+Every command takes `--help` for the rest of its options.
 
-- `--whisper base` for lower RAM and faster ASR, or `--whisper medium` for slower potentially more accurate ASR.
-- `--model qwen3:4b` if 8B is too heavy locally (first run `ollama pull qwen3:4b`).
-- `--gpu` for Whisper CUDA GPU inference. Verify you have compatible NVIDIA CUDA 12 and cuDNN 9; omit this flag for a reliable CPU path.
-- `--days 7`, `--max-per-feed 2`, `--out agenda_output` are defaults.
-- Publisher-provided plain text / SRT / VTT transcripts from `<podcast:transcript>` take priority over downloading audio and Whisper.
+## Layout
 
-## Restrictions / limitations
-
-- Supports public RSS 2.0 feeds with `item` and audio `enclosure`. Does not implement Atom or authenticated feeds.
-- Some RSS transcript formats (HTML, JSON) are not supported by the transcript-first parser and will fall back to audio.
-- Uses no real speaker diarization. Speaker names are only included if explicit in transcription.
-- Local LLM output is **not factual verification**. Contiguous source quotes are checked against transcript chunk; other generated fields require editorial review.
-- Publisher transcript time codes may differ in format. Plain text transcripts may lack time codes.
-- The report aggregates episodes; it does not deduplicate/merge identical stories across series or independently fact-check against primary sources.
-- Downloads and analysis may take a while on CPU. Audio can be hundreds of MB. Respect each provider's rights, terms and rate limits.
-- The local Ollama daemon must be running, and models download the first time.
-- Designed for a single operator and trusted feed list, not a public web service. For production, harden remote URL handling against SSRF and limit redirects and memory usage.
-
-## Scheduling on Windows
-
-Use Windows Task Scheduler and point it to the virtual environment Python path and the script with feed URL arguments. Do **not** launch Claude Code for routine scheduled runs.
-
-## Model note
-
-Use multilingual Whisper model names (`tiny`, `base`, `small`, `medium`), not `.en` models, for Chilean Spanish.
+- `src/`: the app.
+- `tools/`: helper scripts (feed checks, transcription comparisons, the icon renderer, the build wrapper).
+- `assets/brand/`: logo SVGs and the Windows (`.ico`) and macOS (`.icns`) icon sets.
+- `monitor.py`: the original Python prototype, kept for reference only.
