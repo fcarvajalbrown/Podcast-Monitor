@@ -29,19 +29,19 @@ impl Transcriber {
         Ok(Self { context })
     }
 
-    pub fn transcribe(&self, audio: &[f32], language: &str, beam_size: usize, chunk_minutes: usize) -> Result<Vec<Segment>> {
+    pub fn transcribe(&self, audio: &[f32], language: &str, beam_size: usize, chunk_minutes: usize, text_context: Option<i32>) -> Result<Vec<Segment>> {
         let cuts = boundaries(audio, chunk_minutes * 60 * SAMPLE_RATE);
         let mut segments = Vec::new();
         for (index, pair) in cuts.windows(2).enumerate() {
             eprintln!("  chunk {}/{}", index + 1, cuts.len() - 1);
             let offset_s = pair[0] as f64 / SAMPLE_RATE as f64;
-            let part = self.transcribe_chunk(&audio[pair[0]..pair[1]], language, beam_size)?;
+            let part = self.transcribe_chunk(&audio[pair[0]..pair[1]], language, beam_size, text_context)?;
             segments.extend(part.into_iter().map(|segment| Segment { start_s: segment.start_s + offset_s, end_s: segment.end_s + offset_s, text: segment.text }));
         }
         Ok(segments)
     }
 
-    fn transcribe_chunk(&self, audio: &[f32], language: &str, beam_size: usize) -> Result<Vec<Segment>> {
+    fn transcribe_chunk(&self, audio: &[f32], language: &str, beam_size: usize, text_context: Option<i32>) -> Result<Vec<Segment>> {
         let mut state = self.context.create_state().context("creating whisper state")?;
         let strategy = if beam_size <= 1 {
             SamplingStrategy::Greedy { best_of: 1 }
@@ -50,6 +50,9 @@ impl Transcriber {
         };
         let mut params = FullParams::new(strategy);
         params.set_language(Some(language));
+        if let Some(tokens) = text_context {
+            params.set_n_max_text_ctx(tokens);
+        }
         params.set_n_threads(threads());
         params.set_print_special(false);
         params.set_print_progress(false);

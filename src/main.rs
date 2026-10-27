@@ -45,6 +45,8 @@ enum Command {
         greedy: bool,
         #[arg(long, default_value_t = run::DEFAULT_CHUNK_MINUTES, help = "transcribe in chunks of this many minutes, each with fresh context; 0 is one pass")]
         chunk_minutes: usize,
+        #[arg(long, help = "most tokens of earlier text fed to each 30 s window; 0 turns the carried context off")]
+        text_context: Option<i32>,
     },
 }
 
@@ -58,9 +60,9 @@ fn main() -> Result<()> {
             }
             Ok(())
         }
-        Command::Run { feed, model, glossary, work, latest, threshold, title, beam_size, greedy, chunk_minutes } => {
+        Command::Run { feed, model, glossary, work, latest, threshold, title, beam_size, greedy, chunk_minutes, text_context } => {
             let beam_size = if greedy { 1 } else { beam_size };
-            run::run(&run::Options { feed, model, glossary, work, latest, threshold, title, beam_size, chunk_minutes })
+            run::run(&run::Options { feed, model, glossary, work, latest, threshold, title, beam_size, chunk_minutes, text_context })
         }
     }
 }
