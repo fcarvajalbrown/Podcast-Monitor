@@ -123,3 +123,20 @@ The earlier `whisper-cli` prompt run (`name-correction.md`) did fragment after m
 ## Repeat of option 3
 
 Same command a second time (`--chunk-minutes 0 --glossary-prompt`, context carried). The transcript is identical to the first run: 1,399 segments, the same per-ten-minute table, Kast 17, Boric 9, Squella 1, 774 sentences and 384 eligible. Only the compute time differs (400 s against 384 s). So whisper.cpp decoding is deterministic here, and a repeat on the same episode shows no run-to-run noise. It does not show whether the prompt holds on other episodes; the glossary is also built from this episode, a best case. Not tested.
+
+## Second episode: Nada Personal, default against glossary prompt (beam 5, one pass, RTX 2050)
+
+"La sorpresa detrás de la vuelta de María Corina Machado a Venezuela", Radio Duna, 3,563 s, glossary `glossary-np-latest.txt` (best case, built from this episode). Feed `https://mdstrm.com/feeds/65ea0c645728c0087b186ba5/67f56020881515c36adbe29f?property=itunes`, filter `--title Machado` (an accented title filter did not match from the shell).
+
+| Minutes | Default: segments | ending in . ! ? | words per segment | Prompt: segments | ending in . ! ? | words per segment |
+|---|---|---|---|---|---|---|
+| 0-10 | 184 | 40 | 9.6 | 232 | 215 | 7.6 |
+| 10-20 | 171 | 112 | 9.8 | 172 | 117 | 9.9 |
+| 20-30 | 238 | 72 | 7.0 | 434 | 49 | 3.9 |
+| 30-40 | 273 | 114 | 6.2 | 606 | 3 | 2.7 |
+| 40-50 | 543 | 29 | 2.9 | 554 | 4 | 2.8 |
+| 50-59 | 572 | 5 | 2.8 | 586 | 8 | 2.7 |
+
+Compute 319 s default, 320 s prompt, 1,981 and 2,584 segments, no replacement characters. Picker: 372 sentences and 139 eligible (default), 397 and 115 (prompt).
+
+The prompt does not prevent the fragmentation here: with it the text breaks from minute 20, without it from minute 40. So the Ep. 34 result for option 3 does not generalize, and the default fragments on this episode too (after minute 40). Names are the same in both runs except Kast 4 against 3 and Lula 26 against 24.
