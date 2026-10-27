@@ -68,3 +68,31 @@ The fragmentation is gone across the whole episode, which points at the carried 
 Names after the fix: Kast 16 (target 16), Boric 6 (target 7, was 9 with context), Squella 3. Boric misses the target.
 
 Not yet tried: a small cap such as 64 tokens, or the cap together with 10 minute chunks.
+
+## Cause search: cap of 64 tokens with 10 minute chunks (beam 5, RTX 2050)
+
+`--chunk-minutes 10 --text-context 64`. Compute 339 s, 1,764 segments, no replacement characters.
+
+| Minutes | Segments | ending in . ! ? | Words per segment |
+|---|---|---|---|
+| 0-10 | 178 | 126 | 10.5 |
+| 10-20 | 455 | 3 | 4.1 |
+| 20-30 | 118 | 79 | 15.5 |
+| 30-40 | 508 | 7 | 2.8 |
+| 40-50 | 214 | 60 | 6.1 |
+| 50-60 | 138 | 78 | 9.9 |
+| 60-70 | 123 | 86 | 11.3 |
+| 70-78 | 30 | 26 | 35.4 |
+
+Fragmentation returns in 10-20 and 30-40, the same places as chunking alone. Any carried context, even 64 tokens inside a fresh chunk, lets the output break; only `--text-context 0` kept the whole episode intact. Names after the fix: Kast 17, Boric 8, Squella 4. The 70-78 row (30 segments of 35 words) is odd and not looked at.
+
+Summary of the four Ep. 34 runs on the RTX 2050, beam 5 unless noted:
+
+| Setting | compute_s | Fragmented minutes | Kast | Boric |
+|---|---|---|---|---|
+| Default (context carried, one pass) | 395 | 30-78 | 17 | 9 |
+| Chunks of 10 min | 395 | 10-20, 30-50 | 17 | 9 |
+| Context 64 + chunks of 10 min | 339 | 10-20, 30-40 | 17 | 8 |
+| Context 0, one pass | 326 | none | 16 | 6 |
+
+Only context 0 meets Kast at least 16 and avoids fragmentation, and it misses Boric at least 7 by one mention.
