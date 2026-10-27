@@ -1,3 +1,5 @@
+mod feed;
+
 use std::path::PathBuf;
 
 use anyhow::Result;
@@ -34,7 +36,12 @@ enum Command {
 
 fn main() -> Result<()> {
     match Cli::parse().command {
-        Command::Episodes { .. } => anyhow::bail!("episodes is not implemented yet"),
+        Command::Episodes { feed, limit } => {
+            for episode in feed::newest(feed::fetch(&feed)?, limit) {
+                println!("{}  {:>4} min  {}", episode.id(), episode.duration_s / 60, episode.title);
+            }
+            Ok(())
+        }
         Command::Run { .. } => anyhow::bail!("run is not implemented yet"),
     }
 }
