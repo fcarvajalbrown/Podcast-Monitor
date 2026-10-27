@@ -1,4 +1,5 @@
 mod audio;
+mod chunk;
 mod feed;
 mod names;
 mod run;
@@ -50,6 +51,12 @@ enum Command {
         #[arg(long, help = "feed the glossary names to whisper as its initial prompt; has no effect while --text-context is 0")]
         glossary_prompt: bool,
     },
+    #[command(about = "Show how a transcript is split into chunks for the summarizer")]
+    Chunks {
+        transcript: PathBuf,
+        #[arg(long, default_value_t = chunk::DEFAULT_MAX_CHARS)]
+        max_chars: usize,
+    },
 }
 
 fn main() -> Result<()> {
@@ -65,6 +72,12 @@ fn main() -> Result<()> {
         Command::Run { feed, model, glossary, work, latest, threshold, title, beam_size, greedy, chunk_minutes, text_context, glossary_prompt } => {
             let beam_size = if greedy { 1 } else { beam_size };
             run::run(&run::Options { feed, model, glossary, work, latest, threshold, title, beam_size, chunk_minutes, text_context, glossary_prompt })
+        }
+        Command::Chunks { transcript, max_chars } => {
+            for (index, part) in chunk::split(&chunk::load_segments(&transcript)?, max_chars).iter().enumerate() {
+                println!("{}  {} to {}  {} chars  {} lines", index + 1, chunk::clock(part.start_s), chunk::clock(part.end_s), part.text.chars().count(), part.text.lines().count());
+            }
+            Ok(())
         }
     }
 }
