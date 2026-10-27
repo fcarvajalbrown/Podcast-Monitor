@@ -110,12 +110,12 @@ Option 3, glossary names as whisper's initial prompt (`--glossary-prompt`, the 2
 
 | Arm | compute_s | Segments | Sentences / eligible (picker) | Kast | Boric | Squella |
 |---|---|---|---|---|---|---|
-| Default (context, no prompt) | 395 | 1,999* | 438 / 205 | 17 | 9 | 0 |
+| Default (context, no prompt) | 395 | 3,226 | 438 / 205 | 17 | 9 | 0 |
 | 1. Context off | 326 | 1,503 | 485 / 257 | 16 | 6 | 3 |
-| 2. Repair afterwards | 395 | 1,999* | 438 / 205 | 17 | 9 | 0 |
+| 2. Repair afterwards | 395 | 3,226 | 438 / 205 | 17 | 9 | 0 |
 | 3. Prompt, context on | 384 | 1,399 | 774 / 384 | 17 | 9 | 1 |
 | 3b. Prompt, context off | 332 | 1,503 | same as 1 | 16 | 6 | 3 |
 
-*The default run's segment count is 3,226 in `pipeline-ep34-check.md`; the 1,999 above is the chunked run, kept here only for the chunk comparison. Sentences and eligible counts are from `tools/extractive_pick/pick.py` on the fixed transcripts.
+Sentences and eligible counts are from `tools/extractive_pick/pick.py` on the fixed transcripts.
 
 The earlier `whisper-cli` prompt run (`name-correction.md`) did fragment after minute 20, so the prompt's effect is not consistent across builds; here one run per arm, no repeat to show the noise.
