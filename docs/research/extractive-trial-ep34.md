@@ -140,3 +140,11 @@ Same command a second time (`--chunk-minutes 0 --glossary-prompt`, context carri
 Compute 319 s default, 320 s prompt, 1,981 and 2,584 segments, no replacement characters. Picker: 372 sentences and 139 eligible (default), 397 and 115 (prompt).
 
 The prompt does not prevent the fragmentation here: with it the text breaks from minute 20, without it from minute 40. So the Ep. 34 result for option 3 does not generalize, and the default fragments on this episode too (after minute 40). Names are the same in both runs except Kast 4 against 3 and Lula 26 against 24.
+
+## Second episode: Nada Personal, context off
+
+`--chunk-minutes 0 --text-context 0` on the same episode. Compute 248 s (319 s default), 1,332 segments, no replacement characters. Segments average 5.3 to 11.2 words in every ten minute block, so no fragmentation; punctuation is sparser than the first half of the default run (22 to 99 of 136 to 293 segments per block end in punctuation). Picker: 300 sentences and 120 eligible (default 372 and 139).
+
+Names after the fix, against the default run: Machado 10 and 10, Kast 7 against 4, Lula 23 against 26, Ríos 2 against 3, everything else equal.
+
+Across the two episodes, context off is the only setting that removed the fragmentation and it was also the fastest on both (Ep. 34 326 s against 395 s; Nada Personal 248 s against 319 s). The glossary prompt helped on Ep. 34 and made the fragmentation start earlier on Nada Personal. Names: Ep. 34 loses Boric (6 against 9, target 7); Nada Personal gains Kast and loses a few Lula. Two episodes, one run each (the Ep. 34 repeat was identical).
