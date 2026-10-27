@@ -47,3 +47,24 @@ Result, Ep. 34, 8 chunks, compute 395 s, no replacement characters:
 | 70-78 | 87 | 66 | 12.9 |
 
 Chunking recovers minutes 20-30 and 50-78 but not 10-20, 30-40 and 40-50. So cross-chunk context is not the whole cause: a chunk can still break within its own ten minutes. Names unchanged (Kast 17, Boric 9; Squella 4 as in greedy). The picker's 15 picks now spread over the episode (01:00 to 77:14).
+
+## Cause search: no carried text context (beam 5, single pass, RTX 2050)
+
+`--chunk-minutes 0 --text-context 0` sets whisper.cpp's `n_max_text_ctx` to 0, so no earlier text is fed to later windows. Compute 326 s (395 s with context), 1,503 segments, no replacement characters.
+
+| Minutes | Segments | ending in . ! ? | Words per segment |
+|---|---|---|---|
+| 0-10 | 254 | 81 | 7.3 |
+| 10-20 | 245 | 84 | 7.7 |
+| 20-30 | 290 | 81 | 6.4 |
+| 30-40 | 155 | 61 | 9.1 |
+| 40-50 | 123 | 34 | 10.5 |
+| 50-60 | 120 | 38 | 11.3 |
+| 60-70 | 195 | 53 | 7.2 |
+| 70-78 | 121 | 52 | 9.2 |
+
+The fragmentation is gone across the whole episode, which points at the carried context as the cause. Segments are shorter and fewer end in punctuation than in the first 30 minutes with context (about 12 words, 90 %), so sentences span several segments. The picker spreads its 15 picks from 07:49 to 77:14.
+
+Names after the fix: Kast 16 (target 16), Boric 6 (target 7, was 9 with context), Squella 3. Boric misses the target.
+
+Not yet tried: a small cap such as 64 tokens, or the cap together with 10 minute chunks.
