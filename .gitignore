@@ -1,0 +1,7 @@
+/target/
+/agenda_output/
+/.venv/
+__pycache__/
+*.mp3
+*.m4a
+*.wav
