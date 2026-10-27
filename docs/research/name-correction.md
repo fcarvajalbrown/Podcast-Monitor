@@ -130,3 +130,13 @@ Findings:
 - The phonetic fix is not safe on a new show at these settings. Most of its changes here were wrong: first names (María, Andrés), a city (Arica) and ordinary words (Dios, Pros) became glossary surnames. Only Kass to Kast and Faundes to Faúndez were right. The Ep. 34 result ("no wrong change found") does not generalize.
 - The fix also missed what was needed: "Milley" and "Shinjaps" were not matched to Milei and Sheinbaum.
 - Speed: 412 s without the prompt and 422 s with it, for 59 min of audio.
+
+## Measured: stricter threshold on both episodes
+
+`phonetic_fix.py --threshold 0.85` on the `whisper-cli` no-prompt transcripts.
+
+- Nada Personal: Kass to Kast x3, Faundes to Faúndez x1. 4 changes, all correct.
+- Ep. 34: Cass to Kast x6, París to Parisi x3, Belolio to Bellolio x2, Cast to Kast x2, Contarto to Contardo x1, Arena to Arenas x1, Mabdani to Mamdani x1. 16 changes; the París contexts are about the candidate ("París es curioso porque es menos cartucho"), so all read as correct.
+- 0.85 still misses Milley (Milei) and Shinjaps (Sheinbaum).
+
+Felipe's decision: v1 runs the fix at 0.85 and also sends the glossary to the summarizer with each chunk, so summaries and people lists use the right names where the transcript stays wrong. Quotes keep the transcript's words. The initial prompt is dropped from v1.
