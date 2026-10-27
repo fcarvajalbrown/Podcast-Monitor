@@ -5,6 +5,7 @@ mod names;
 mod quotes;
 mod report;
 mod run;
+mod section;
 mod summarize;
 mod tally;
 mod transcribe;
