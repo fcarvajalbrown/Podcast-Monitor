@@ -24,12 +24,12 @@ All items done; see `docs/ROADMAP-HISTORY.md`.
 
 ## Phase 2: Summarizer through her assistant CLI
 
-Chunking decided with Felipe: the whole episode goes in one call when it is under a size cap, split at segment boundaries into equal parts only above it; each line is sent as `[mm:ss] text`. Ep. 34 is 68k characters and Nada Personal 54k, both one call.
+Chunking decided with Felipe: the whole episode goes in one call when it is under a size cap, split at segment boundaries into equal parts only above it; each line is sent as `[mm:ss] text`. With the minute prefix Ep. 34 is 80,402 characters and Nada Personal 64,535, both one chunk at the 120,000 cap.
 
 | # | Item | Status |
 |---|---|---|
-| 1 | Transcript chunking: one chunk under the cap, equal parts at segment boundaries above it | In Progress |
-| 2 | CLI wrapper: `claude -p` and `codex exec` behind one interface, glossary sent with each chunk | Not Started |
+| 1 | Transcript chunking: one chunk under the cap, equal parts at segment boundaries above it | Done |
+| 2 | CLI wrapper: `claude -p` and `codex exec` behind one interface, glossary sent with each chunk | In Progress |
 | 3 | Quote matching: find each quote in the transcript, print its text and minute, drop unmatched | Not Started |
 | 4 | Limit-error pause: stop cleanly, keep finished episodes | Not Started |
 | 5 | Extractive picker on `noctx-fixed.json` and `np-noctx-fixed.json` as the fallback check, read by Felipe | Not Started |
