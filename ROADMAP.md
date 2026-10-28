@@ -5,6 +5,10 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 ## Open items
 
 - Opened as a window, the exe also shows a console, and closing that console kills the run. Fix chosen by Felipe: the window frees the console when the console belongs to it alone (FreeConsole); commands in a terminal keep printing. Done after the running weekly run.
+- Weekly PDF: three show blocks lost their topic table because Codex copied the `(mm:ss)` duration from the prompt into the group labels, so no label matched (`docs/research/weekly-run.md`).
+- Weekly PDF: a show with two episodes on one day lists the day twice ("lunes 26, lunes 26 y martes 27").
+- Weekly PDF: a topic table can break across pages, leaving a header and one row alone.
+- Codex reads Felipe's global instruction files (`~/.claude/CLAUDE.md`, humanizer and writing skills) on every summary call; the run should not depend on the machine owner's own instructions.
 
 ## Phases
 
@@ -102,7 +106,7 @@ Chosen by Felipe:
 | 4 | Run queue: those episodes one after another, resumable, progress per episode | Done |
 | 5 | Automatic fallback: a Codex limit switches the run to Claude Sonnet 5, assistant noted per episode | Done |
 | 6 | Short per-show layout: sections and length chosen by Felipe, summary and topics in percent | Done |
-| 7 | Weekly PDF: every show of the week in one file, from a Generar informe semanal button | In Progress |
+| 7 | Weekly PDF: every show of the week in one file, from a Generar informe semanal button | Done |
 | 8 | Bottlenecks: stage times read from the debug log | Not Started |
 | 10 | Low-memory guard, before item 9: under 2 GB free the run unloads the model and waits, showing free memory and a Reanudar ahora button; goes on at 3 GB; stops cleanly after 15 min | Done |
 | 9 | Acceptance: this week's report sent to the reader, copy kept in `work/sent/` | Not Started |
