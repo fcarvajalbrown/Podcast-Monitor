@@ -41,8 +41,14 @@ fn failure(message: String) -> anyhow::Error {
     }
 }
 
+pub const FALLBACK_MODEL: &str = "claude-sonnet-5";
+
 pub trait Assistant {
     fn ask(&self, prompt: &str, schema: &Value) -> Result<Value>;
+
+    fn model(&self) -> Option<&str> {
+        None
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -69,6 +75,8 @@ pub struct ChunkReply {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Summary {
     pub provider: Provider,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub model: Option<String>,
     pub chunk_count: usize,
     pub chunks: Vec<ChunkReply>,
 }
@@ -129,7 +137,7 @@ pub fn prompt(part: &Chunk, index: usize, count: usize, glossary: Option<&Glossa
 pub fn summarize(chunks: &[Chunk], glossary: Option<&Glossary>, provider: Provider, assistant: &dyn Assistant, path: &Path) -> Result<Summary> {
     let mut summary = read_json::<Summary>(path)?
         .filter(|done| done.provider == provider && done.chunk_count == chunks.len())
-        .unwrap_or(Summary { provider, chunk_count: chunks.len(), chunks: Vec::new() });
+        .unwrap_or(Summary { provider, model: assistant.model().map(String::from), chunk_count: chunks.len(), chunks: Vec::new() });
     let schema = schema();
     for (index, part) in chunks.iter().enumerate().skip(summary.chunks.len()) {
         log::info!("  summarizing part {} of {} ({} to {})", index + 1, chunks.len(), chunk::clock(part.start_s), chunk::clock(part.end_s));
@@ -142,6 +150,7 @@ pub fn summarize(chunks: &[Chunk], glossary: Option<&Glossary>, provider: Provid
 
 pub struct Cli {
     pub provider: Provider,
+    pub model: Option<String>,
 }
 
 impl Cli {
@@ -191,12 +200,27 @@ stderr: {}",
     }
 }
 
+impl Cli {
+    pub fn new(provider: Provider) -> Self {
+        Self { provider, model: None }
+    }
+
+    pub fn fallback_for(provider: Provider) -> Option<Self> {
+        (provider == Provider::Codex).then(|| Self { provider: Provider::Claude, model: Some(FALLBACK_MODEL.into()) })
+    }
+}
+
 impl Assistant for Cli {
+    fn model(&self) -> Option<&str> {
+        self.model.as_deref()
+    }
+
     fn ask(&self, prompt: &str, schema: &Value) -> Result<Value> {
         let dir = self.scratch()?;
         let reply = match self.provider {
             Provider::Claude => {
-                let args = ["-p", "--output-format", "json", "--json-schema", &schema.to_string(), "--no-session-persistence", "--tools", ""].map(String::from);
+                let mut args = ["-p", "--output-format", "json", "--json-schema", &schema.to_string(), "--no-session-persistence", "--tools", ""].map(String::from).to_vec();
+                args.extend(self.model.iter().flat_map(|model| ["--model".to_string(), model.clone()]));
                 claude_reply(&self.call(&args, &dir, prompt)?)
             }
             Provider::Codex => {
@@ -205,7 +229,9 @@ impl Assistant for Cli {
                 fs::write(&schema_path, schema.to_string())?;
                 let _ = fs::remove_file(&reply_path);
                 let args = ["exec", "--ephemeral", "--skip-git-repo-check", "-s", "read-only", "--output-schema"].map(String::from).into_iter()
-                    .chain([schema_path.display().to_string(), "-o".into(), reply_path.display().to_string(), "-".into()])
+                    .chain([schema_path.display().to_string(), "-o".into(), reply_path.display().to_string()])
+                    .chain(self.model.iter().flat_map(|model| ["-m".to_string(), model.clone()]))
+                    .chain(["-".into()])
                     .collect::<Vec<_>>();
                 self.call(&args, &dir, prompt)?;
                 let text = fs::read_to_string(&reply_path).with_context(|| format!("reading {}", reply_path.display()))?;
@@ -295,6 +321,7 @@ mod tests {
         };
         let summary = Summary {
             provider: Provider::Claude,
+            model: None,
             chunk_count: 2,
             chunks: vec![part(" Primera parte. ", "Tema", &["Ana Pérez", "Luis Soto"], "uno"), part("Segunda parte.", "Tema", &["Luis Soto", "Eva Ríos"], "dos")],
         };

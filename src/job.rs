@@ -118,7 +118,10 @@ pub fn finished(data: &Path, request: &Request) -> bool {
     folder.join(REPORT_FILE).is_file() && summary.is_some_and(|done| done.chunks.len() == done.chunk_count)
 }
 
-pub fn run_queue(data: &Path, requests: &[Request], provider: Provider, assistant: &dyn Assistant, on_episode: &dyn Fn(usize, &Request), stage: StageSink) -> QueueOutcome {
+pub type Choice<'a> = (Provider, &'a dyn Assistant);
+
+pub fn run_queue(data: &Path, requests: &[Request], first: Choice, mut fallback: Option<Choice>, on_episode: &dyn Fn(usize, &Request), stage: StageSink) -> QueueOutcome {
+    let (mut provider, mut assistant) = first;
     if let Err(error) = mark_unfinished_week(data, requests) {
         log::error!("saving the unfinished week: {error:#}");
     }
@@ -132,7 +135,15 @@ pub fn run_queue(data: &Path, requests: &[Request], provider: Provider, assistan
             outcome.reports.push(episode_folder(data, request).join(REPORT_FILE));
             continue;
         }
-        match run_with(data, request, provider, assistant, stage.clone(), &mut transcriber) {
+        let mut result = run_with(data, request, provider, assistant, stage.clone(), &mut transcriber);
+        if result == Err(Failure::Limit)
+            && let Some((next, next_assistant)) = fallback.take()
+        {
+            log::warn!("{provider:?} hit its limit; switching to {next:?} {} for the rest of the queue", next_assistant.model().unwrap_or("default model"));
+            (provider, assistant) = (next, next_assistant);
+            result = run_with(data, request, provider, assistant, stage.clone(), &mut transcriber);
+        }
+        match result {
             Ok(pdf) => outcome.reports.push(pdf),
             Err(Failure::Other) => outcome.failed.push((request.clone(), Failure::Other)),
             Err(stop) => {
@@ -328,12 +339,12 @@ mod tests {
         requests.iter().for_each(|request| place_transcript(&data, request));
         let seen = Mutex::new(Vec::new());
         let (sink, _) = recorder();
-        let outcome = run_queue(&data, &requests, Provider::Codex, &Reply(true), &|index, _| seen.lock().unwrap().push(index), sink.clone());
+        let outcome = run_queue(&data, &requests, (Provider::Codex, &Reply(true)), None, &|index, _| seen.lock().unwrap().push(index), sink.clone());
         assert_eq!(outcome.reports.len(), 2);
         assert_eq!(outcome.stopped, None);
         assert_eq!(*seen.lock().unwrap(), [0, 1]);
         assert_eq!(unfinished_week(&data).unwrap(), None);
-        let rerun = run_queue(&data, &requests, Provider::Codex, &Reply(false), &|_, _| {}, sink);
+        let rerun = run_queue(&data, &requests, (Provider::Codex, &Reply(false)), None, &|_, _| {}, sink);
         assert_eq!(rerun.reports, outcome.reports);
         fs::remove_dir_all(&data).unwrap();
     }
@@ -344,10 +355,38 @@ mod tests {
         let requests = vec![request(), second_request()];
         requests.iter().for_each(|request| place_transcript(&data, request));
         let (sink, _) = recorder();
-        let outcome = run_queue(&data, &requests, Provider::Codex, &Reply(false), &|_, _| {}, sink);
+        let outcome = run_queue(&data, &requests, (Provider::Codex, &Reply(false)), None, &|_, _| {}, sink);
         assert_eq!(outcome.stopped, Some(Failure::Limit));
         assert!(outcome.reports.is_empty());
         assert_eq!(unfinished_week(&data).unwrap(), Some(requests));
+        fs::remove_dir_all(&data).unwrap();
+    }
+
+    struct Pinned;
+
+    impl Assistant for Pinned {
+        fn ask(&self, prompt: &str, schema: &Value) -> Result<Value> {
+            Reply(true).ask(prompt, schema)
+        }
+
+        fn model(&self) -> Option<&str> {
+            Some(summarize::FALLBACK_MODEL)
+        }
+    }
+
+    #[test]
+    fn a_limit_switches_the_rest_of_the_queue_to_the_fallback() {
+        let data = data_dir("queue-fallback");
+        let requests = [request(), second_request()];
+        requests.iter().for_each(|request| place_transcript(&data, request));
+        let (sink, _) = recorder();
+        let outcome = run_queue(&data, &requests, (Provider::Codex, &Reply(false)), Some((Provider::Claude, &Pinned)), &|_, _| {}, sink);
+        assert_eq!(outcome.stopped, None);
+        assert_eq!(outcome.reports.len(), 2);
+        for request in &requests {
+            let summary: summarize::Summary = read_json(&episode_folder(&data, request).join("summary.json")).unwrap().unwrap();
+            assert_eq!((summary.provider, summary.model.as_deref()), (Provider::Claude, Some("claude-sonnet-5")));
+        }
         fs::remove_dir_all(&data).unwrap();
     }
 

@@ -243,7 +243,7 @@ fn begin(window: &mut Window, request: Request) -> Task<Message> {
         let sink: job::StageSink = Arc::new(move |stage| {
             let _ = stages.unbounded_send(RunEvent::Stage(stage));
         });
-        let outcome = job::run(&data_dir, &request, provider, &summarize::Cli { provider }, sink);
+        let outcome = job::run(&data_dir, &request, provider, &summarize::Cli::new(provider), sink);
         let _ = sender.unbounded_send(RunEvent::Finished(outcome));
     });
     Task::run(receiver, Message::Run)

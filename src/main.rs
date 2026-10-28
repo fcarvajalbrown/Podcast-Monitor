@@ -143,7 +143,7 @@ fn dispatch() -> Result<()> {
             let segments = chunk::load_segments(&transcript)?;
             let chunks = chunk::split(&segments, max_chars);
             let out = out.unwrap_or_else(|| transcript.with_file_name("summary.json"));
-            let summary = match summarize::summarize(&chunks, glossary.as_ref(), provider, &summarize::Cli { provider }, &out) {
+            let summary = match summarize::summarize(&chunks, glossary.as_ref(), provider, &summarize::Cli::new(provider), &out) {
                 Err(error) if error.downcast_ref::<summarize::LimitReached>().is_some() => {
                     log::error!("{error}");
                     log::info!("finished parts are saved in {}; run the same command again later to continue", out.display());
@@ -213,7 +213,8 @@ fn dispatch() -> Result<()> {
                 };
                 let count = requests.len();
                 let stage: job::StageSink = std::sync::Arc::new(|_| {});
-                let outcome = job::run_queue(&data, &requests, provider, &summarize::Cli { provider }, &|index, request| log::info!("[{}/{count}] {} · {}", index + 1, request.show.title, request.episode.title), stage);
+                let fallback = summarize::Cli::fallback_for(provider);
+                let outcome = job::run_queue(&data, &requests, (provider, &summarize::Cli::new(provider)), fallback.as_ref().map(|cli| (cli.provider, cli as &dyn summarize::Assistant)), &|index, request| log::info!("[{}/{count}] {} · {}", index + 1, request.show.title, request.episode.title), stage);
                 log::info!("{} report(s), {} failed", outcome.reports.len(), outcome.failed.len());
                 for (request, failure) in &outcome.failed {
                     log::warn!("failed: {} · {} ({failure:?})", request.show.title, request.episode.title);
