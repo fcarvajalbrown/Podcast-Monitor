@@ -15,6 +15,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 | 3 | PDF report in the escritorio layout | Done |
 | 4 | Desktop window in Spanish | In Progress |
 | 5 | macOS build with Metal, reference episodes, first on-demand report | Not Started |
+| 6 | Free-AI path for a reader with no paid assistant | Not Started |
 
 ## Phase 1: Pipeline as a Windows CLI
 
@@ -66,3 +67,12 @@ Native Rust window in iced 0.14 (Felipe's pick, `docs/research/gui-crates.md`), 
 | 4 | On-demand episode run in the background: transcribe, summarize, report; progress per episode; resume after a closed app; limit-error stop explained in Spanish | Done |
 | 5 | Open PDF at the end of a run | Done |
 | 6 | Acceptance on Ep. 34 and Nada Personal driven from the window | Not Started |
+
+## Phase 6: Free-AI path for a reader with no paid assistant
+
+Asked by Felipe: a reader without Claude or ChatGPT subscriptions can use ChatGPT in the browser or any free AI chat by copy and paste. Both items wanted, for flexibility; their order is decided when the phase starts.
+
+| # | Item | Status |
+|---|---|---|
+| 1 | Summary by copy and paste: the window copies the prompt and the `[mm:ss]` transcript text, she pastes them into any browser AI chat and pastes the reply back; the app checks quotes, ranks airtime and people, and builds the PDF as with the CLI | Not Started |
+| 2 | Transcript from a browser AI: she uploads the audio to a browser AI and pastes the transcript back; the app skips Whisper and runs the name fix, summary and PDF | Not Started |
