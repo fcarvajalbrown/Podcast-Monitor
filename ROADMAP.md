@@ -90,6 +90,7 @@ Chosen by Felipe:
 - Summarizer fallback: when Codex hits its limit the run switches on its own to Claude pinned to Sonnet 5, and the report says which assistant summarized each episode.
 - The week is Monday to now, in local time.
 - The weekly report has one block per show, covering that show's episodes of the week together.
+- Each block: a header line (show, publisher, episodes with their days, total duration), a 3 to 4 line summary of the week, and 5 to 8 grouped topics with percent of airtime only. No people, no quotes.
 
 | # | Item | Status |
 |---|---|---|
