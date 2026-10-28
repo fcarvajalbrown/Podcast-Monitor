@@ -1,17 +1,17 @@
 # Session notes
 
-Current state: phases 1 and 3 done; phase 2 done except item 6 (text of a real usage-limit message, blocked until a real limit is hit). `podcast-monitor report [run-folder]` builds the Spanish PDF in the escritorio layout through Typst (`src/report.rs`, `src/report.typ`, `src/section.rs`, `src/assemble.rs`); checks in `tools/pdf_check/` (`measure.py` positions, `quotes.py` quotes at their minute). Saved replies: `work/summary-ep34-claude.json`, `work/summary-np-codex.json`. Next: phase 4 item 1 (GUI crate pick); phase 4 items approved in chat 6 and in ROADMAP.md. See `ROADMAP.md` and `docs/ROADMAP-HISTORY.md`.
+Current state: phases 1 and 3 done; phase 5 deferred; phase 7 (weekly report) done except item 9, the reader receiving this week's report, which Felipe handles himself. The window has a Generar / Continuar informe semanal button; `podcast-monitor week [--run] [--report]` does the same from a terminal. Week of 26 October: PDF at `%APPDATA%\Podcast-Monitor\weeks\2026-10-26\informe-semanal.pdf` (13 shows, 7 pages), copy in `work/sent/`. Debug logs in `%APPDATA%\Podcast-Monitor\logs\`; `tools/log_stages/stages.py <log>` times each stage. Build with `tools/build/cargo-windows.cmd <args> -j 2` from bash. See `ROADMAP.md`, `docs/ROADMAP-HISTORY.md`, `docs/research/weekly-run.md`.
 
 Open flags:
-- Phase 4: ask Felipe which run modes the window offers before item 4 (PRD says one button per run mode; v1 has only on-demand runs).
-- Phase 2 item 6: limit markers not yet checked against a real limit message from either CLI.
-- Ads rank as a topic: "Publicidad y mensajes de patrocinadores" is the top airtime topic on Nada Personal (5:52); no ad filter.
-- Merge of parts tested only by unit test; no saved episode splits.
-- Picker fallback is Python (`tools/extractive_pick/pick.py`); how the Rust app uses it on a limit error not decided. Two ad picks on Nada Personal; no ad filter.
-- Ep. 34 23:44 "a su diestra" likely "a su derecha" (Felipe 80 to 90 % sure), not checked against audio.
-- Open: with context off Boric is 6 on Ep. 34 (target 7); Kast 16. Do not change the target; ask Felipe if it comes up.
+- Console fix (3644824) waits for Felipe's double-click check; ROADMAP open item.
+- Phase 7 item 9: done when Felipe says the reader has the report; copy goes to `work/sent/`.
+- Phase 4 item 6: acceptance on Ep. 34 and Nada Personal from the window, not started.
+- Transcription is about 80 % of a run after the resampler fix; next speed lever, not started.
+- Weekly grouping can split one story across two themes.
+- Phase 2 item 6: limit markers not checked against a real limit message.
+- No ad filter: ads rank as topics and as picker picks.
+- Rerunning an episode with another provider overwrites its summary.
+- Boric 6 on Ep. 34 with context off (target 7); do not change the target.
 - whisper-rs 424 s against whisper-cli 354 s on the RTX 2050, not investigated.
-- No CPU-only or integrated-GPU speed measured; left by Felipe's choice.
-- App size: Windows release exe 103.3 MB with the report (63.2 MB before); no macOS build measured.
-- Older run folders have no `show.json`; `report` falls back to the folder name until `run` is rerun on that feed.
-- PRD open question: which assistant subscription the reader has.
+- No CPU-only or integrated-GPU speed measured.
+- Older run folders without `show.json` fall back to the folder name.
