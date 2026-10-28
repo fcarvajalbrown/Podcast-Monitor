@@ -91,6 +91,7 @@ Chosen by Felipe:
 - The week is Monday to now, in local time.
 - The weekly report has one block per show, covering that show's episodes of the week together.
 - Each block: a header line (show, publisher, episodes with their days, total duration), a 3 to 4 line summary of the week, and 5 to 8 grouped topics with percent of airtime only. No people, no quotes.
+- A closing line in the PDF says which assistant summarized which show, an exception Felipe made for this report. The weekly run starts on Codex.
 
 | # | Item | Status |
 |---|---|---|
