@@ -56,7 +56,7 @@ All items done; see `docs/ROADMAP-HISTORY.md`.
 
 ## Phase 4: Desktop window in Spanish
 
-Native Rust window in iced 0.14 (Felipe's pick, `docs/research/gui-crates.md`), Spanish UI strings, code and logs in English (`docs/PRD.md` sections 5 to 7). Items approved by Felipe in this order. The PRD's "one button per run mode" is unresolved while v1 has only on-demand runs; ask Felipe which run modes the window offers before item 4.
+Native Rust window in iced 0.14 (Felipe's pick, `docs/research/gui-crates.md`), Spanish UI strings, code and logs in English (`docs/PRD.md` sections 5 to 7). The window keeps its show list and run folders in the OS app-data folder (`~/Library/Application Support/Podcast-Monitor`, `%APPDATA%\Podcast-Monitor`), chosen by Felipe; the CLI keeps `work/`. Items approved by Felipe in this order. The PRD's "one button per run mode" is unresolved while v1 has only on-demand runs; ask Felipe which run modes the window offers before item 4.
 
 | # | Item | Status |
 |---|---|---|
