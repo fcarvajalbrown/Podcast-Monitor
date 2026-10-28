@@ -86,6 +86,14 @@ pub fn topic_label(episode: usize, name: &str) -> String {
     format!("E{}: {}", episode + 1, name)
 }
 
+pub fn bare_label(label: &str) -> &str {
+    let label = label.trim();
+    let Some(open) = label.rfind(" (") else { return label };
+    let inside = &label[open + 2..];
+    let clock = inside.strip_suffix(')').is_some_and(|time| !time.is_empty() && time.chars().all(|c| c.is_ascii_digit() || c == ':'));
+    if clock { label[..open].trim_end() } else { label }
+}
+
 pub fn day(date: &DateTime<FixedOffset>) -> String {
     let local = date.with_timezone(&Local).date_naive();
     format!("{} {}", WEEKDAYS[local.weekday().num_days_from_monday() as usize], local.day())
@@ -137,9 +145,10 @@ pub fn shares(episodes: &[EpisodeDigest], groups: &[Group]) -> Vec<(String, u32)
     for group in groups {
         let mut sum = 0.0;
         for label in &group.topics {
-            if !placed.contains(label) {
-                placed.push(label.clone());
-                sum += seconds(label);
+            let label = bare_label(label).to_string();
+            if !placed.contains(&label) {
+                sum += seconds(&label);
+                placed.push(label);
             }
         }
         shares.push((group.name.trim().to_string(), sum));
@@ -201,7 +210,8 @@ impl ShowBlock {
     fn details(&self) -> String {
         let mut dated: Vec<DateTime<Local>> = self.episodes.iter().flatten().map(|date| date.with_timezone(&Local)).collect();
         dated.sort();
-        let days: Vec<String> = dated.iter().map(|date| format!("{} {}", WEEKDAYS[date.weekday().num_days_from_monday() as usize], date.day())).collect();
+        let mut days: Vec<String> = dated.iter().map(|date| format!("{} {}", WEEKDAYS[date.weekday().num_days_from_monday() as usize], date.day())).collect();
+        days.dedup();
         let month = dated.last().map(|date| format!(" de {}", MONTHS[date.month0() as usize])).unwrap_or_default();
         let count = match self.episodes.len() {
             1 => "1 episodio".to_string(),
@@ -386,6 +396,23 @@ mod tests {
     fn shares_are_percent_of_the_week_largest_first_each_topic_counted_once() {
         let groups = vec![group("Brasil", &["E1: Lula", "E2: Brasil"]), group("Decretos", &["E2: Decretos", "E1: Lula"]), group("Cierre", &["E1: Cierre"]), group("Vacío", &["E9: nada"])];
         assert_eq!(shares(&week(), &groups), [("Decretos".to_string(), 45), ("Brasil".to_string(), 25), ("Cierre".to_string(), 3)]);
+    }
+
+    #[test]
+    fn labels_copied_with_their_airtime_still_match() {
+        let groups = vec![group("Decretos", &["E2: Decretos (15:00)", "E1: Lula (05:00)"]), group("Resto", &[" E2: Brasil (1:03:20) ", "E1: Cierre (sin hora)"])];
+        assert_eq!(shares(&week(), &groups), [("Decretos".to_string(), 60), ("Resto".to_string(), 10)]);
+        assert_eq!(bare_label("E1: Lula (05:00)"), "E1: Lula");
+        assert_eq!(bare_label("E1: Cierre (sin hora)"), "E1: Cierre (sin hora)");
+    }
+
+    #[test]
+    fn two_episodes_on_one_day_name_the_day_once() {
+        let mut episodes = week();
+        episodes.insert(0, digest("c", "2026-10-26T18:00:00-03:00", 600, &[]));
+        let saved = SavedWeek { provider: Provider::Codex, model: None, episodes: vec![], reply: WeekReply { summary: String::new(), groups: vec![] } };
+        let block = block("Programa", "Radio", &episodes, &saved);
+        assert_eq!(block.blocks()[1], Block::Paragraph("Radio. 3 episodios (lunes 26 y martes 27 de octubre), 43 min.".into()));
     }
 
     #[test]

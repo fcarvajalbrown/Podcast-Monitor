@@ -26,7 +26,7 @@
 #show heading.where(level: 3): set par(leading: 3.5pt)
 #show heading.where(level: 3): set block(above: 16.5pt, below: 9.5pt)
 
-#let booktabs(rows, weights) = block(above: 12pt, below: 22pt, {
+#let booktabs(rows, weights) = block(above: 12pt, below: 22pt, breakable: rows.len() > 12, {
   set text(9pt)
   set par(justify: false, leading: 2.5pt)
   table(
