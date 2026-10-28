@@ -84,6 +84,11 @@ Deferred indefinitely by Felipe after the reader's feedback: he runs the tool on
 
 Asked by the reader (`docs/research/reader-feedback.md`): this week's episodes of her show list in one PDF, short per show, keeping the summary and the topics by airtime in percent only. Priority set by Felipe: this phase comes next, ahead of phase 4 item 6 and phase 6. Items are approved by Felipe before they are written here.
 
+Chosen by Felipe:
+
+- The weekly run is built into the app first, then this week's episodes go through it.
+- Summarizer fallback: when Codex hits its limit the run switches on its own to Claude pinned to Sonnet 5, and the report says which assistant summarized each episode.
+
 ## Phase 6: Free-AI path for a reader with no paid assistant
 
 Asked by Felipe: a reader without Claude or ChatGPT subscriptions can use ChatGPT in the browser or any free AI chat by copy and paste. Both items wanted, for flexibility; their order is decided when the phase starts.
