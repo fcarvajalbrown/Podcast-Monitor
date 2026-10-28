@@ -100,7 +100,7 @@ Chosen by Felipe:
 | 3 | Week picker: the episodes published in a date range across the saved shows | Done |
 | 4 | Run queue: those episodes one after another, resumable, progress per episode | Done |
 | 5 | Automatic fallback: a Codex limit switches the run to Claude Sonnet 5, assistant noted per episode | Done |
-| 6 | Short per-show layout: sections and length chosen by Felipe, summary and topics in percent | Not Started |
+| 6 | Short per-show layout: sections and length chosen by Felipe, summary and topics in percent | Done |
 | 7 | Weekly PDF: every show of the week in one file, from a Generar informe semanal button | Not Started |
 | 8 | Bottlenecks: stage times read from the debug log | Not Started |
 | 9 | Acceptance: this week's report sent to the reader, copy kept in `work/sent/` | Not Started |
