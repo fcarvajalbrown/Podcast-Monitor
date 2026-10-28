@@ -91,7 +91,7 @@ Chosen by Felipe:
 
 | # | Item | Status |
 |---|---|---|
-| 1 | Debug log: every event of every run, window or CLI (stages with time, assistant calls and replies, errors, panics, settings changes) to `logs/` in the app-data folder | Not Started |
+| 1 | Debug log: every event of every run, window or CLI (stages with time, assistant calls and replies, errors, panics, settings changes) to `logs/` in the app-data folder | Done |
 | 2 | Her 17 shows with a feed loaded into the saved show list | Not Started |
 | 3 | Week picker: the episodes published in a date range across the saved shows | Not Started |
 | 4 | Run queue: those episodes one after another, resumable, progress per episode | Not Started |
