@@ -16,13 +16,18 @@ Build: `tools/build/cargo-windows.cmd build --release --manifest-path tools/gui_
 | Rebuild after touching `main.rs` | 3 s | 7 s | 8 s |
 | Packages in `Cargo.lock` | 430 | 396 | 554 |
 | Default renderer | wgpu | wgpu, tiny-skia software fallback | FemtoVG (OpenGL), software renderer also built |
-| Code for the test window | 95 lines, immediate mode | 90 lines, messages and update | 120 lines, UI in the `slint!` markup language plus Rust callbacks |
+| Code for the test window (plus 54 shared lines) | 94 lines, immediate mode | 99 lines, messages and update | 109 lines, UI in the `slint!` markup language plus Rust callbacks |
 | Built on first try | no: 0.37 replaced `App::update` with `App::ui` and changed the screenshot call | yes | yes |
 | Selectable list | `selectable_label` per row | none built in; a column of buttons styled as selected or plain | `StandardListView` |
-| Screenshot of its own window | `ViewportCommand::Screenshot` with a callback | `window::screenshot` task | `Window::take_snapshot` |
+| Screenshot of its own window | `ViewportCommand::Screenshot` with a callback | `window::screenshot` task; taken at start-up it came out blank, so it waits for the third frame through `window::frames` | `Window::take_snapshot` |
+| Font | its own bundled font | Windows system font | Windows system font |
+| Spanish characters in the window | all correct | all correct | all correct |
+| Look with no styling | flat grey, small text | blue filled buttons, larger text; the accents line wraps at 560 px | Windows 11 Fluent style, list leaves empty space below two rows |
 
 Slint's royalty-free licence, from `LICENSES/LicenseRef-Slint-Royalty-free-2.0.md` in the crate: it covers desktop, mobile and web applications, not embedded systems, and asks for the `AboutSlint` widget in an About screen reachable from the top menu (or the splash screen) and the Slint attribution badge on a public web page, preferably where the binaries are downloaded. The other two carry no such condition.
 
 Size against the app: `podcast-monitor.exe` is 103.3 MB with the report built in; the window adds roughly the exe sizes above less the `open` and `png` crates, which are shared. Not yet measured as part of the app, and no macOS build measured.
 
-Screenshots and Felipe's pick: pending.
+Screenshots, 560 by 420 logical pixels at 125 % scaling: `gui-crates/egui.png`, `gui-crates/iced.png`, `gui-crates/slint.png`. The Abrir PDF button calls the same `open::that` in all three and was not clicked in this run.
+
+Felipe's pick: pending.
