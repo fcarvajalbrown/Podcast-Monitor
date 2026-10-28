@@ -35,7 +35,7 @@ Every command takes `--help` for the rest of its options.
 ## Layout
 
 - `src/`: the app.
-- `tools/`: helper scripts (feed checks, transcription comparisons, PDF layout and quote checks, the icon renderer, the build wrapper).
+- `tools/`: helper scripts (feed checks, transcription comparisons, PDF layout and quote checks, a process memory sampler, the icon renderer, the build wrapper).
 - `assets/brand/`: logo SVGs and the Windows (`.ico`) and macOS (`.icns`) icon sets.
 - `assets/fonts/`: Latin Modern Roman, compiled into the app for the report (GUST Font License, `LICENSE-latin-modern.txt`).
 - `monitor.py`: the original Python prototype, kept for reference only.

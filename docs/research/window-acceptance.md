@@ -11,5 +11,6 @@ Setup: release build of `podcast-monitor.exe` (113.3 MB) with no command, so it 
 - Name fix: same eight replacements as before (Cass, Kass and Cast to Kast; Esquella to Squella; Belolio to Bellolio; París to Parisi; Arena to Arenas; Contarto to Contardo). Kast 16 and Boric 6 in the corrected transcript, equal to the context-off CLI result.
 - The log shows two runs of the episode: the first summarized and wrote `informe.pdf`; the second skipped the transcript, summarized again and rewrote the PDF. `settings.json` and `summary.json` say Codex, so the PDF on disk carries the Codex summary, not Claude's. A run on a finished episode with the other assistant replaces the earlier summary without asking.
 - PDF (3 pages): `tools/pdf_check/quotes.py` finds all 5 quotes at their printed minute in `transcript.fixed.json`; `tools/pdf_check/measure.py` gives Latin Modern only, header baseline 86.4 pt, red rule 91.4 pt, title baseline 125.4 pt, text column from 76.9 pt, as in phase 3.
+- Felipe ran the second pass on purpose to try Codex and accepted Ep. 34 with the Codex summary.
 - Abrir PDF opened the file in the system viewer (a LibreOffice lock file appeared next to it).
 - Memory: not sampled during the transcription; the idle window afterwards used 110 MB.
