@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use crate::assemble;
 use crate::chunk;
 use crate::feed::{self, Episode};
+use crate::memory;
 use crate::names::Glossary;
 use crate::run::{self, ShowInfo, Transcription, read_json, write_json};
 use crate::shows::SavedShow;
@@ -34,6 +35,7 @@ pub struct Request {
 pub enum Stage {
     Preparing,
     Transcribing(i32),
+    WaitingForMemory(u64),
     Summarizing,
     Report,
 }
@@ -43,6 +45,7 @@ pub enum Failure {
     MissingModel(PathBuf),
     Limit,
     MissingCli,
+    LowMemory,
     Other,
 }
 
@@ -181,6 +184,14 @@ fn run_with(data: &Path, request: &Request, provider: Provider, assistant: &dyn 
         return Err(Failure::MissingModel(model));
     }
     log::info!("run {} / {} with {provider:?} into {}", request.show.title, request.episode.title, folder.display());
+    let probe = memory::system_probe();
+    if memory::low(&probe).is_some() && transcriber.take().is_some() {
+        log::info!("unloaded the whisper model to free memory");
+    }
+    let waiting = stage.clone();
+    if memory::wait(&probe, &|free| waiting(Stage::WaitingForMemory(free))) == memory::Wait::TimedOut {
+        return Err(Failure::LowMemory);
+    }
     let started = std::time::Instant::now();
     let logged: StageSink = Arc::new(move |current| {
         if !matches!(current, Stage::Transcribing(_)) {

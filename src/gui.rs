@@ -47,6 +47,8 @@ const PREPARING: &str = "Descargando y preparando el audio…";
 const REPORT: &str = "Armando el PDF…";
 const FAILED: &str = "El informe no se pudo terminar. Lo ya terminado quedó guardado; puedes intentarlo de nuevo con Continuar.";
 const OPEN_PDF: &str = "Abrir PDF";
+const RESUME_NOW: &str = "Reanudar ahora";
+const LOW_MEMORY: &str = "El equipo estuvo sin memoria libre durante 15 minutos. Lo ya terminado quedó guardado; cierra otros programas y usa Continuar.";
 const START_WEEK: &str = "Generar informe semanal";
 const CONTINUE_WEEK: &str = "Continuar informe semanal";
 const COLLECTING: &str = "Buscando los episodios de esta semana…";
@@ -127,6 +129,7 @@ enum Message {
     Run(RunEvent),
     StartWeek,
     Week(WeekEvent),
+    ResumeNow,
     OpenPdf,
 }
 
@@ -231,10 +234,25 @@ fn program_name(provider: Provider) -> &'static str {
     }
 }
 
+fn gigabytes(megabytes: u64) -> String {
+    format!("{:.1}", megabytes as f64 / 1024.0).replace('.', ",")
+}
+
+fn waiting_for_memory(window: &Window) -> bool {
+    let single = window.running.as_ref().is_some_and(|(_, stage)| matches!(stage, Stage::WaitingForMemory(_)));
+    let week = window.week.as_ref().is_some_and(|state| matches!(state.stage, Some(Stage::WaitingForMemory(_))));
+    single || week
+}
+
 fn stage_text(stage: Stage, provider: Provider) -> String {
     match stage {
         Stage::Preparing => PREPARING.into(),
         Stage::Transcribing(percent) => format!("Transcribiendo: {percent} %"),
+        Stage::WaitingForMemory(free) => format!(
+            "Esperando memoria libre: hay {} GB libres y sigue sola al llegar a {} GB. Cierra otros programas o usa Reanudar ahora.",
+            gigabytes(free),
+            gigabytes(crate::memory::RESUME_MB)
+        ),
         Stage::Summarizing => format!("Resumiendo con {}…", provider_name(provider)),
         Stage::Report => REPORT.into(),
     }
@@ -255,6 +273,7 @@ fn failure_text(failure: &Failure, provider: Provider) -> String {
             "No se encontró el programa {}. Instálalo e inicia sesión una vez en la Terminal; luego usa Continuar.",
             program_name(provider)
         ),
+        Failure::LowMemory => LOW_MEMORY.into(),
         Failure::Other => FAILED.into(),
     }
 }
@@ -530,6 +549,7 @@ fn update(window: &mut Window, message: Message) -> Task<Message> {
             }
         }
         Message::StartWeek => return begin_week(window),
+        Message::ResumeNow => crate::memory::resume_now(),
         Message::Week(event) => {
             let Some(state) = window.week.as_mut() else { return Task::none() };
             match event {
@@ -685,6 +705,9 @@ fn run_panel(window: &Window) -> Element<'_, Message> {
             panel = panel.push(row![question, button(CONTINUE).on_press(Message::Continue)].spacing(8).align_y(Alignment::Center));
         }
         (None, None) => {}
+    }
+    if waiting_for_memory(window) {
+        panel = panel.push(button(RESUME_NOW).on_press(Message::ResumeNow));
     }
     if let Some(status) = &window.status {
         panel = panel.push(text(status.clone()));
@@ -953,6 +976,22 @@ mod tests {
         assert!(simulator(view(&window)).find(CONTINUE_WEEK).is_ok());
         assert_eq!(week_to_run(&dir, &[]).monday, chrono::NaiveDate::from_ymd_opt(2026, 10, 26).unwrap());
         std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn waiting_for_memory_shows_free_memory_and_a_resume_button() {
+        let dir = data_dir("memory");
+        let mut window = open(dir.clone());
+        window.week = Some(WeekState::default());
+        let _ = update(&mut window, Message::Week(WeekEvent::Episode(0, 28, "Nada Personal  ·  «Episodio de prueba»".into())));
+        assert!(simulator(view(&window)).find(RESUME_NOW).is_err());
+        let _ = update(&mut window, Message::Week(WeekEvent::Stage(Stage::WaitingForMemory(1536))));
+        assert!(simulator(view(&window)).find("Esperando memoria libre: hay 1,5 GB libres y sigue sola al llegar a 3,0 GB. Cierra otros programas o usa Reanudar ahora.").is_ok());
+        drive(&mut window, |ui| {
+            ui.click(RESUME_NOW).unwrap();
+        });
+        let _ = update(&mut window, Message::Week(WeekEvent::Finished(Err(Failure::LowMemory))));
+        assert_eq!(window.status.as_deref(), Some(LOW_MEMORY));
     }
 
     #[test]

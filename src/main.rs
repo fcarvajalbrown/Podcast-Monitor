@@ -6,6 +6,7 @@ mod directory;
 mod feed;
 mod gui;
 mod job;
+mod memory;
 mod names;
 mod quotes;
 mod report;
@@ -106,7 +107,7 @@ enum Command {
 fn main() -> Result<()> {
     let data = shows::data_dir();
     match debug_log::start(&data, job::settings(&data).debug_log) {
-        Ok(Some(path)) => log::debug!("log file {}", path.display()),
+        Ok(Some(path)) => log::debug!("log file {}, free memory {:?} MB", path.display(), memory::free_mb()),
         Ok(None) => {}
         Err(error) => eprintln!("debug log not started: {error:#}"),
     }
