@@ -12,6 +12,8 @@ use crate::job::{self, Failure, Request, Settings, Stage};
 use crate::section::{spanish_date, spanish_duration};
 use crate::shows::{self, SavedShow};
 use crate::summarize::{self, Provider};
+use crate::week::{self, Week};
+use crate::weekly;
 
 const TITLE: &str = "Podcast-Monitor";
 const SHOWS_HEADING: &str = "Programas guardados";
@@ -45,6 +47,10 @@ const PREPARING: &str = "Descargando y preparando el audio…";
 const REPORT: &str = "Armando el PDF…";
 const FAILED: &str = "El informe no se pudo terminar. Lo ya terminado quedó guardado; puedes intentarlo de nuevo con Continuar.";
 const OPEN_PDF: &str = "Abrir PDF";
+const START_WEEK: &str = "Generar informe semanal";
+const CONTINUE_WEEK: &str = "Continuar informe semanal";
+const COLLECTING: &str = "Buscando los episodios de esta semana…";
+const WEEK_SUMMARIES: &str = "Resumiendo la semana de cada programa y armando el PDF…";
 const EPISODE_COUNT: usize = 10;
 
 struct Window {
@@ -67,7 +73,31 @@ struct Window {
     running: Option<(Request, Stage)>,
     status: Option<String>,
     report: Option<PathBuf>,
+    unfinished_week: bool,
+    week: Option<WeekState>,
     opener: fn(&Path) -> std::io::Result<()>,
+}
+
+#[derive(Debug, Clone, Default, PartialEq)]
+struct WeekState {
+    position: Option<(usize, usize, String)>,
+    stage: Option<Stage>,
+    building: bool,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+struct WeekDone {
+    pdf: PathBuf,
+    shows: usize,
+    left_out: usize,
+}
+
+#[derive(Debug, Clone)]
+enum WeekEvent {
+    Episode(usize, usize, String),
+    Stage(Stage),
+    Building,
+    Finished(Result<WeekDone, Failure>),
 }
 
 #[derive(Debug, Clone)]
@@ -95,6 +125,8 @@ enum Message {
     Start,
     Continue,
     Run(RunEvent),
+    StartWeek,
+    Week(WeekEvent),
     OpenPdf,
 }
 
@@ -120,6 +152,7 @@ fn open(data_dir: PathBuf) -> Window {
         None
     });
     let provider = job::settings(&data_dir).provider;
+    let unfinished_week = has_unfinished_week(&data_dir);
     Window {
         data_dir,
         list_path,
@@ -140,6 +173,8 @@ fn open(data_dir: PathBuf) -> Window {
         running: None,
         status: None,
         report: None,
+        unfinished_week,
+        week: None,
         opener: open_with_system,
     }
 }
@@ -225,7 +260,7 @@ fn failure_text(failure: &Failure, provider: Provider) -> String {
 }
 
 fn begin(window: &mut Window, request: Request) -> Task<Message> {
-    if window.running.is_some() {
+    if !idle(window) {
         return Task::none();
     }
     if let Err(error) = job::mark_unfinished(&window.data_dir, &request) {
@@ -249,8 +284,104 @@ fn begin(window: &mut Window, request: Request) -> Task<Message> {
     Task::run(receiver, Message::Run)
 }
 
+fn has_unfinished_week(data: &Path) -> bool {
+    job::unfinished_week(data).unwrap_or_else(|error| {
+        log::error!("reading the unfinished week: {error:#}");
+        None
+    }).is_some()
+}
+
+fn idle(window: &Window) -> bool {
+    window.running.is_none() && window.week.is_none()
+}
+
+fn week_to_run(data: &Path, saved: &[SavedShow]) -> Week {
+    match job::unfinished_week(data) {
+        Ok(Some(stopped)) => {
+            let earliest = stopped.iter().filter_map(|request| request.episode.published).map(|date| date.with_timezone(&Local).date_naive()).min();
+            Week { monday: week::monday(earliest.unwrap_or_else(|| Local::now().date_naive())), requests: stopped, failed: Vec::new() }
+        }
+        Ok(None) => week::collect(saved, Local::now()),
+        Err(error) => {
+            log::error!("reading the unfinished week: {error:#}");
+            week::collect(saved, Local::now())
+        }
+    }
+}
+
+fn week_job(data: &Path, saved: &[SavedShow], provider: Provider, sender: &mpsc::UnboundedSender<WeekEvent>) -> Result<WeekDone, Failure> {
+    let week = week_to_run(data, saved);
+    let count = week.requests.len();
+    let first = summarize::Cli::new(provider);
+    let fallback = summarize::Cli::fallback_for(provider);
+    let fallback_choice = || fallback.as_ref().map(|cli| (cli.provider, cli as &dyn summarize::Assistant));
+    let stages = sender.clone();
+    let sink: job::StageSink = Arc::new(move |stage| {
+        let _ = stages.unbounded_send(WeekEvent::Stage(stage));
+    });
+    let on_episode = |index: usize, request: &Request| {
+        let _ = sender.unbounded_send(WeekEvent::Episode(index, count, format!("{}  ·  «{}»", request.show.title, request.episode.title)));
+    };
+    let queue = job::run_queue(data, &week.requests, (provider, &first), fallback_choice(), &on_episode, sink);
+    if let Some(stop) = queue.stopped {
+        return Err(stop);
+    }
+    let _ = sender.unbounded_send(WeekEvent::Building);
+    let built = weekly::build(data, &week, saved, (provider, &first), fallback_choice()).map_err(|error| {
+        log::error!("weekly report: {error:#}");
+        Failure::Other
+    })?;
+    if let Some(stop) = built.stopped {
+        return Err(stop);
+    }
+    let pdf = built.pdf.ok_or(Failure::Other)?;
+    Ok(WeekDone { pdf, shows: built.shows, left_out: built.missing.len() })
+}
+
+fn begin_week(window: &mut Window) -> Task<Message> {
+    if !idle(window) {
+        return Task::none();
+    }
+    window.week = Some(WeekState::default());
+    window.status = None;
+    window.report = None;
+    let (sender, receiver) = mpsc::unbounded();
+    let data_dir = window.data_dir.clone();
+    let saved = window.shows.clone();
+    let provider = window.provider;
+    std::thread::spawn(move || {
+        let outcome = week_job(&data_dir, &saved, provider, &sender);
+        let _ = sender.unbounded_send(WeekEvent::Finished(outcome));
+    });
+    Task::run(receiver, Message::Week)
+}
+
+fn week_done_text(done: &WeekDone) -> String {
+    let shows = if done.shows == 1 { "1 programa".to_string() } else { format!("{} programas", done.shows) };
+    let left_out = match done.left_out {
+        0 => String::new(),
+        1 => " 1 episodio no se pudo procesar y quedó fuera.".into(),
+        many => format!(" {many} episodios no se pudieron procesar y quedaron fuera."),
+    };
+    format!("Informe semanal listo: {shows}.{left_out}")
+}
+
+fn week_stage_text(state: &WeekState, provider: Provider) -> Vec<String> {
+    if state.building {
+        return vec![WEEK_SUMMARIES.into()];
+    }
+    match &state.position {
+        None => vec![COLLECTING.into()],
+        Some((index, count, label)) => {
+            let mut lines = vec![format!("Episodio {} de {count}: {label}", index + 1)];
+            lines.extend(state.stage.map(|stage| stage_text(stage, provider)));
+            lines
+        }
+    }
+}
+
 fn update(window: &mut Window, message: Message) -> Task<Message> {
-    if !matches!(message, Message::SearchInput(_) | Message::FeedInput(_) | Message::Run(RunEvent::Stage(Stage::Transcribing(_)))) {
+    if !matches!(message, Message::SearchInput(_) | Message::FeedInput(_) | Message::Run(RunEvent::Stage(Stage::Transcribing(_))) | Message::Week(WeekEvent::Stage(Stage::Transcribing(_)))) {
         log::debug!("window: {message:?}");
     }
     match message {
@@ -398,6 +529,30 @@ fn update(window: &mut Window, message: Message) -> Task<Message> {
                 Err(failure) => window.status = Some(failure_text(&failure, window.provider)),
             }
         }
+        Message::StartWeek => return begin_week(window),
+        Message::Week(event) => {
+            let Some(state) = window.week.as_mut() else { return Task::none() };
+            match event {
+                WeekEvent::Episode(index, count, label) => {
+                    state.position = Some((index, count, label));
+                    state.stage = None;
+                }
+                WeekEvent::Stage(stage) => state.stage = Some(stage),
+                WeekEvent::Building => state.building = true,
+                WeekEvent::Finished(outcome) => {
+                    window.week = None;
+                    match outcome {
+                        Ok(done) => {
+                            log::info!("weekly report written to {}", done.pdf.display());
+                            window.status = Some(week_done_text(&done));
+                            window.report = Some(done.pdf);
+                        }
+                        Err(failure) => window.status = Some(failure_text(&failure, window.provider)),
+                    }
+                    window.unfinished_week = has_unfinished_week(&window.data_dir);
+                }
+            }
+        }
         Message::OpenPdf => {
             if let Some(pdf) = &window.report
                 && let Err(error) = (window.opener)(pdf)
@@ -504,10 +659,20 @@ fn run_panel(window: &Window) -> Element<'_, Message> {
     ]
     .spacing(16)
     .align_y(Alignment::Center);
-    let idle = window.running.is_none();
+    let idle = idle(window);
     let start = button(START).on_press_maybe((idle && window.picked.is_some()).then_some(Message::Start));
+    let week_label = if window.unfinished_week { CONTINUE_WEEK } else { START_WEEK };
+    let start_week = button(week_label).on_press_maybe((idle && !window.shows.is_empty()).then_some(Message::StartWeek));
 
-    let mut panel = column![text(EPISODES_HEADING).size(22), boxed(list).height(Length::Fill), assistant, start].spacing(10);
+    let mut panel = column![text(EPISODES_HEADING).size(22), boxed(list).height(Length::Fill), assistant, row![start, start_week].spacing(8)].spacing(10);
+    if let Some(state) = &window.week {
+        for line in week_stage_text(state, window.provider) {
+            panel = panel.push(text(line));
+        }
+        if let Some(Stage::Transcribing(percent)) = state.stage {
+            panel = panel.push(progress_bar(0.0..=100.0, percent as f32));
+        }
+    }
     match (&window.running, &window.unfinished) {
         (Some((request, stage)), _) => {
             panel = panel.push(text(format!("«{}»", request.episode.title))).push(text(stage_text(*stage, window.provider)));
@@ -744,6 +909,50 @@ mod tests {
         window.opener = refuse;
         let _ = update(&mut window, Message::OpenPdf);
         assert_eq!(window.status, Some(format!("No se pudo abrir el PDF. Está en {}", pdf.display())));
+    }
+
+    #[test]
+    fn weekly_run_shows_each_episode_and_ends_with_open_pdf() {
+        let dir = data_dir("week");
+        let mut window = open(dir.clone());
+        window.opener = record;
+        let _ = update(&mut window, Message::Fetched(Ok(radio_duna())));
+        assert!(simulator(view(&window)).find(START_WEEK).is_ok());
+        window.week = Some(WeekState::default());
+        assert!(simulator(view(&window)).find(COLLECTING).is_ok());
+        let _ = update(&mut window, Message::Week(WeekEvent::Episode(2, 26, "Nada Personal  ·  «Episodio de prueba»".into())));
+        let _ = update(&mut window, Message::Week(WeekEvent::Stage(Stage::Transcribing(30))));
+        {
+            let mut ui = simulator(view(&window));
+            assert!(ui.find("Episodio 3 de 26: Nada Personal  ·  «Episodio de prueba»").is_ok());
+            assert!(ui.find("Transcribiendo: 30 %").is_ok());
+        }
+        let _ = update(&mut window, Message::Week(WeekEvent::Building));
+        assert!(simulator(view(&window)).find(WEEK_SUMMARIES).is_ok());
+        let pdf = dir.join("weeks").join("2026-10-26").join(weekly::WEEKLY_FILE);
+        let _ = update(&mut window, Message::Week(WeekEvent::Finished(Ok(WeekDone { pdf: pdf.clone(), shows: 13, left_out: 2 }))));
+        assert!(window.week.is_none());
+        assert!(simulator(view(&window)).find("Informe semanal listo: 13 programas. 2 episodios no se pudieron procesar y quedaron fuera.").is_ok());
+        drive(&mut window, |ui| {
+            ui.click(OPEN_PDF).unwrap();
+        });
+        assert_eq!(OPENED.with(|opened| opened.borrow().last().cloned()), Some(pdf));
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn a_stopped_week_offers_to_continue_after_a_reopen() {
+        let dir = data_dir("week-stopped");
+        let mut window = open(dir.clone());
+        window.week = Some(WeekState::default());
+        job::mark_unfinished_week(&dir, &[Request { show: radio_duna(), episode: episode() }]).unwrap();
+        let _ = update(&mut window, Message::Week(WeekEvent::Finished(Err(Failure::Limit))));
+        assert!(window.unfinished_week);
+        let window = open(dir.clone());
+        assert!(window.unfinished_week);
+        assert!(simulator(view(&window)).find(CONTINUE_WEEK).is_ok());
+        assert_eq!(week_to_run(&dir, &[]).monday, chrono::NaiveDate::from_ymd_opt(2026, 10, 26).unwrap());
+        std::fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]
