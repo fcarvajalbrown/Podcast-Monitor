@@ -1,6 +1,7 @@
 mod assemble;
 mod audio;
 mod chunk;
+mod directory;
 mod feed;
 mod gui;
 mod names;
