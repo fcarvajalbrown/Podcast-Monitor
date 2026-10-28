@@ -17,6 +17,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 | 5 | macOS build with Metal, reference episodes, first on-demand report | Deferred |
 | 6 | Free-AI path for a reader with no paid assistant | Not Started |
 | 7 | Weekly report across the show list | In Progress |
+| 8 | App icon and window design | Not Started |
 
 ## Phase 1: Pipeline as a Windows CLI
 
@@ -113,3 +114,12 @@ Asked by Felipe: a reader without Claude or ChatGPT subscriptions can use ChatGP
 |---|---|---|
 | 1 | Summary by copy and paste: the window copies the prompt and the `[mm:ss]` transcript text, she pastes them into any browser AI chat and pastes the reply back; the app checks quotes, ranks airtime and people, and builds the PDF as with the CLI | Not Started |
 | 2 | Transcript from a browser AI: she uploads the audio to a browser AI and pastes the transcript back; the app skips Whisper and runs the name fix, summary and PDF | Not Started |
+
+## Phase 8: App icon and window design
+
+Asked by Felipe as future work: the app icon and a window design modelled on Cuña-Cutter (`C:\Projects\Cuña-Cutter`: `assets/brand/`, PRD section 7, ADR 0008). Items are ordered when the phase starts.
+
+| # | Item | Status |
+|---|---|---|
+| 1 | App icon: the icons in `assets/brand/` embedded in the Windows exe and shown on the window | Not Started |
+| 2 | Window design modelled on Cuña-Cutter's UX | Not Started |
