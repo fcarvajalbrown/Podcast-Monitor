@@ -20,6 +20,7 @@ pub struct Episode {
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct Feed {
     pub title: String,
+    pub author: String,
     pub episodes: Vec<Episode>,
 }
 
@@ -54,6 +55,7 @@ pub fn parse(xml: &str) -> Result<Feed> {
     let mut episodes = Vec::new();
     let mut current: Option<Episode> = None;
     let mut show_title = String::new();
+    let mut show_author = String::new();
     let mut field = String::new();
     let mut text = String::new();
     loop {
@@ -62,7 +64,7 @@ pub fn parse(xml: &str) -> Result<Feed> {
                 let name = tag.name().as_ref().to_string();
                 if name == "item" {
                     current = Some(Episode::default());
-                } else if current.is_some() || (name == "title" && show_title.is_empty()) {
+                } else if current.is_some() || (name == "title" && show_title.is_empty()) || (name == "itunes:author" && show_author.is_empty()) {
                     field = name;
                     text.clear();
                 }
@@ -109,13 +111,16 @@ pub fn parse(xml: &str) -> Result<Feed> {
                 } else if current.is_none() && name == "title" && field == "title" {
                     show_title = text.trim().to_string();
                     field.clear();
+                } else if current.is_none() && name == "itunes:author" && field == "itunes:author" {
+                    show_author = text.trim().to_string();
+                    field.clear();
                 }
             }
             Event::Eof => break,
             _ => {}
         }
     }
-    Ok(Feed { title: show_title, episodes })
+    Ok(Feed { title: show_title, author: show_author, episodes })
 }
 
 fn assign(episode: &mut Episode, field: &str, value: &str) {
@@ -181,6 +186,7 @@ mod tests {
 <rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
 <channel>
   <title>Example Show</title>
+  <itunes:author>Radio Ejemplo</itunes:author>
   <item>
     <title>Ep. 2 - Lluvia &amp; sol</title>
     <guid>ep-2</guid>
@@ -207,6 +213,7 @@ mod tests {
     fn parses_items_with_audio() {
         let feed = parse(FEED).unwrap();
         assert_eq!(feed.title, "Example Show");
+        assert_eq!(feed.author, "Radio Ejemplo");
         let episodes = feed.episodes;
         assert_eq!(episodes.len(), 2);
         let first = &episodes[0];
