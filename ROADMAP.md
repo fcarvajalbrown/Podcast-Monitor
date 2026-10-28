@@ -5,7 +5,6 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 ## Open items
 
 - Console fix built, check pending by Felipe: opened by double-click, the exe frees the console it owns alone (`GetConsoleProcessList` count 1, then `FreeConsole`), and Codex and Claude calls start with `CREATE_NO_WINDOW` so they open no console of their own. Done once a double-click shows only the window.
-- Codex reads Felipe's global instruction files (`~/.claude/CLAUDE.md`, humanizer and writing skills) on every summary call; the run should not depend on the machine owner's own instructions.
 
 ## Phases
 

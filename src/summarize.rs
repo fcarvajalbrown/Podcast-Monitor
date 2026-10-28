@@ -50,6 +50,9 @@ fn failure(message: String) -> anyhow::Error {
     }
 }
 
+const CODEX_SELF_CONTAINED: &str = "This task is self-contained: everything you need is in this message. Do not run any command and do not read any file, including instruction or skill files; answer from this message alone.
+
+";
 pub const FALLBACK_MODEL: &str = "claude-sonnet-5";
 
 pub trait Assistant {
@@ -244,7 +247,7 @@ impl Assistant for Cli {
                     .chain(self.model.iter().flat_map(|model| ["-m".to_string(), model.clone()]))
                     .chain(["-".into()])
                     .collect::<Vec<_>>();
-                self.call(&args, &dir, prompt)?;
+                self.call(&args, &dir, &format!("{CODEX_SELF_CONTAINED}{prompt}"))?;
                 let text = fs::read_to_string(&reply_path).with_context(|| format!("reading {}", reply_path.display()))?;
                 log::debug!("codex reply: {text}");
                 serde_json::from_str(&text).context("parsing codex reply")
