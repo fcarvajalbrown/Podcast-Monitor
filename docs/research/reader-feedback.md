@@ -51,3 +51,12 @@ Show list she sent with it, 20 shows, as written:
 20. Contracorriente – The Clin (cut off in the message)
 
 Against `feeds-test-list.md`: these are the 23 test shows minus Entender es Todo, A mí nunca me han encuestado and Con Diálogo Es Distinto. 17 of the 20 have an official feed; Cómo te lo explico, Contracorriente and Comentarios de Tomás Mosciatti still have none found.
+
+## Size of a week
+
+`tools/feed_check/check_feeds.py tools/feed_check/shows-reader.json --since 2026-10-26` (her 20 shows; raw output in `tools/feed_check/results-reader-week.json`), checked on Wednesday 28 October:
+
+- Monday 26 to Wednesday 28 October: 25 episodes, 18.7 h of audio, from 13 shows.
+- 0 episodes so far this week from Lo Que Importa, Sin Llorar, CIPER en tus Oídos and Expediente Mónica.
+- Cómo te lo explico, Contracorriente and Comentarios de Tomás Mosciatti still resolve to the wrong show or the stale re-upload listed in `feeds-test-list.md`, so their 0 means nothing.
+- At the Ep. 34 window speed on the RTX 2050 (4,685 s of audio in 395 s, about 12x), 18.7 h of audio is about 1.6 h of transcription, before the summaries.

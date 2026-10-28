@@ -1,6 +1,7 @@
 import argparse
 import json
 import sys
+from datetime import date
 import urllib.parse
 import urllib.request
 from email.utils import parsedate_to_datetime
@@ -33,19 +34,25 @@ def duration_seconds(text):
         return 0
 
 
-def summarize_feed(feed_url):
+def summarize_feed(feed_url, since=None):
     channel = ET.fromstring(get(feed_url)).find('channel')
     items = channel.findall('item')
     with_audio = [item for item in items if item.find('enclosure') is not None]
     transcripts = sum(1 for item in items for child in item if child.tag.endswith('}transcript'))
     hours = sum(duration_seconds(item.findtext(f'{ITUNES_NS}duration')) for item in items) / 3600
     dates = []
+    recent_seconds = []
     for item in items:
         try:
-            dates.append(parsedate_to_datetime(item.findtext('pubDate')))
+            published = parsedate_to_datetime(item.findtext('pubDate'))
         except (TypeError, ValueError):
-            pass
+            continue
+        dates.append(published)
+        if since and published.date() >= since:
+            recent_seconds.append(duration_seconds(item.findtext(f'{ITUNES_NS}duration')))
     return {
+        'since_episodes': len(recent_seconds),
+        'since_hours': round(sum(recent_seconds) / 3600, 1),
         'episodes': len(items),
         'with_audio': len(with_audio),
         'hours': round(hours, 1),
@@ -55,7 +62,7 @@ def summarize_feed(feed_url):
     }
 
 
-def check(term, publisher):
+def check(term, publisher, since=None):
     matches = apple_search(term)
     if publisher:
         matches = [m for m in matches if publisher.lower() in m.get('artistName', '').lower()] or matches
@@ -68,7 +75,7 @@ def check(term, publisher):
         row['status'] = 'no feed URL in Apple directory'
         return row
     try:
-        row.update(summarize_feed(feed_url))
+        row.update(summarize_feed(feed_url, since))
         row['status'] = 'ok'
     except Exception as error:
         row['status'] = f'feed failed: {error}'
@@ -79,13 +86,14 @@ def main():
     parser = argparse.ArgumentParser(description='Find each show in the Apple directory and check its RSS feed')
     parser.add_argument('shows', help='JSON file: list of {"name": ..., "publisher": ...}')
     parser.add_argument('--out', help='write results as JSON here')
+    parser.add_argument('--since', type=date.fromisoformat, help='also count episodes and hours published on or after this date (YYYY-MM-DD)')
     args = parser.parse_args()
     sys.stdout.reconfigure(encoding='utf-8')
     with open(args.shows, encoding='utf-8') as handle:
         shows = json.load(handle)
-    results = [check(show['name'], show.get('publisher', '')) for show in shows]
+    results = [check(show['name'], show.get('publisher', ''), args.since) for show in shows]
     for row in results:
-        print(' | '.join(str(row.get(key, '')) for key in ('show', 'publisher', 'status', 'episodes', 'with_audio', 'hours', 'transcript_tags', 'oldest', 'newest', 'feed')))
+        print(' | '.join(str(row.get(key, '')) for key in ('show', 'publisher', 'status', 'episodes', 'with_audio', 'hours', 'transcript_tags', 'oldest', 'newest', 'since_episodes', 'since_hours', 'feed')))
     if args.out:
         with open(args.out, 'w', encoding='utf-8') as handle:
             json.dump(results, handle, ensure_ascii=False, indent=2)
