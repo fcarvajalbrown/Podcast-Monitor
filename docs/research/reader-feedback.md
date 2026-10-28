@@ -10,7 +10,7 @@ Asked by Felipe for an ideal date for the first reports:
 
 > que sea actual, o sea, los de esta semana por ejemplo
 
-What it asks for, read against the current PDF (Ep. 34 is 3 pages: summary, 29 topics with minutes, 50 people, 5 quotes):
+What it asks for, read against the current PDF (Ep. 34 is 3 pages: summary, 29 topics with minutes, 43 people, 5 quotes):
 
 - Keep the summary and the topics by airtime; airtime as a percentage only, not minutes.
 - Each show short, because the report covers many shows.
