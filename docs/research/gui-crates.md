@@ -16,7 +16,7 @@ Build: `tools/build/cargo-windows.cmd build --release --manifest-path tools/gui_
 | Rebuild after touching `main.rs` | 3 s | 7 s | 8 s |
 | Packages in `Cargo.lock` | 430 | 396 | 554 |
 | Default renderer | wgpu | wgpu, tiny-skia software fallback | FemtoVG (OpenGL), software renderer also built |
-| Code for the test window (plus 54 shared lines) | 94 lines, immediate mode | 99 lines, messages and update | 109 lines, UI in the `slint!` markup language plus Rust callbacks |
+| Code for the test window (plus 54 shared lines) | 94 lines, immediate mode | 96 lines, messages and update | 109 lines, UI in the `slint!` markup language plus Rust callbacks |
 | Built on first try | no: 0.37 replaced `App::update` with `App::ui` and changed the screenshot call | yes | yes |
 | Selectable list | `selectable_label` per row | none built in; a column of buttons styled as selected or plain | `StandardListView` |
 | Screenshot of its own window | `ViewportCommand::Screenshot` with a callback | `window::screenshot` task; taken at start-up it came out blank, so it waits for the third frame through `window::frames` | `Window::take_snapshot` |
@@ -30,4 +30,4 @@ Size against the app: `podcast-monitor.exe` is 103.3 MB with the report built in
 
 Screenshots, 560 by 420 logical pixels at 125 % scaling: `gui-crates/egui.png`, `gui-crates/iced.png`, `gui-crates/slint.png`. The Abrir PDF button calls the same `open::that` in all three and was not clicked in this run.
 
-Felipe's pick: pending.
+Decision: Felipe picked iced after viewing the three screenshots.

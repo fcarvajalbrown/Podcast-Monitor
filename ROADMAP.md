@@ -56,11 +56,11 @@ All items done; see `docs/ROADMAP-HISTORY.md`.
 
 ## Phase 4: Desktop window in Spanish
 
-Native Rust window, Spanish UI strings, code and logs in English (`docs/PRD.md` sections 5 to 7). Items approved by Felipe in this order. The PRD's "one button per run mode" is unresolved while v1 has only on-demand runs; ask Felipe which run modes the window offers before item 4.
+Native Rust window in iced 0.14 (Felipe's pick, `docs/research/gui-crates.md`), Spanish UI strings, code and logs in English (`docs/PRD.md` sections 5 to 7). Items approved by Felipe in this order. The PRD's "one button per run mode" is unresolved while v1 has only on-demand runs; ask Felipe which run modes the window offers before item 4.
 
 | # | Item | Status |
 |---|---|---|
-| 1 | GUI crate pick: one test window per open-source native Rust candidate (egui, iced, Slint) with Spanish text, a list, buttons, a progress bar and an Open PDF action; Felipe picks from screenshots | Not Started |
+| 1 | GUI crate pick: one test window per open-source native Rust candidate (egui, iced, Slint) with Spanish text, a list, buttons, a progress bar and an Open PDF action; Felipe picks from screenshots | Done |
 | 2 | Saved show list: add by pasted feed URL, remove, kept on disk | Not Started |
 | 3 | Add by name search in Apple's directory, confirm step showing the publisher | Not Started |
 | 4 | On-demand episode run in the background: transcribe, summarize, report; progress per episode; resume after a closed app; limit-error stop explained in Spanish | Not Started |
