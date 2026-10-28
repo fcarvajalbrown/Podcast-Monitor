@@ -16,7 +16,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 | 4 | Desktop window in Spanish | In Progress |
 | 5 | macOS build with Metal, reference episodes, first on-demand report | Deferred |
 | 6 | Free-AI path for a reader with no paid assistant | Not Started |
-| 7 | Weekly report across the show list | Not Started |
+| 7 | Weekly report across the show list | In Progress |
 
 ## Phase 1: Pipeline as a Windows CLI
 
@@ -88,6 +88,18 @@ Chosen by Felipe:
 
 - The weekly run is built into the app first, then this week's episodes go through it.
 - Summarizer fallback: when Codex hits its limit the run switches on its own to Claude pinned to Sonnet 5, and the report says which assistant summarized each episode.
+
+| # | Item | Status |
+|---|---|---|
+| 1 | Debug log: every event of every run, window or CLI (stages with time, assistant calls and replies, errors, panics, settings changes) to `logs/` in the app-data folder | Not Started |
+| 2 | Her 17 shows with a feed loaded into the saved show list | Not Started |
+| 3 | Week picker: the episodes published in a date range across the saved shows | Not Started |
+| 4 | Run queue: those episodes one after another, resumable, progress per episode | Not Started |
+| 5 | Automatic fallback: a Codex limit switches the run to Claude Sonnet 5, assistant noted per episode | Not Started |
+| 6 | Short per-show layout: sections and length chosen by Felipe, summary and topics in percent | Not Started |
+| 7 | Weekly PDF: every show of the week in one file, from a Generar informe semanal button | Not Started |
+| 8 | Bottlenecks: stage times read from the debug log | Not Started |
+| 9 | Acceptance: this week's report sent to the reader, copy kept in `work/sent/` | Not Started |
 
 ## Phase 6: Free-AI path for a reader with no paid assistant
 
