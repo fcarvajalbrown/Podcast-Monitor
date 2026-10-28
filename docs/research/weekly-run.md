@@ -20,3 +20,21 @@ Started 14:09 from the window launched on its own (not from the agent shell), Co
 - One topic table (Columnistas Página 13) breaks across pages 1 and 2, leaving one row and its header on page 2.
 - Each Codex call read Felipe's own instruction files before answering: `~/.claude/CLAUDE.md` 74 times and the humanizer, felipe-outward-writing and ponytail skills, through Codex's global instructions. It worked, but the summaries ran under instructions written for Felipe's own work, and the reader's machine will not have them.
 - The two `mpa: invalid main_data_begin` and `xing tag ... crc mismatch` warnings come from the MP3 decoder on damaged frames and did not stop any decode; the one ERROR line is Codex's own model-list refresh timing out.
+
+## Stage times (phase 7 item 8)
+
+Read from the debug logs with `tools/log_stages/stages.py <log>`. Second run, 18 episodes, 12.6 h of audio, 82.3 min in all:
+
+| Stage | Time | Share | Median per episode |
+|---|---|---|---|
+| Download | 1.7 min | 2 % | 6 s |
+| Decode to 16 kHz | 18.3 min | 22 % | 64 s |
+| Transcription | 52.4 min | 64 % | 171 s (12 to 16x real time) |
+| Codex summary | 9.9 min | 12 % | 31 s |
+| Name fix and episode PDF | under 1 s | 0 % | 0 s |
+
+The first run's 9 episodes split the same way (21 %, 66 %, 11 %).
+
+Decode was the resampler, not the MP3 decoder: on El Villegas "Kast y Lula" (2,681 s at 44.1 kHz) symphonia decoded in 2.7 s, and the resampler took 55.3 s because it worked out sine and cosine terms for 64 taps of every output sample. Its weights repeat (160 phases for 44.1 kHz, 1 for 48 kHz), so they are now computed once per phase: 1.6 s, output within 6e-8 of the old filter (`audio::tests::times_decode_and_both_resamplers_on_a_real_episode`, run with `PM_AUDIO=<file> -- --ignored`). On this week's audio that is about 17 of the 82 minutes saved.
+
+Transcription is now about 80 % of the run and the next lever; the Codex call is the one after it.

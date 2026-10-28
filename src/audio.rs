@@ -90,25 +90,45 @@ pub fn resample(input: &[f32], from: u32, to: u32) -> Vec<f32> {
     if from == to || input.is_empty() {
         return input.to_vec();
     }
-    let step = from as f64 / to as f64;
-    let cutoff = (to as f64 / from as f64).min(1.0) * 0.95;
-    let output_len = (input.len() as f64 / step).floor() as usize;
+    let common = gcd(from as u64, to as u64);
+    let (from, to) = (from as u64 / common, to as u64 / common);
+    let table = phase_table(from, to);
+    let output_len = (input.len() as u64 * to / from) as usize;
     let last = input.len() as i64 - 1;
-    (0..output_len)
+    (0..output_len as u64)
         .map(|n| {
-            let position = n as f64 * step;
-            let center = position.floor() as i64;
-            let mut sum = 0.0;
-            let mut weight = 0.0;
-            for k in (center - SINC_HALF_TAPS + 1)..=(center + SINC_HALF_TAPS) {
-                let distance = position - k as f64;
-                let tap = cutoff * sinc(cutoff * distance) * blackman(distance / SINC_HALF_TAPS as f64);
-                sum += tap * input[k.clamp(0, last) as usize] as f64;
-                weight += tap;
-            }
-            (sum / weight) as f32
+            let center = (n * from / to) as i64;
+            let taps = &table[(n * from % to) as usize];
+            let first = center - SINC_HALF_TAPS + 1;
+            let sum: f64 = if first >= 0 && first + taps.len() as i64 - 1 <= last {
+                taps.iter().zip(&input[first as usize..]).map(|(tap, sample)| tap * *sample as f64).sum()
+            } else {
+                taps.iter().enumerate().map(|(j, tap)| tap * input[(first + j as i64).clamp(0, last) as usize] as f64).sum()
+            };
+            sum as f32
         })
         .collect()
+}
+
+fn phase_table(from: u64, to: u64) -> Vec<Vec<f64>> {
+    let cutoff = (to as f64 / from as f64).min(1.0) * 0.95;
+    (0..to)
+        .map(|phase| {
+            let fraction = phase as f64 / to as f64;
+            let taps: Vec<f64> = (0..2 * SINC_HALF_TAPS)
+                .map(|j| {
+                    let distance = fraction + (SINC_HALF_TAPS - 1 - j) as f64;
+                    cutoff * sinc(cutoff * distance) * blackman(distance / SINC_HALF_TAPS as f64)
+                })
+                .collect();
+            let weight: f64 = taps.iter().sum();
+            taps.into_iter().map(|tap| tap / weight).collect()
+        })
+        .collect()
+}
+
+fn gcd(a: u64, b: u64) -> u64 {
+    if b == 0 { a } else { gcd(b, a % b) }
 }
 
 fn sinc(x: f64) -> f64 {
@@ -133,6 +153,55 @@ mod tests {
 
     fn rms(samples: &[f32]) -> f64 {
         (samples.iter().map(|&s| (s as f64).powi(2)).sum::<f64>() / samples.len() as f64).sqrt()
+    }
+
+    fn direct(input: &[f32], from: u32, to: u32) -> Vec<f32> {
+        let step = from as f64 / to as f64;
+        let cutoff = (to as f64 / from as f64).min(1.0) * 0.95;
+        let output_len = (input.len() as f64 / step).floor() as usize;
+        let last = input.len() as i64 - 1;
+        (0..output_len)
+            .map(|n| {
+                let position = n as f64 * step;
+                let center = position.floor() as i64;
+                let mut sum = 0.0;
+                let mut weight = 0.0;
+                for k in (center - SINC_HALF_TAPS + 1)..=(center + SINC_HALF_TAPS) {
+                    let distance = position - k as f64;
+                    let tap = cutoff * sinc(cutoff * distance) * blackman(distance / SINC_HALF_TAPS as f64);
+                    sum += tap * input[k.clamp(0, last) as usize] as f64;
+                    weight += tap;
+                }
+                (sum / weight) as f32
+            })
+            .collect()
+    }
+
+    #[test]
+    fn phase_table_matches_the_direct_filter() {
+        for (from, frequency) in [(44_100, 1000.0), (48_000, 3000.0), (22_050, 440.0), (24_000, 7000.0)] {
+            let input = tone(frequency, from, 0.5);
+            let (fast, slow) = (resample(&input, from, WHISPER_RATE), direct(&input, from, WHISPER_RATE));
+            assert_eq!(fast.len(), slow.len());
+            let worst = fast.iter().zip(&slow).map(|(a, b)| (a - b).abs()).fold(0.0, f32::max);
+            assert!(worst < 1e-5, "{from}: {worst}");
+        }
+    }
+
+    #[test]
+    #[ignore]
+    fn times_decode_and_both_resamplers_on_a_real_episode() {
+        let path = std::path::PathBuf::from(std::env::var("PM_AUDIO").expect("PM_AUDIO names an audio file"));
+        let started = std::time::Instant::now();
+        let (samples, rate) = decode_mono(&path).unwrap();
+        let decoded = started.elapsed();
+        let fast = resample(&samples, rate, WHISPER_RATE);
+        let table = started.elapsed() - decoded;
+        let slow = direct(&samples, rate, WHISPER_RATE);
+        let direct_time = started.elapsed() - decoded - table;
+        let worst = fast.iter().zip(&slow).map(|(a, b)| (a - b).abs()).fold(0.0, f32::max);
+        println!("{} s of audio at {rate} Hz: decode {decoded:?}, phase table {table:?}, direct {direct_time:?}, worst difference {worst}", samples.len() as u32 / rate);
+        assert_eq!(fast.len(), slow.len());
     }
 
     #[test]
