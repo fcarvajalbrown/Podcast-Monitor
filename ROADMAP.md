@@ -56,7 +56,7 @@ All items done; see `docs/ROADMAP-HISTORY.md`.
 
 ## Phase 4: Desktop window in Spanish
 
-Native Rust window in iced 0.14 (Felipe's pick, `docs/research/gui-crates.md`), Spanish UI strings, code and logs in English (`docs/PRD.md` sections 5 to 7). The window keeps its show list and run folders in the OS app-data folder (`~/Library/Application Support/Podcast-Monitor`, `%APPDATA%\Podcast-Monitor`), chosen by Felipe; the CLI keeps `work/`. Items approved by Felipe in this order. Run mode chosen by Felipe for the PRD's "one button per run mode": one mode, select a saved show, pick one of its newest episodes, press one run button.
+Native Rust window in iced 0.14 (Felipe's pick, `docs/research/gui-crates.md`), Spanish UI strings, code and logs in English (`docs/PRD.md` sections 5 to 7). The window keeps its show list and run folders in the OS app-data folder (`~/Library/Application Support/Podcast-Monitor`, `%APPDATA%\Podcast-Monitor`), chosen by Felipe; the CLI keeps `work/`. Items approved by Felipe in this order. Run mode chosen by Felipe for the PRD's "one button per run mode": one mode, select a saved show, pick one of its newest episodes, press one run button. Also chosen by Felipe for item 4: the Whisper model is copied once to `models/ggml-large-v3-turbo.bin` in the app-data folder (the window says where if it is missing; download on first run is left to phase 5), the summarizer is a Claude or Codex choice in the window saved in the app-data folder, and one `glossary.txt` there, if present, serves every run.
 
 | # | Item | Status |
 |---|---|---|
