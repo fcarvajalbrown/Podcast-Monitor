@@ -28,7 +28,7 @@ iced_test = "0.14.0"
 
 [target.'cfg(windows)'.dependencies]
 whisper-rs-sys = { version = "0.15.0", features = ["vulkan"] }
-windows-sys = { version = "0.61.2", features = ["Win32_System_SystemInformation"] }
+windows-sys = { version = "0.61.2", features = ["Win32_System_Console", "Win32_System_SystemInformation", "Win32_System_Threading"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 whisper-rs = { version = "0.16.0", features = ["metal"] }

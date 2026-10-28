@@ -118,8 +118,25 @@ fn main() -> Result<()> {
     outcome
 }
 
+#[cfg(windows)]
+fn free_own_console() {
+    use windows_sys::Win32::System::Console::{FreeConsole, GetConsoleProcessList};
+    let mut attached = [0u32; 2];
+    let count = unsafe { GetConsoleProcessList(attached.as_mut_ptr(), attached.len() as u32) };
+    if count == 1 {
+        log::debug!("the console belongs to the window alone; freeing it");
+        unsafe { FreeConsole() };
+    } else {
+        log::debug!("console shared with {} other process(es); keeping it", count.saturating_sub(1));
+    }
+}
+
+#[cfg(not(windows))]
+fn free_own_console() {}
+
 fn dispatch() -> Result<()> {
     let Some(command) = Cli::parse().command else {
+        free_own_console();
         return Ok(gui::run()?);
     };
     match command {

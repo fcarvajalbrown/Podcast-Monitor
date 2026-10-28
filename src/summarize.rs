@@ -12,6 +12,15 @@ use crate::chunk::{self, Chunk};
 use crate::names::Glossary;
 use crate::run::{read_json, write_json};
 
+#[cfg(windows)]
+fn hide_console(command: &mut Command) {
+    use std::os::windows::process::CommandExt;
+    command.creation_flags(windows_sys::Win32::System::Threading::CREATE_NO_WINDOW);
+}
+
+#[cfg(not(windows))]
+fn hide_console(_command: &mut Command) {}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, ValueEnum)]
 #[serde(rename_all = "lowercase")]
 pub enum Provider {
@@ -172,7 +181,9 @@ impl Cli {
     fn call(&self, args: &[String], dir: &Path, prompt: &str) -> Result<String> {
         log::debug!("calling {} with {args:?}, prompt {} chars", self.program(), prompt.chars().count());
         let started = std::time::Instant::now();
-        let mut child = Command::new(self.program())
+        let mut command = Command::new(self.program());
+        hide_console(&mut command);
+        let mut child = command
             .args(args)
             .current_dir(dir)
             .stdin(Stdio::piped())
