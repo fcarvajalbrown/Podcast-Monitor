@@ -1,11 +1,17 @@
 use std::path::PathBuf;
+use std::sync::Arc;
 
-use iced::widget::{button, column, container, row, rule, scrollable, text, text_input};
+use chrono::Local;
+use iced::futures::channel::mpsc;
+use iced::widget::{button, column, container, progress_bar, radio, row, rule, scrollable, text, text_input};
 use iced::{Alignment, Element, Length, Size, Task};
 
 use crate::directory;
-use crate::feed;
+use crate::feed::{self, Episode};
+use crate::job::{self, Failure, Request, Settings, Stage};
+use crate::section::{spanish_date, spanish_duration};
 use crate::shows::{self, SavedShow};
+use crate::summarize::{self, Provider};
 
 const TITLE: &str = "Podcast-Monitor";
 const SHOWS_HEADING: &str = "Programas guardados";
@@ -28,17 +34,43 @@ const NO_AUDIO: &str = "Ese feed no tiene episodios con audio.";
 const ALREADY_SAVED: &str = "Ese programa ya está guardado.";
 const LOAD_FAILED: &str = "No se pudo leer la lista de programas guardados; los cambios no se guardarán.";
 const SAVE_FAILED: &str = "No se pudo guardar la lista de programas.";
+const EPISODES_HEADING: &str = "Episodios";
+const PICK_SHOW: &str = "Elige un programa guardado para ver sus episodios.";
+const LOADING_EPISODES: &str = "Cargando episodios…";
+const EPISODES_FAILED: &str = "No se pudieron cargar los episodios. Revisa la conexión a internet.";
+const ASSISTANT: &str = "Asistente para los resúmenes:";
+const START: &str = "Generar informe";
+const CONTINUE: &str = "Continuar";
+const PREPARING: &str = "Descargando y preparando el audio…";
+const REPORT: &str = "Armando el PDF…";
+const FAILED: &str = "El informe no se pudo terminar. Lo ya terminado quedó guardado; puedes intentarlo de nuevo con Continuar.";
+const EPISODE_COUNT: usize = 10;
 
 struct Window {
+    data_dir: PathBuf,
     list_path: Option<PathBuf>,
     shows: Vec<SavedShow>,
     selected: Option<String>,
     search_input: String,
     results: Vec<SavedShow>,
-    pending: Option<SavedShow>,
+    confirming: Option<SavedShow>,
     feed_input: String,
     busy: bool,
     notice: Option<&'static str>,
+    provider: Provider,
+    episodes: Vec<Episode>,
+    episodes_loading: bool,
+    episodes_failed: bool,
+    picked: Option<String>,
+    unfinished: Option<Request>,
+    running: Option<(Request, Stage)>,
+    status: Option<String>,
+}
+
+#[derive(Debug, Clone)]
+enum RunEvent {
+    Stage(Stage),
+    Finished(Result<PathBuf, Failure>),
 }
 
 #[derive(Debug, Clone)]
@@ -54,17 +86,24 @@ enum Message {
     Fetched(Result<SavedShow, &'static str>),
     Select(String),
     Remove,
+    Episodes(String, Result<Vec<Episode>, ()>),
+    PickEpisode(String),
+    Provider(Provider),
+    Start,
+    Continue,
+    Run(RunEvent),
 }
 
 pub fn run() -> iced::Result {
-    iced::application(boot, update, view).title(TITLE).window_size(Size::new(640.0, 600.0)).run()
+    iced::application(boot, update, view).title(TITLE).window_size(Size::new(1000.0, 640.0)).run()
 }
 
 fn boot() -> Window {
-    open(shows::list_path(&shows::data_dir()))
+    open(shows::data_dir())
 }
 
-fn open(path: PathBuf) -> Window {
+fn open(data_dir: PathBuf) -> Window {
+    let path = shows::list_path(&data_dir);
     let (list_path, shows, notice) = match shows::load(&path) {
         Ok(shows) => (Some(path), shows, None),
         Err(error) => {
@@ -72,16 +111,30 @@ fn open(path: PathBuf) -> Window {
             (None, Vec::new(), Some(LOAD_FAILED))
         }
     };
+    let unfinished = job::unfinished(&data_dir).unwrap_or_else(|error| {
+        eprintln!("reading the unfinished run: {error:#}");
+        None
+    });
+    let provider = job::settings(&data_dir).provider;
     Window {
+        data_dir,
         list_path,
         shows,
         selected: None,
         search_input: String::new(),
         results: Vec::new(),
-        pending: None,
+        confirming: None,
         feed_input: String::new(),
         busy: false,
         notice,
+        provider,
+        episodes: Vec::new(),
+        episodes_loading: false,
+        episodes_failed: false,
+        picked: None,
+        unfinished,
+        running: None,
+        status: None,
     }
 }
 
@@ -103,6 +156,10 @@ fn fetch_show(url: String) -> Result<SavedShow, &'static str> {
     Ok(SavedShow { title: fetched.title, publisher: fetched.author, feed: url })
 }
 
+fn newest_episodes(url: String) -> Result<Vec<Episode>, ()> {
+    feed::fetch(&url).map(|fetched| feed::newest(fetched.episodes, EPISODE_COUNT)).map_err(|error| eprintln!("listing episodes of {url}: {error:#}"))
+}
+
 fn save(window: &mut Window) {
     let Some(path) = &window.list_path else { return };
     if let Err(error) = shows::save(path, &window.shows) {
@@ -115,6 +172,72 @@ fn is_saved(window: &Window, feed: &str) -> bool {
     window.shows.iter().any(|saved| saved.feed == feed)
 }
 
+fn provider_name(provider: Provider) -> &'static str {
+    match provider {
+        Provider::Claude => "Claude",
+        Provider::Codex => "Codex",
+    }
+}
+
+fn program_name(provider: Provider) -> &'static str {
+    match provider {
+        Provider::Claude => "claude",
+        Provider::Codex => "codex",
+    }
+}
+
+fn stage_text(stage: Stage, provider: Provider) -> String {
+    match stage {
+        Stage::Preparing => PREPARING.into(),
+        Stage::Transcribing(percent) => format!("Transcribiendo: {percent} %"),
+        Stage::Summarizing => format!("Resumiendo con {}…", provider_name(provider)),
+        Stage::Report => REPORT.into(),
+    }
+}
+
+fn failure_text(failure: &Failure, provider: Provider) -> String {
+    match failure {
+        Failure::MissingModel(path) => format!(
+            "Falta el modelo de transcripción. Copia {} en la carpeta {} y vuelve a intentarlo con Continuar.",
+            job::MODEL_FILE,
+            path.parent().map(|dir| dir.display().to_string()).unwrap_or_default()
+        ),
+        Failure::Limit => format!(
+            "{} llegó a su límite de uso. Lo ya terminado quedó guardado; vuelve a intentarlo más tarde con Continuar.",
+            provider_name(provider)
+        ),
+        Failure::MissingCli => format!(
+            "No se encontró el programa {}. Instálalo e inicia sesión una vez en la Terminal; luego usa Continuar.",
+            program_name(provider)
+        ),
+        Failure::Other => FAILED.into(),
+    }
+}
+
+fn begin(window: &mut Window, request: Request) -> Task<Message> {
+    if window.running.is_some() {
+        return Task::none();
+    }
+    if let Err(error) = job::mark_unfinished(&window.data_dir, &request) {
+        eprintln!("saving the unfinished run: {error:#}");
+    }
+    window.unfinished = Some(request.clone());
+    window.running = Some((request.clone(), Stage::Preparing));
+    window.status = None;
+    let (sender, receiver) = mpsc::unbounded();
+    let data_dir = window.data_dir.clone();
+    let provider = window.provider;
+    std::thread::spawn(move || {
+        let stages = sender.clone();
+        let sink: job::StageSink = Arc::new(move |stage| {
+            let _ = stages.unbounded_send(RunEvent::Stage(stage));
+        });
+        let outcome = job::run(&data_dir, &request, provider, &summarize::Cli { provider }, sink);
+        let _ = sender.unbounded_send(RunEvent::Finished(outcome));
+    });
+    Task::run(receiver, Message::Run)
+}
+
 fn update(window: &mut Window, message: Message) -> Task<Message> {
     match message {
         Message::SearchInput(input) => window.search_input = input,
@@ -125,7 +248,7 @@ fn update(window: &mut Window, message: Message) -> Task<Message> {
             }
             window.busy = true;
             window.results.clear();
-            window.pending = None;
+            window.confirming = None;
             window.notice = Some(SEARCHING);
             return Task::perform(async move { search(term) }, Message::Found);
         }
@@ -142,15 +265,15 @@ fn update(window: &mut Window, message: Message) -> Task<Message> {
         Message::Pick(show) => {
             if is_saved(window, &show.feed) {
                 window.notice = Some(ALREADY_SAVED);
-                window.pending = None;
+                window.confirming = None;
             } else {
                 window.notice = None;
-                window.pending = Some(show);
+                window.confirming = Some(show);
             }
         }
-        Message::Cancel => window.pending = None,
+        Message::Cancel => window.confirming = None,
         Message::Confirm => {
-            let Some(show) = window.pending.clone() else { return Task::none() };
+            let Some(show) = window.confirming.clone() else { return Task::none() };
             if window.busy {
                 return Task::none();
             }
@@ -181,7 +304,7 @@ fn update(window: &mut Window, message: Message) -> Task<Message> {
                         window.feed_input.clear();
                         window.search_input.clear();
                         window.results.clear();
-                        window.pending = None;
+                        window.confirming = None;
                         save(window);
                     } else {
                         window.notice = Some(ALREADY_SAVED);
@@ -190,11 +313,73 @@ fn update(window: &mut Window, message: Message) -> Task<Message> {
                 Err(notice) => window.notice = Some(notice),
             }
         }
-        Message::Select(feed) => window.selected = Some(feed),
+        Message::Select(feed) => {
+            if window.selected.as_deref() == Some(feed.as_str()) {
+                return Task::none();
+            }
+            window.selected = Some(feed.clone());
+            window.episodes.clear();
+            window.picked = None;
+            window.episodes_loading = true;
+            window.episodes_failed = false;
+            let url = feed.clone();
+            return Task::perform(async move { newest_episodes(url) }, move |result| Message::Episodes(feed.clone(), result));
+        }
         Message::Remove => {
             if let Some(feed) = window.selected.take() {
                 shows::remove(&mut window.shows, &feed);
+                window.episodes.clear();
+                window.picked = None;
+                window.episodes_loading = false;
                 save(window);
+            }
+        }
+        Message::Episodes(feed, result) => {
+            if window.selected.as_deref() != Some(feed.as_str()) {
+                return Task::none();
+            }
+            window.episodes_loading = false;
+            match result {
+                Ok(episodes) => window.episodes = episodes,
+                Err(()) => window.episodes_failed = true,
+            }
+        }
+        Message::PickEpisode(id) => window.picked = Some(id),
+        Message::Provider(provider) => {
+            window.provider = provider;
+            if let Err(error) = job::save_settings(&window.data_dir, &Settings { provider }) {
+                eprintln!("saving settings: {error:#}");
+            }
+        }
+        Message::Start => {
+            let show = window.shows.iter().find(|show| window.selected.as_deref() == Some(show.feed.as_str())).cloned();
+            let episode = window.episodes.iter().find(|episode| window.picked.as_deref() == Some(episode.id().as_str())).cloned();
+            if let (Some(show), Some(episode)) = (show, episode) {
+                return begin(window, Request { show, episode });
+            }
+        }
+        Message::Continue => {
+            if let Some(request) = window.unfinished.clone() {
+                return begin(window, request);
+            }
+        }
+        Message::Run(RunEvent::Stage(stage)) => {
+            if let Some((_, current)) = window.running.as_mut() {
+                *current = stage;
+            }
+        }
+        Message::Run(RunEvent::Finished(outcome)) => {
+            let Some((request, _)) = window.running.take() else { return Task::none() };
+            match outcome {
+                Ok(pdf) => {
+                    eprintln!("report written to {}", pdf.display());
+                    if let Err(error) = job::clear_unfinished(&window.data_dir) {
+                        eprintln!("clearing the unfinished run: {error:#}");
+                    }
+                    window.unfinished = None;
+                    window.status = Some(format!("Informe listo: «{}».", request.episode.title));
+                }
+                Err(failure) => window.status = Some(failure_text(&failure, window.provider)),
             }
         }
     }
@@ -205,6 +390,18 @@ fn label(show: &SavedShow) -> String {
     if show.publisher.is_empty() { show.title.clone() } else { format!("{}  ·  {}", show.title, show.publisher) }
 }
 
+fn episode_label(episode: &Episode) -> String {
+    let mut parts = Vec::new();
+    if let Some(published) = episode.published {
+        parts.push(spanish_date(published.with_timezone(&Local).date_naive()));
+    }
+    parts.push(episode.title.clone());
+    if episode.duration_s > 0 {
+        parts.push(spanish_duration(episode.duration_s));
+    }
+    parts.join("  ·  ")
+}
+
 fn confirm_question(show: &SavedShow) -> String {
     if show.publisher.is_empty() {
         format!("¿Agregar «{}»?", show.title)
@@ -213,18 +410,22 @@ fn confirm_question(show: &SavedShow) -> String {
     }
 }
 
-fn show_row<'a>(show: &SavedShow, selected: bool, message: Message) -> Element<'a, Message> {
+fn selectable<'a>(label: String, selected: bool, message: Message) -> Element<'a, Message> {
     let style = if selected { button::primary } else { button::text };
-    button(text(label(show))).width(Length::Fill).style(style).on_press(message).into()
+    button(text(label)).width(Length::Fill).style(style).on_press(message).into()
 }
 
-fn view(window: &Window) -> Element<'_, Message> {
+fn boxed<'a>(content: impl Into<Element<'a, Message>>) -> container::Container<'a, Message> {
+    container(content).padding(6).width(Length::Fill).style(container::bordered_box)
+}
+
+fn shows_panel(window: &Window) -> Element<'_, Message> {
     let list: Element<'_, Message> = if window.shows.is_empty() {
         text(NO_SHOWS).into()
     } else {
         let rows = window.shows.iter().map(|show| {
             let selected = window.selected.as_deref() == Some(show.feed.as_str());
-            show_row(show, selected, Message::Select(show.feed.clone()))
+            selectable(label(show), selected, Message::Select(show.feed.clone()))
         });
         scrollable(column(rows).spacing(2)).into()
     };
@@ -233,20 +434,20 @@ fn view(window: &Window) -> Element<'_, Message> {
     let search_input = text_input(SEARCH_PLACEHOLDER, &window.search_input).id("search").on_input(Message::SearchInput).on_submit(Message::Search);
     let search = button(SEARCH).on_press_maybe((!window.busy).then_some(Message::Search));
     let mut add = column![text(ADD_HEADING).size(22), row![search_input, search].spacing(8)].spacing(10);
-    if let Some(show) = &window.pending {
+    if let Some(show) = &window.confirming {
         let confirm = button(CONFIRM).on_press_maybe((!window.busy).then_some(Message::Confirm));
         let cancel = button(CANCEL).style(button::secondary).on_press(Message::Cancel);
         add = add.push(row![text(confirm_question(show)).width(Length::Fill), confirm, cancel].spacing(8).align_y(Alignment::Center));
     } else if !window.results.is_empty() {
-        let rows = window.results.iter().map(|show| show_row(show, false, Message::Pick(show.clone())));
-        add = add.push(text(PICK_ONE)).push(container(column(rows).spacing(2)).padding(6).width(Length::Fill).style(container::bordered_box));
+        let rows = window.results.iter().map(|show| selectable(label(show), false, Message::Pick(show.clone())));
+        add = add.push(text(PICK_ONE)).push(boxed(column(rows).spacing(2)));
     }
 
     let feed_input = text_input(FEED_PLACEHOLDER, &window.feed_input).id("feed").on_input(Message::FeedInput).on_submit(Message::AddFeed);
     let add_feed = button(ADD_FEED).on_press_maybe((!window.busy).then_some(Message::AddFeed));
     column![
         text(SHOWS_HEADING).size(22),
-        container(list).padding(6).width(Length::Fill).height(Length::Fill).style(container::bordered_box),
+        boxed(list).height(Length::Fill),
         row![remove].spacing(8),
         rule::horizontal(1),
         add,
@@ -254,12 +455,68 @@ fn view(window: &Window) -> Element<'_, Message> {
         text(window.notice.unwrap_or("")),
     ]
     .spacing(10)
+    .into()
+}
+
+fn run_panel(window: &Window) -> Element<'_, Message> {
+    let list: Element<'_, Message> = if window.selected.is_none() {
+        text(PICK_SHOW).into()
+    } else if window.episodes_loading {
+        text(LOADING_EPISODES).into()
+    } else if window.episodes_failed {
+        text(EPISODES_FAILED).into()
+    } else {
+        let rows = window.episodes.iter().map(|episode| {
+            let id = episode.id();
+            let picked = window.picked.as_deref() == Some(id.as_str());
+            selectable(episode_label(episode), picked, Message::PickEpisode(id))
+        });
+        scrollable(column(rows).spacing(2)).into()
+    };
+    let assistant = row![
+        text(ASSISTANT),
+        radio(provider_name(Provider::Claude), Provider::Claude, Some(window.provider), Message::Provider),
+        radio(provider_name(Provider::Codex), Provider::Codex, Some(window.provider), Message::Provider),
+    ]
+    .spacing(16)
+    .align_y(Alignment::Center);
+    let idle = window.running.is_none();
+    let start = button(START).on_press_maybe((idle && window.picked.is_some()).then_some(Message::Start));
+
+    let mut panel = column![text(EPISODES_HEADING).size(22), boxed(list).height(Length::Fill), assistant, start].spacing(10);
+    match (&window.running, &window.unfinished) {
+        (Some((request, stage)), _) => {
+            panel = panel.push(text(format!("«{}»", request.episode.title))).push(text(stage_text(*stage, window.provider)));
+            if let Stage::Transcribing(percent) = stage {
+                panel = panel.push(progress_bar(0.0..=100.0, *percent as f32));
+            }
+        }
+        (None, Some(request)) => {
+            let question = text(format!("Quedó un informe sin terminar: «{}».", request.episode.title)).width(Length::Fill);
+            panel = panel.push(row![question, button(CONTINUE).on_press(Message::Continue)].spacing(8).align_y(Alignment::Center));
+        }
+        (None, None) => {}
+    }
+    if let Some(status) = &window.status {
+        panel = panel.push(text(status.clone()));
+    }
+    panel.into()
+}
+
+fn view(window: &Window) -> Element<'_, Message> {
+    row![
+        container(shows_panel(window)).width(Length::FillPortion(1)),
+        container(run_panel(window)).width(Length::FillPortion(1)),
+    ]
+    .spacing(24)
     .padding(12)
     .into()
 }
 
 #[cfg(test)]
 mod tests {
+    use chrono::DateTime;
+
     use super::*;
     use iced_test::simulator;
 
@@ -273,15 +530,31 @@ mod tests {
         }
     }
 
+    fn data_dir(name: &str) -> PathBuf {
+        let dir = std::env::temp_dir().join(format!("podcast-monitor-gui-{name}-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        dir
+    }
+
     fn radio_duna() -> SavedShow {
         SavedShow { title: "Nada Personal".into(), publisher: "Radio Duna".into(), feed: FEED.into() }
     }
 
+    fn episode() -> Episode {
+        Episode {
+            guid: "np-1".into(),
+            title: "Episodio de prueba".into(),
+            published: DateTime::parse_from_rfc3339("2026-10-26T15:00:00-03:00").ok(),
+            duration_s: 3559,
+            audio_url: "https://example.com/np-1.mp3".into(),
+            description: String::new(),
+        }
+    }
+
     #[test]
     fn add_by_feed_url_then_remove_survives_a_reopen() {
-        let dir = std::env::temp_dir().join(format!("podcast-monitor-gui-{}", std::process::id()));
-        let path = shows::list_path(&dir);
-        let mut window = open(path.clone());
+        let dir = data_dir("add");
+        let mut window = open(dir.clone());
         assert!(simulator(view(&window)).find(NO_SHOWS).is_ok());
 
         drive(&mut window, |ui| {
@@ -296,22 +569,23 @@ mod tests {
         let _ = update(&mut window, Message::Fetched(Ok(radio_duna())));
         assert!(window.feed_input.is_empty());
 
-        let mut window = open(path.clone());
+        let mut window = open(dir.clone());
         assert_eq!(window.shows, [radio_duna()]);
         drive(&mut window, |ui| {
             ui.click("Nada Personal  ·  Radio Duna").unwrap();
         });
+        assert!(window.episodes_loading);
         drive(&mut window, |ui| {
             ui.click(REMOVE).unwrap();
         });
-        assert!(open(path).shows.is_empty());
+        assert!(open(dir.clone()).shows.is_empty());
         std::fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]
     fn a_failed_fetch_or_a_saved_feed_shows_a_notice() {
-        let dir = std::env::temp_dir().join(format!("podcast-monitor-gui-notice-{}", std::process::id()));
-        let mut window = open(shows::list_path(&dir));
+        let dir = data_dir("notice");
+        let mut window = open(dir.clone());
         let _ = update(&mut window, Message::Fetched(Err(BAD_FEED)));
         assert!(simulator(view(&window)).find(BAD_FEED).is_ok());
         let _ = update(&mut window, Message::Fetched(Ok(radio_duna())));
@@ -324,9 +598,8 @@ mod tests {
 
     #[test]
     fn search_result_is_added_only_after_the_confirm_step() {
-        let dir = std::env::temp_dir().join(format!("podcast-monitor-gui-search-{}", std::process::id()));
-        let path = shows::list_path(&dir);
-        let mut window = open(path.clone());
+        let dir = data_dir("search");
+        let mut window = open(dir.clone());
         drive(&mut window, |ui| {
             ui.click(iced_test::selector::id("search")).unwrap();
             ui.typewrite("nada personal");
@@ -340,18 +613,18 @@ mod tests {
         drive(&mut window, |ui| {
             ui.click("Nada Personal  ·  Radio Duna").unwrap();
         });
-        assert_eq!(window.pending, Some(radio_duna()));
+        assert_eq!(window.confirming, Some(radio_duna()));
         assert!(window.shows.is_empty());
         assert!(simulator(view(&window)).find("¿Agregar «Nada Personal», de Radio Duna?").is_ok());
 
         drive(&mut window, |ui| {
             ui.click(CANCEL).unwrap();
         });
-        assert!(window.pending.is_none());
+        assert!(window.confirming.is_none());
         drive(&mut window, |ui| {
             ui.click("Nada Personal  ·  Nada Personal").unwrap();
         });
-        assert_eq!(window.pending, Some(other));
+        assert_eq!(window.confirming, Some(other));
         let _ = update(&mut window, Message::Pick(radio_duna()));
         drive(&mut window, |ui| {
             ui.click(CONFIRM).unwrap();
@@ -359,16 +632,67 @@ mod tests {
         assert!(window.busy);
         assert!(window.shows.is_empty());
         let _ = update(&mut window, Message::Fetched(Ok(radio_duna())));
-        assert!(window.results.is_empty() && window.pending.is_none());
-        assert_eq!(open(path).shows, [radio_duna()]);
+        assert!(window.results.is_empty() && window.confirming.is_none());
+        assert_eq!(open(dir.clone()).shows, [radio_duna()]);
 
         let _ = update(&mut window, Message::Found(Ok(vec![radio_duna()])));
         let _ = update(&mut window, Message::Pick(radio_duna()));
         assert_eq!(window.notice, Some(ALREADY_SAVED));
-        assert!(window.pending.is_none());
+        assert!(window.confirming.is_none());
         let _ = update(&mut window, Message::Found(Ok(Vec::new())));
         assert_eq!(window.notice, Some(NO_RESULTS));
         std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn picked_episode_runs_stops_at_a_limit_and_continues_after_a_reopen() {
+        let dir = data_dir("run");
+        let mut window = open(dir.clone());
+        let _ = update(&mut window, Message::Fetched(Ok(radio_duna())));
+        let _ = update(&mut window, Message::Select(FEED.into()));
+        let _ = update(&mut window, Message::Episodes(FEED.into(), Ok(vec![episode()])));
+        let row = "26 de octubre de 2026  ·  Episodio de prueba  ·  59 min";
+        let _ = update(&mut window, Message::Provider(Provider::Codex));
+        drive(&mut window, |ui| {
+            ui.click(row).unwrap();
+        });
+        assert_eq!(window.provider, Provider::Codex);
+        assert_eq!(window.picked, Some(episode().id()));
+        drive(&mut window, |ui| {
+            ui.click(START).unwrap();
+        });
+        let request = Request { show: radio_duna(), episode: episode() };
+        assert_eq!(window.running, Some((request.clone(), Stage::Preparing)));
+        assert_eq!(job::unfinished(&dir).unwrap(), Some(request.clone()));
+
+        let _ = update(&mut window, Message::Run(RunEvent::Stage(Stage::Transcribing(40))));
+        assert!(simulator(view(&window)).find("Transcribiendo: 40 %").is_ok());
+        let _ = update(&mut window, Message::Run(RunEvent::Stage(Stage::Summarizing)));
+        assert!(simulator(view(&window)).find("Resumiendo con Codex…").is_ok());
+        let _ = update(&mut window, Message::Run(RunEvent::Finished(Err(Failure::Limit))));
+        assert!(window.running.is_none());
+        assert!(simulator(view(&window)).find(failure_text(&Failure::Limit, Provider::Codex).as_str()).is_ok());
+
+        let mut window = open(dir.clone());
+        assert_eq!(window.provider, Provider::Codex);
+        assert!(simulator(view(&window)).find("Quedó un informe sin terminar: «Episodio de prueba».").is_ok());
+        drive(&mut window, |ui| {
+            ui.click(CONTINUE).unwrap();
+        });
+        assert_eq!(window.running, Some((request, Stage::Preparing)));
+        let _ = update(&mut window, Message::Run(RunEvent::Finished(Ok(dir.join("informe.pdf")))));
+        assert!(window.unfinished.is_none());
+        assert_eq!(job::unfinished(&dir).unwrap(), None);
+        assert!(simulator(view(&window)).find("Informe listo: «Episodio de prueba».").is_ok());
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn failures_read_in_spanish() {
+        let missing = failure_text(&Failure::MissingModel(PathBuf::from("datos").join("models").join(job::MODEL_FILE)), Provider::Claude);
+        assert!(missing.starts_with("Falta el modelo de transcripción. Copia ggml-large-v3-turbo.bin en la carpeta datos"));
+        assert!(failure_text(&Failure::MissingCli, Provider::Claude).contains("programa claude."));
+        assert!(failure_text(&Failure::Limit, Provider::Claude).starts_with("Claude llegó a su límite de uso."));
     }
 
     #[test]
@@ -376,7 +700,7 @@ mod tests {
     fn writes_snapshots() {
         let dir = std::env::temp_dir().join("podcast-monitor-gui-snapshots");
         let _ = std::fs::remove_dir_all(&dir);
-        let mut window = open(shows::list_path(&dir.join("data")));
+        let mut window = open(dir.join("data"));
         let animales = SavedShow { title: "Animales Políticos".into(), publisher: "Casa Editorial Lo Que Importa".into(), feed: "https://anchor.fm/s/106ac41b0/podcast/rss".into() };
         window.shows = vec![animales, radio_duna()];
         window.search_input = "nada personal".into();
@@ -384,15 +708,22 @@ mod tests {
             radio_duna(),
             SavedShow { title: "Nada Personal - Podcast".into(), publisher: "Nada Personal".into(), feed: "https://b/feed".into() },
         ];
-        let size = Size::new(640.0, 600.0);
+        window.selected = Some(FEED.into());
+        window.episodes = vec![episode()];
+        window.picked = Some(episode().id());
+        window.running = Some((Request { show: radio_duna(), episode: episode() }, Stage::Transcribing(45)));
+        let size = Size::new(1000.0, 640.0);
         let theme = iced::Theme::Light;
         let snapshot = |window: &Window, name: &str| {
             let mut ui = iced_test::Simulator::with_size(Default::default(), size, view(window));
             ui.snapshot(&theme).unwrap().matches_image(dir.join(name)).unwrap();
         };
-        snapshot(&window, "results.png");
+        snapshot(&window, "running.png");
         let _ = update(&mut window, Message::Pick(SavedShow { title: "Nada Personal - Podcast".into(), publisher: "Nada Personal".into(), feed: "https://b/feed".into() }));
-        snapshot(&window, "confirm.png");
+        window.running = None;
+        window.unfinished = Some(Request { show: radio_duna(), episode: episode() });
+        window.status = Some(failure_text(&Failure::Limit, Provider::Claude));
+        snapshot(&window, "limit.png");
         println!("{}", dir.display());
     }
 
@@ -404,5 +735,6 @@ mod tests {
         let animales = fetch_show("https://anchor.fm/s/106ac41b0/podcast/rss".into()).unwrap();
         println!("{} | {}", animales.title, animales.publisher);
         assert!(fetch_show("https://example.com/".into()).is_err());
+        assert_eq!(newest_episodes(FEED.into()).unwrap().len(), EPISODE_COUNT);
     }
 }

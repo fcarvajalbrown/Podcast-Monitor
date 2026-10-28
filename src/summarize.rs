@@ -12,7 +12,7 @@ use crate::chunk::{self, Chunk};
 use crate::names::Glossary;
 use crate::run::{read_json, write_json};
 
-#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize, ValueEnum)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, ValueEnum)]
 #[serde(rename_all = "lowercase")]
 pub enum Provider {
     Claude,
