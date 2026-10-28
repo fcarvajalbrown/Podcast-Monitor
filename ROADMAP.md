@@ -89,6 +89,7 @@ Chosen by Felipe:
 - The weekly run is built into the app first, then this week's episodes go through it.
 - Summarizer fallback: when Codex hits its limit the run switches on its own to Claude pinned to Sonnet 5, and the report says which assistant summarized each episode.
 - The week is Monday to now, in local time.
+- The weekly report has one block per show, covering that show's episodes of the week together.
 
 | # | Item | Status |
 |---|---|---|
