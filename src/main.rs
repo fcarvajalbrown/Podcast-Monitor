@@ -15,6 +15,7 @@ mod shows;
 mod summarize;
 mod tally;
 mod transcribe;
+mod week;
 
 use std::path::PathBuf;
 
@@ -85,6 +86,8 @@ enum Command {
         #[arg(required = true)]
         feeds: Vec<String>,
     },
+    #[command(about = "List this week's episodes, Monday to now in local time, across the saved show list")]
+    Week,
     #[command(about = "Build one PDF report from every finished summary under a run folder")]
     Report {
         #[arg(default_value = "work/runs")]
@@ -180,6 +183,21 @@ fn dispatch() -> Result<()> {
                 shows::save(&path, &saved)?;
             }
             log::info!("{} show(s) in {}", saved.len(), path.display());
+            Ok(())
+        }
+        Command::Week => {
+            let saved = shows::load(&shows::list_path(&shows::data_dir()))?;
+            let week = week::collect(&saved, chrono::Local::now());
+            let mut seconds = 0;
+            for request in &week.requests {
+                seconds += request.episode.duration_s;
+                let published = request.episode.published.map(|date| date.with_timezone(&chrono::Local).format("%a %d %H:%M").to_string()).unwrap_or_default();
+                println!("{published}  {:>4} min  {}  ·  {}", request.episode.duration_s / 60, request.show.title, request.episode.title);
+            }
+            println!("{} episode(s), {:.1} h, since Monday {}", week.requests.len(), seconds as f64 / 3600.0, week.monday);
+            for show in &week.failed {
+                log::warn!("feed failed: {}", show.title);
+            }
             Ok(())
         }
         Command::Report { folder, out } => {
