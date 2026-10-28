@@ -111,12 +111,12 @@ fn open(data_dir: PathBuf) -> Window {
     let (list_path, shows, notice) = match shows::load(&path) {
         Ok(shows) => (Some(path), shows, None),
         Err(error) => {
-            eprintln!("loading the show list: {error:#}");
+            log::error!("loading the show list: {error:#}");
             (None, Vec::new(), Some(LOAD_FAILED))
         }
     };
     let unfinished = job::unfinished(&data_dir).unwrap_or_else(|error| {
-        eprintln!("reading the unfinished run: {error:#}");
+        log::error!("reading the unfinished run: {error:#}");
         None
     });
     let provider = job::settings(&data_dir).provider;
@@ -150,14 +150,14 @@ fn open_with_system(path: &Path) -> std::io::Result<()> {
 
 fn search(term: String) -> Result<Vec<SavedShow>, &'static str> {
     directory::search(&term).map_err(|error| {
-        eprintln!("searching for {term}: {error:#}");
+        log::warn!("searching for {term}: {error:#}");
         SEARCH_FAILED
     })
 }
 
 fn fetch_show(url: String) -> Result<SavedShow, &'static str> {
     let fetched = feed::fetch(&url).map_err(|error| {
-        eprintln!("adding {url}: {error:#}");
+        log::warn!("adding {url}: {error:#}");
         BAD_FEED
     })?;
     if fetched.episodes.is_empty() {
@@ -167,13 +167,13 @@ fn fetch_show(url: String) -> Result<SavedShow, &'static str> {
 }
 
 fn newest_episodes(url: String) -> Result<Vec<Episode>, ()> {
-    feed::fetch(&url).map(|fetched| feed::newest(fetched.episodes, EPISODE_COUNT)).map_err(|error| eprintln!("listing episodes of {url}: {error:#}"))
+    feed::fetch(&url).map(|fetched| feed::newest(fetched.episodes, EPISODE_COUNT)).map_err(|error| log::warn!("listing episodes of {url}: {error:#}"))
 }
 
 fn save(window: &mut Window) {
     let Some(path) = &window.list_path else { return };
     if let Err(error) = shows::save(path, &window.shows) {
-        eprintln!("saving the show list: {error:#}");
+        log::error!("saving the show list: {error:#}");
         window.notice = Some(SAVE_FAILED);
     }
 }
@@ -229,7 +229,7 @@ fn begin(window: &mut Window, request: Request) -> Task<Message> {
         return Task::none();
     }
     if let Err(error) = job::mark_unfinished(&window.data_dir, &request) {
-        eprintln!("saving the unfinished run: {error:#}");
+        log::error!("saving the unfinished run: {error:#}");
     }
     window.unfinished = Some(request.clone());
     window.running = Some((request.clone(), Stage::Preparing));
@@ -250,6 +250,9 @@ fn begin(window: &mut Window, request: Request) -> Task<Message> {
 }
 
 fn update(window: &mut Window, message: Message) -> Task<Message> {
+    if !matches!(message, Message::SearchInput(_) | Message::FeedInput(_) | Message::Run(RunEvent::Stage(Stage::Transcribing(_)))) {
+        log::debug!("window: {message:?}");
+    }
     match message {
         Message::SearchInput(input) => window.search_input = input,
         Message::Search => {
@@ -358,8 +361,9 @@ fn update(window: &mut Window, message: Message) -> Task<Message> {
         Message::PickEpisode(id) => window.picked = Some(id),
         Message::Provider(provider) => {
             window.provider = provider;
-            if let Err(error) = job::save_settings(&window.data_dir, &Settings { provider }) {
-                eprintln!("saving settings: {error:#}");
+            log::info!("provider set to {provider:?}");
+            if let Err(error) = job::save_settings(&window.data_dir, &Settings { provider, ..job::settings(&window.data_dir) }) {
+                log::error!("saving settings: {error:#}");
             }
         }
         Message::Start => {
@@ -383,9 +387,9 @@ fn update(window: &mut Window, message: Message) -> Task<Message> {
             let Some((request, _)) = window.running.take() else { return Task::none() };
             match outcome {
                 Ok(pdf) => {
-                    eprintln!("report written to {}", pdf.display());
+                    log::info!("report written to {}", pdf.display());
                     if let Err(error) = job::clear_unfinished(&window.data_dir) {
-                        eprintln!("clearing the unfinished run: {error:#}");
+                        log::error!("clearing the unfinished run: {error:#}");
                     }
                     window.unfinished = None;
                     window.status = Some(format!("Informe listo: «{}».", request.episode.title));
@@ -398,7 +402,7 @@ fn update(window: &mut Window, message: Message) -> Task<Message> {
             if let Some(pdf) = &window.report
                 && let Err(error) = (window.opener)(pdf)
             {
-                eprintln!("opening {}: {error}", pdf.display());
+                log::error!("opening {}: {error}", pdf.display());
                 window.status = Some(format!("No se pudo abrir el PDF. Está en {}", pdf.display()));
             }
         }

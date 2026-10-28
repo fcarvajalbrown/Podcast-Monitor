@@ -51,7 +51,7 @@ impl Transcriber {
         let cuts = boundaries(audio, decoding.chunk_minutes * 60 * SAMPLE_RATE);
         let mut segments = Vec::new();
         for (index, pair) in cuts.windows(2).enumerate() {
-            eprintln!("  chunk {}/{}", index + 1, cuts.len() - 1);
+            log::info!("  chunk {}/{}", index + 1, cuts.len() - 1);
             let offset_s = pair[0] as f64 / SAMPLE_RATE as f64;
             let part = self.transcribe_chunk(&audio[pair[0]..pair[1]], language, decoding, progress.clone())?;
             segments.extend(part.into_iter().map(|segment| Segment { start_s: segment.start_s + offset_s, end_s: segment.end_s + offset_s, text: segment.text }));
@@ -77,7 +77,14 @@ impl Transcriber {
         params.set_print_progress(false);
         params.set_print_realtime(false);
         params.set_print_timestamps(false);
-        params.set_progress_callback_safe(move |percent: i32| progress(percent));
+        let mut logged = -1;
+        params.set_progress_callback_safe(move |percent: i32| {
+            if crate::debug_log::progress_step(logged, percent) {
+                logged = percent;
+                log::debug!("transcribing {percent}%");
+            }
+            progress(percent)
+        });
         state.full(params, audio).context("running whisper")?;
         eprintln!();
         state

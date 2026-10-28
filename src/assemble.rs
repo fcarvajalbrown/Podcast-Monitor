@@ -42,7 +42,7 @@ fn show_title(folder: &Path) -> Result<String> {
         Some(show) => Ok(show.title),
         None => {
             let name = parent.file_name().map(|name| name.to_string_lossy().into_owned()).unwrap_or_default();
-            eprintln!("  no show.json in {}; using the folder name, run `run` on the feed again to save the title", parent.display());
+            log::warn!("  no show.json in {}; using the folder name, run `run` on the feed again to save the title", parent.display());
             Ok(name)
         }
     }
@@ -51,7 +51,7 @@ fn show_title(folder: &Path) -> Result<String> {
 pub fn load(folder: &Path) -> Result<Option<EpisodeSection>> {
     let Some(summary) = read_json::<Summary>(&folder.join("summary.json"))? else { return Ok(None) };
     if summary.chunks.len() < summary.chunk_count {
-        eprintln!("  {}: summary has {} of {} parts, left out", folder.display(), summary.chunks.len(), summary.chunk_count);
+        log::warn!("  {}: summary has {} of {} parts, left out", folder.display(), summary.chunks.len(), summary.chunk_count);
         return Ok(None);
     }
     let episode = read_json::<Episode>(&folder.join("episode.json"))?.ok_or_else(|| anyhow!("{} has no episode.json", folder.display()))?;
@@ -65,7 +65,7 @@ pub fn load(folder: &Path) -> Result<Option<EpisodeSection>> {
     for quote in &merged.quotes {
         match index.find(&quote.text, &quote.minute) {
             Some(found) => quotes.push(found),
-            None => eprintln!("  dropped quote, not in the transcript: {}  {}", quote.minute, quote.text),
+            None => log::warn!("  dropped quote, not in the transcript: {}  {}", quote.minute, quote.text),
         }
     }
     Ok(Some(EpisodeSection {
@@ -92,7 +92,7 @@ pub fn blocks(sections: &[EpisodeSection]) -> Vec<Block> {
 pub fn build(root: &Path, out: &Path) -> Result<usize> {
     let mut sections = Vec::new();
     for folder in episode_folders(root)? {
-        eprintln!("{}", folder.display());
+        log::info!("{}", folder.display());
         sections.extend(load(&folder).with_context(|| format!("episode {}", folder.display()))?);
     }
     if sections.is_empty() {

@@ -1,6 +1,7 @@
 mod assemble;
 mod audio;
 mod chunk;
+mod debug_log;
 mod directory;
 mod feed;
 mod gui;
@@ -89,6 +90,20 @@ enum Command {
 }
 
 fn main() -> Result<()> {
+    let data = shows::data_dir();
+    match debug_log::start(&data, job::settings(&data).debug_log) {
+        Ok(Some(path)) => log::debug!("log file {}", path.display()),
+        Ok(None) => {}
+        Err(error) => eprintln!("debug log not started: {error:#}"),
+    }
+    let outcome = dispatch();
+    if let Err(error) = &outcome {
+        log::debug!("exiting with error: {error:#}");
+    }
+    outcome
+}
+
+fn dispatch() -> Result<()> {
     let Some(command) = Cli::parse().command else {
         return Ok(gui::run()?);
     };
@@ -119,13 +134,13 @@ fn main() -> Result<()> {
             let out = out.unwrap_or_else(|| transcript.with_file_name("summary.json"));
             let summary = match summarize::summarize(&chunks, glossary.as_ref(), provider, &summarize::Cli { provider }, &out) {
                 Err(error) if error.downcast_ref::<summarize::LimitReached>().is_some() => {
-                    eprintln!("{error}");
-                    eprintln!("finished parts are saved in {}; run the same command again later to continue", out.display());
+                    log::error!("{error}");
+                    log::info!("finished parts are saved in {}; run the same command again later to continue", out.display());
                     std::process::exit(2);
                 }
                 other => other?,
             };
-            eprintln!("{} part(s) saved to {}", summary.chunks.len(), out.display());
+            log::info!("{} part(s) saved to {}", summary.chunks.len(), out.display());
             let episode = summary.merged();
             for topic in tally::airtime(&episode.topics) {
                 println!("{}  {}", chunk::clock(topic.seconds), topic.name);
@@ -145,7 +160,7 @@ fn main() -> Result<()> {
         Command::Report { folder, out } => {
             let out = out.unwrap_or_else(|| folder.join("informe.pdf"));
             let count = assemble::build(&folder, &out)?;
-            eprintln!("{count} episode(s) in {}", out.display());
+            log::info!("{count} episode(s) in {}", out.display());
             Ok(())
         }
     }

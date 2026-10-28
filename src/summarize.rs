@@ -132,7 +132,7 @@ pub fn summarize(chunks: &[Chunk], glossary: Option<&Glossary>, provider: Provid
         .unwrap_or(Summary { provider, chunk_count: chunks.len(), chunks: Vec::new() });
     let schema = schema();
     for (index, part) in chunks.iter().enumerate().skip(summary.chunks.len()) {
-        eprintln!("  summarizing part {} of {} ({} to {})", index + 1, chunks.len(), chunk::clock(part.start_s), chunk::clock(part.end_s));
+        log::info!("  summarizing part {} of {} ({} to {})", index + 1, chunks.len(), chunk::clock(part.start_s), chunk::clock(part.end_s));
         let reply = assistant.ask(&prompt(part, index, chunks.len(), glossary), &schema)?;
         summary.chunks.push(serde_json::from_value(reply).context("reading the assistant's reply")?);
         write_json(path, &summary)?;
@@ -161,6 +161,8 @@ impl Cli {
     }
 
     fn call(&self, args: &[String], dir: &Path, prompt: &str) -> Result<String> {
+        log::debug!("calling {} with {args:?}, prompt {} chars", self.program(), prompt.chars().count());
+        let started = std::time::Instant::now();
         let mut child = Command::new(self.program())
             .args(args)
             .current_dir(dir)
@@ -172,6 +174,15 @@ impl Cli {
         child.stdin.take().ok_or_else(|| anyhow!("no stdin"))?.write_all(prompt.as_bytes())?;
         let output = child.wait_with_output()?;
         let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
+        log::debug!(
+            "{} exited with {} after {:.1} s
+stdout: {stdout}
+stderr: {}",
+            self.program(),
+            output.status,
+            started.elapsed().as_secs_f64(),
+            String::from_utf8_lossy(&output.stderr)
+        );
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
             return Err(failure(format!("{} exited with {}: {}", self.program(), output.status, tail(&format!("{stdout}\n{stderr}"), 800))));
@@ -198,6 +209,7 @@ impl Assistant for Cli {
                     .collect::<Vec<_>>();
                 self.call(&args, &dir, prompt)?;
                 let text = fs::read_to_string(&reply_path).with_context(|| format!("reading {}", reply_path.display()))?;
+                log::debug!("codex reply: {text}");
                 serde_json::from_str(&text).context("parsing codex reply")
             }
         };

@@ -48,11 +48,17 @@ pub enum Failure {
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct Settings {
     pub provider: Provider,
+    #[serde(default = "debug_log_on")]
+    pub debug_log: bool,
+}
+
+fn debug_log_on() -> bool {
+    true
 }
 
 impl Default for Settings {
     fn default() -> Self {
-        Self { provider: Provider::Claude }
+        Self { provider: Provider::Claude, debug_log: debug_log_on() }
     }
 }
 
@@ -84,7 +90,7 @@ pub fn clear_unfinished(data: &Path) -> Result<()> {
 
 pub fn settings(data: &Path) -> Settings {
     read_json(&data.join(SETTINGS_FILE)).unwrap_or_else(|error| {
-        eprintln!("reading settings: {error:#}");
+        log::warn!("reading settings: {error:#}");
         None
     }).unwrap_or_default()
 }
@@ -100,7 +106,17 @@ pub fn run(data: &Path, request: &Request, provider: Provider, assistant: &dyn A
     if !folder.join("transcript.json").is_file() && !model.is_file() {
         return Err(Failure::MissingModel(model));
     }
-    steps(data, &folder, model, request, provider, assistant, stage).map_err(|error| classify(&error))
+    log::info!("run {} / {} with {provider:?} into {}", request.show.title, request.episode.title, folder.display());
+    let started = std::time::Instant::now();
+    let logged: StageSink = Arc::new(move |current| {
+        if !matches!(current, Stage::Transcribing(_)) {
+            log::debug!("stage {current:?} at {:.1} s", started.elapsed().as_secs_f64());
+        }
+        stage(current)
+    });
+    let outcome = steps(data, &folder, model, request, provider, assistant, logged).map_err(|error| classify(&error));
+    log::info!("run ended after {:.1} s: {}", started.elapsed().as_secs_f64(), match &outcome { Ok(pdf) => pdf.display().to_string(), Err(failure) => format!("{failure:?}") });
+    outcome
 }
 
 fn steps(data: &Path, folder: &Path, model: PathBuf, request: &Request, provider: Provider, assistant: &dyn Assistant, stage: StageSink) -> Result<PathBuf> {
@@ -129,7 +145,7 @@ fn steps(data: &Path, folder: &Path, model: PathBuf, request: &Request, provider
 }
 
 fn classify(error: &anyhow::Error) -> Failure {
-    eprintln!("run failed: {error:#}");
+    log::error!("run failed: {error:#}");
     if error.downcast_ref::<LimitReached>().is_some() {
         return Failure::Limit;
     }
@@ -248,8 +264,11 @@ mod tests {
     fn settings_default_to_claude_and_persist() {
         let data = data_dir("settings");
         assert_eq!(settings(&data).provider, Provider::Claude);
-        save_settings(&data, &Settings { provider: Provider::Codex }).unwrap();
+        save_settings(&data, &Settings { provider: Provider::Codex, debug_log: false }).unwrap();
         assert_eq!(settings(&data).provider, Provider::Codex);
+        assert!(!settings(&data).debug_log);
+        fs::write(data.join(SETTINGS_FILE), r#"{"provider":"codex"}"#).unwrap();
+        assert!(settings(&data).debug_log);
         fs::remove_dir_all(&data).unwrap();
     }
 }

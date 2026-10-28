@@ -90,11 +90,11 @@ pub fn run(options: &Options) -> Result<()> {
     let episodes = feed::newest(matching, options.latest);
     fs::create_dir_all(&show_dir)?;
     write_json(&show_dir.join("show.json"), &ShowInfo { title: show.title.clone() })?;
-    eprintln!("{}: {} episode(s) into {}", show.title, episodes.len(), show_dir.display());
+    log::info!("{}: {} episode(s) into {}", show.title, episodes.len(), show_dir.display());
     for episode in &episodes {
         let folder = show_dir.join(episode.id());
         fs::create_dir_all(&folder)?;
-        eprintln!("{}", episode.title);
+        log::info!("{}", episode.title);
         process(episode, &folder, &options.transcription, glossary.as_ref(), &mut transcriber, &print_progress()).with_context(|| format!("episode {}", episode.id()))?;
     }
     Ok(())
@@ -105,12 +105,12 @@ pub fn process(episode: &Episode, folder: &Path, options: &Transcription, glossa
     let transcript_path = folder.join("transcript.json");
     let transcript: Transcript = match read_json(&transcript_path)? {
         Some(done) => {
-            eprintln!("  transcript already done");
+            log::info!("  transcript already done");
             done
         }
         None => {
             let audio_path = audio::download(&episode.audio_url, folder)?;
-            eprintln!("  decoding {}", audio_path.display());
+            log::info!("  decoding {}", audio_path.display());
             let samples = audio::load_for_whisper(&audio_path)?;
             if transcriber.is_none() {
                 *transcriber = Some(Transcriber::load(&options.model)?);
@@ -132,7 +132,7 @@ pub fn process(episode: &Episode, folder: &Path, options: &Transcription, glossa
                 segments,
             };
             write_json(&transcript_path, &transcript)?;
-            eprintln!("  transcribed {:.0} s of audio in {:.0} s", transcript.audio_s, transcript.compute_s);
+            log::info!("  transcribed {:.0} s of audio in {:.0} s", transcript.audio_s, transcript.compute_s);
             transcript
         }
     };
@@ -140,7 +140,7 @@ pub fn process(episode: &Episode, folder: &Path, options: &Transcription, glossa
         let (segments, replacements) = names::correct(&transcript.segments, glossary, options.threshold);
         let fixed = FixedTranscript { threshold: options.threshold, replacements: listed(replacements), segments };
         for replacement in &fixed.replacements {
-            eprintln!("  {} -> {} x{}", replacement.heard, replacement.name, replacement.count);
+            log::info!("  {} -> {} x{}", replacement.heard, replacement.name, replacement.count);
         }
         write_json(&folder.join("transcript.fixed.json"), &fixed)?;
     }
