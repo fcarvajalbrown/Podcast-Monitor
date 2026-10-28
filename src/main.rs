@@ -87,7 +87,10 @@ enum Command {
         feeds: Vec<String>,
     },
     #[command(about = "List this week's episodes, Monday to now in local time, across the saved show list")]
-    Week,
+    Week {
+        #[arg(long, help = "run every listed episode through transcription, summary and PDF, skipping finished ones; uses the window's assistant choice")]
+        run: bool,
+    },
     #[command(about = "Build one PDF report from every finished summary under a run folder")]
     Report {
         #[arg(default_value = "work/runs")]
@@ -185,7 +188,7 @@ fn dispatch() -> Result<()> {
             log::info!("{} show(s) in {}", saved.len(), path.display());
             Ok(())
         }
-        Command::Week => {
+        Command::Week { run } => {
             let saved = shows::load(&shows::list_path(&shows::data_dir()))?;
             let week = week::collect(&saved, chrono::Local::now());
             let mut seconds = 0;
@@ -197,6 +200,27 @@ fn dispatch() -> Result<()> {
             println!("{} episode(s), {:.1} h, since Monday {}", week.requests.len(), seconds as f64 / 3600.0, week.monday);
             for show in &week.failed {
                 log::warn!("feed failed: {}", show.title);
+            }
+            if run {
+                let data = shows::data_dir();
+                let provider = job::settings(&data).provider;
+                let requests = match job::unfinished_week(&data)? {
+                    Some(stopped) => {
+                        log::info!("continuing the stopped queue of {} episode(s)", stopped.len());
+                        stopped
+                    }
+                    None => week.requests,
+                };
+                let count = requests.len();
+                let stage: job::StageSink = std::sync::Arc::new(|_| {});
+                let outcome = job::run_queue(&data, &requests, provider, &summarize::Cli { provider }, &|index, request| log::info!("[{}/{count}] {} · {}", index + 1, request.show.title, request.episode.title), stage);
+                log::info!("{} report(s), {} failed", outcome.reports.len(), outcome.failed.len());
+                for (request, failure) in &outcome.failed {
+                    log::warn!("failed: {} · {} ({failure:?})", request.show.title, request.episode.title);
+                }
+                if let Some(stop) = outcome.stopped {
+                    bail!("stopped: {stop:?}; run the same command again to continue");
+                }
             }
             Ok(())
         }
