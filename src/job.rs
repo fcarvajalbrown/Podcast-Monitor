@@ -13,13 +13,14 @@ use crate::names::Glossary;
 use crate::run::{self, ShowInfo, Transcription, read_json, write_json};
 use crate::shows::SavedShow;
 use crate::summarize::{self, Assistant, LimitReached, Provider};
-use crate::transcribe::Progress;
+use crate::transcribe::{Progress, Transcriber};
 
 pub const MODEL_FILE: &str = "ggml-large-v3-turbo.bin";
 pub const REPORT_FILE: &str = "informe.pdf";
 const MODELS_FOLDER: &str = "models";
 const RUNS_FOLDER: &str = "runs";
 const UNFINISHED_FILE: &str = "current-run.json";
+const UNFINISHED_WEEK_FILE: &str = "current-week.json";
 const SETTINGS_FILE: &str = "settings.json";
 const GLOSSARY_FILE: &str = "glossary.txt";
 
@@ -64,6 +65,13 @@ impl Default for Settings {
 
 pub type StageSink = Arc<dyn Fn(Stage) + Send + Sync>;
 
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct QueueOutcome {
+    pub reports: Vec<PathBuf>,
+    pub failed: Vec<(Request, Failure)>,
+    pub stopped: Option<Failure>,
+}
+
 pub fn model_path(data: &Path) -> PathBuf {
     data.join(MODELS_FOLDER).join(MODEL_FILE)
 }
@@ -88,6 +96,57 @@ pub fn clear_unfinished(data: &Path) -> Result<()> {
     }
 }
 
+pub fn unfinished_week(data: &Path) -> Result<Option<Vec<Request>>> {
+    read_json(&data.join(UNFINISHED_WEEK_FILE))
+}
+
+pub fn mark_unfinished_week(data: &Path, requests: &[Request]) -> Result<()> {
+    fs::create_dir_all(data)?;
+    write_json(&data.join(UNFINISHED_WEEK_FILE), &requests)
+}
+
+pub fn clear_unfinished_week(data: &Path) -> Result<()> {
+    match fs::remove_file(data.join(UNFINISHED_WEEK_FILE)) {
+        Err(error) if error.kind() != ErrorKind::NotFound => Err(error.into()),
+        _ => Ok(()),
+    }
+}
+
+pub fn finished(data: &Path, request: &Request) -> bool {
+    let folder = episode_folder(data, request);
+    let summary: Option<summarize::Summary> = read_json(&folder.join("summary.json")).unwrap_or(None);
+    folder.join(REPORT_FILE).is_file() && summary.is_some_and(|done| done.chunks.len() == done.chunk_count)
+}
+
+pub fn run_queue(data: &Path, requests: &[Request], provider: Provider, assistant: &dyn Assistant, on_episode: &dyn Fn(usize, &Request), stage: StageSink) -> QueueOutcome {
+    if let Err(error) = mark_unfinished_week(data, requests) {
+        log::error!("saving the unfinished week: {error:#}");
+    }
+    log::info!("queue of {} episode(s) with {provider:?}", requests.len());
+    let mut transcriber = None;
+    let mut outcome = QueueOutcome::default();
+    for (index, request) in requests.iter().enumerate() {
+        on_episode(index, request);
+        if finished(data, request) {
+            log::info!("already finished: {} / {}", request.show.title, request.episode.title);
+            outcome.reports.push(episode_folder(data, request).join(REPORT_FILE));
+            continue;
+        }
+        match run_with(data, request, provider, assistant, stage.clone(), &mut transcriber) {
+            Ok(pdf) => outcome.reports.push(pdf),
+            Err(Failure::Other) => outcome.failed.push((request.clone(), Failure::Other)),
+            Err(stop) => {
+                outcome.stopped = Some(stop);
+                return outcome;
+            }
+        }
+    }
+    if let Err(error) = clear_unfinished_week(data) {
+        log::error!("clearing the unfinished week: {error:#}");
+    }
+    outcome
+}
+
 pub fn settings(data: &Path) -> Settings {
     read_json(&data.join(SETTINGS_FILE)).unwrap_or_else(|error| {
         log::warn!("reading settings: {error:#}");
@@ -101,6 +160,10 @@ pub fn save_settings(data: &Path, settings: &Settings) -> Result<()> {
 }
 
 pub fn run(data: &Path, request: &Request, provider: Provider, assistant: &dyn Assistant, stage: StageSink) -> Result<PathBuf, Failure> {
+    run_with(data, request, provider, assistant, stage, &mut None)
+}
+
+fn run_with(data: &Path, request: &Request, provider: Provider, assistant: &dyn Assistant, stage: StageSink, transcriber: &mut Option<Transcriber>) -> Result<PathBuf, Failure> {
     let folder = episode_folder(data, request);
     let model = model_path(data);
     if !folder.join("transcript.json").is_file() && !model.is_file() {
@@ -114,12 +177,12 @@ pub fn run(data: &Path, request: &Request, provider: Provider, assistant: &dyn A
         }
         stage(current)
     });
-    let outcome = steps(data, &folder, model, request, provider, assistant, logged).map_err(|error| classify(&error));
+    let outcome = steps(data, &folder, model, request, provider, assistant, logged, transcriber).map_err(|error| classify(&error));
     log::info!("run ended after {:.1} s: {}", started.elapsed().as_secs_f64(), match &outcome { Ok(pdf) => pdf.display().to_string(), Err(failure) => format!("{failure:?}") });
     outcome
 }
 
-fn steps(data: &Path, folder: &Path, model: PathBuf, request: &Request, provider: Provider, assistant: &dyn Assistant, stage: StageSink) -> Result<PathBuf> {
+fn steps(data: &Path, folder: &Path, model: PathBuf, request: &Request, provider: Provider, assistant: &dyn Assistant, stage: StageSink, transcriber: &mut Option<Transcriber>) -> Result<PathBuf> {
     fs::create_dir_all(folder).with_context(|| format!("creating {}", folder.display()))?;
     if let Some(show_dir) = folder.parent() {
         write_json(&show_dir.join("show.json"), &ShowInfo { title: request.show.title.clone() })?;
@@ -130,7 +193,7 @@ fn steps(data: &Path, folder: &Path, model: PathBuf, request: &Request, provider
     stage(Stage::Preparing);
     let transcribing = stage.clone();
     let progress: Progress = Arc::new(move |percent| transcribing(Stage::Transcribing(percent)));
-    run::process(&request.episode, folder, &Transcription::with_defaults(model), glossary.as_ref(), &mut None, &progress)?;
+    run::process(&request.episode, folder, &Transcription::with_defaults(model), glossary.as_ref(), transcriber, &progress)?;
 
     stage(Stage::Summarizing);
     let fixed = folder.join("transcript.fixed.json");
@@ -248,6 +311,43 @@ mod tests {
         clear_unfinished(&data).unwrap();
         clear_unfinished(&data).unwrap();
         assert_eq!(unfinished(&data).unwrap(), None);
+        fs::remove_dir_all(&data).unwrap();
+    }
+
+    fn second_request() -> Request {
+        let mut second = request();
+        second.episode.guid = "ep-2".into();
+        second.episode.title = "Ep. 2".into();
+        second
+    }
+
+    #[test]
+    fn queue_runs_every_episode_then_skips_finished_ones_on_a_rerun() {
+        let data = data_dir("queue");
+        let requests = [request(), second_request()];
+        requests.iter().for_each(|request| place_transcript(&data, request));
+        let seen = Mutex::new(Vec::new());
+        let (sink, _) = recorder();
+        let outcome = run_queue(&data, &requests, Provider::Codex, &Reply(true), &|index, _| seen.lock().unwrap().push(index), sink.clone());
+        assert_eq!(outcome.reports.len(), 2);
+        assert_eq!(outcome.stopped, None);
+        assert_eq!(*seen.lock().unwrap(), [0, 1]);
+        assert_eq!(unfinished_week(&data).unwrap(), None);
+        let rerun = run_queue(&data, &requests, Provider::Codex, &Reply(false), &|_, _| {}, sink);
+        assert_eq!(rerun.reports, outcome.reports);
+        fs::remove_dir_all(&data).unwrap();
+    }
+
+    #[test]
+    fn queue_stops_at_a_limit_and_keeps_the_week_marker() {
+        let data = data_dir("queue-limit");
+        let requests = vec![request(), second_request()];
+        requests.iter().for_each(|request| place_transcript(&data, request));
+        let (sink, _) = recorder();
+        let outcome = run_queue(&data, &requests, Provider::Codex, &Reply(false), &|_, _| {}, sink);
+        assert_eq!(outcome.stopped, Some(Failure::Limit));
+        assert!(outcome.reports.is_empty());
+        assert_eq!(unfinished_week(&data).unwrap(), Some(requests));
         fs::remove_dir_all(&data).unwrap();
     }
 
