@@ -16,6 +16,7 @@ mod summarize;
 mod tally;
 mod transcribe;
 mod week;
+mod weekly;
 
 use std::path::PathBuf;
 
