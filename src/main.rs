@@ -2,11 +2,13 @@ mod assemble;
 mod audio;
 mod chunk;
 mod feed;
+mod gui;
 mod names;
 mod quotes;
 mod report;
 mod run;
 mod section;
+mod shows;
 mod summarize;
 mod tally;
 mod transcribe;
@@ -17,10 +19,10 @@ use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "podcast-monitor", about = "Turn podcast episodes into corrected, timestamped transcripts")]
+#[command(name = "podcast-monitor", about = "Turn podcast episodes into corrected, timestamped transcripts; with no command, open the window")]
 struct Cli {
     #[command(subcommand)]
-    command: Command,
+    command: Option<Command>,
 }
 
 #[derive(Subcommand)]
@@ -85,7 +87,10 @@ enum Command {
 }
 
 fn main() -> Result<()> {
-    match Cli::parse().command {
+    let Some(command) = Cli::parse().command else {
+        return Ok(gui::run()?);
+    };
+    match command {
         Command::Episodes { feed, limit } => {
             let show = feed::fetch(&feed)?;
             println!("{}", show.title);

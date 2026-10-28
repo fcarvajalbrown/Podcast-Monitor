@@ -17,12 +17,14 @@ tools/build/cargo-windows.cmd build --release
 ## Use
 
 ```
+podcast-monitor
 podcast-monitor episodes <feed-url>
 podcast-monitor run <feed-url> --model <ggml-model.bin> [--glossary <names.txt>] [--latest 1]
 podcast-monitor summarize <transcript.json> [--glossary <names.txt>] [--provider <cli>]
 podcast-monitor report [run-folder] [--out <file.pdf>]
 ```
 
+- With no command it opens the window in Spanish, which keeps the saved show list in the app-data folder (`%APPDATA%\Podcast-Monitor` on Windows, `~/Library/Application Support/Podcast-Monitor` on the Mac). A show is added by pasting its RSS feed address.
 - `episodes` lists the newest episodes of a feed.
 - `run` downloads, transcribes and name-fixes the newest episodes into `work/runs`. Finished steps are kept, so running it again picks up where it stopped.
 - `summarize` sends the transcript to an assistant CLI you are logged into, saves each part as it finishes, then prints the topics, people and quotes.
