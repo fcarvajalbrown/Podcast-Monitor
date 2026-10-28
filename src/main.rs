@@ -18,7 +18,7 @@ mod transcribe;
 
 use std::path::PathBuf;
 
-use anyhow::Result;
+use anyhow::{Context, Result, bail};
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -79,6 +79,11 @@ enum Command {
         max_chars: usize,
         #[arg(long, help = "where the summary is saved; defaults to summary.json next to the transcript")]
         out: Option<PathBuf>,
+    },
+    #[command(about = "Add shows to the window's saved show list by feed URL, under the feed's title and author")]
+    AddShow {
+        #[arg(required = true)]
+        feeds: Vec<String>,
     },
     #[command(about = "Build one PDF report from every finished summary under a run folder")]
     Report {
@@ -155,6 +160,26 @@ fn dispatch() -> Result<()> {
                     None => println!("dropped  {}  {}", quote.minute, quote.text),
                 }
             }
+            Ok(())
+        }
+        Command::AddShow { feeds } => {
+            let path = shows::list_path(&shows::data_dir());
+            let mut saved = shows::load(&path)?;
+            for url in feeds {
+                let fetched = feed::fetch(&url).with_context(|| format!("fetching {url}"))?;
+                if fetched.episodes.is_empty() {
+                    bail!("{url} has no episodes with audio");
+                }
+                let show = shows::SavedShow { title: fetched.title, publisher: fetched.author, feed: url };
+                let line = format!("{}  ·  {}", show.title, show.publisher);
+                if shows::add(&mut saved, show) {
+                    log::info!("added {line}");
+                } else {
+                    log::info!("already saved: {line}");
+                }
+                shows::save(&path, &saved)?;
+            }
+            log::info!("{} show(s) in {}", saved.len(), path.display());
             Ok(())
         }
         Command::Report { folder, out } => {
