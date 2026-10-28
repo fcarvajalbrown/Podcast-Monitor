@@ -6,7 +6,11 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
 use crate::feed::Episode;
-use crate::report::Block;
+use crate::job::{Choice, Failure, Request, episode_folder};
+use crate::report::{self, Block};
+use crate::shows::SavedShow;
+use crate::summarize::LimitReached;
+use crate::week::Week;
 use crate::run::{read_json, write_json};
 use crate::section::spanish_duration;
 use crate::summarize::{Assistant, Provider, Summary};
@@ -222,9 +226,137 @@ impl ShowBlock {
     }
 }
 
+pub const WEEKLY_FILE: &str = "informe-semanal.pdf";
+
+pub fn assistant_name(provider: Provider, model: Option<&str>) -> String {
+    let base = match provider {
+        Provider::Claude => "Claude",
+        Provider::Codex => "Codex",
+    };
+    match model {
+        Some(crate::summarize::FALLBACK_MODEL) => format!("{base} Sonnet 5"),
+        Some(model) => format!("{base} ({model})"),
+        None => base.into(),
+    }
+}
+
+pub fn closing(blocks: &[ShowBlock], quiet: &[String]) -> Vec<Block> {
+    let mut lines = Vec::new();
+    if !quiet.is_empty() {
+        lines.push(format!("Sin episodios esta semana: {}.", spoken_list(quiet)));
+    }
+    let mut counts: Vec<(String, usize)> = Vec::new();
+    for block in blocks {
+        for (provider, model) in &block.assistants {
+            let name = assistant_name(*provider, model.as_deref());
+            match counts.iter_mut().find(|(seen, _)| *seen == name) {
+                Some((_, count)) => *count += 1,
+                None => counts.push((name, 1)),
+            }
+        }
+    }
+    let shows = |count: usize| if count == 1 { "1 programa".to_string() } else { format!("{count} programas") };
+    match counts.as_slice() {
+        [] => {}
+        [(name, _)] => lines.push(format!("Resúmenes hechos con {name}.")),
+        many => lines.push(format!("Resúmenes hechos con {}.", spoken_list(&many.iter().map(|(name, count)| format!("{name} ({})", shows(*count))).collect::<Vec<_>>()))),
+    }
+    lines.into_iter().map(Block::Paragraph).collect()
+}
+
+pub fn title(monday: NaiveDate) -> String {
+    format!("Monitoreo de podcasts: semana del {}", crate::section::spanish_date(monday))
+}
+
+#[derive(Debug, Default)]
+pub struct WeeklyOutcome {
+    pub pdf: Option<PathBuf>,
+    pub shows: usize,
+    pub missing: Vec<String>,
+    pub stopped: Option<Failure>,
+}
+
+fn limited(error: &anyhow::Error) -> bool {
+    error.downcast_ref::<LimitReached>().is_some()
+}
+
+pub fn build(data: &Path, week: &Week, saved: &[SavedShow], first: Choice, mut fallback: Option<Choice>) -> Result<WeeklyOutcome> {
+    let (mut provider, mut assistant) = first;
+    let mut outcome = WeeklyOutcome::default();
+    let mut blocks = Vec::new();
+    let mut quiet = Vec::new();
+    let mut shows: Vec<&SavedShow> = saved.iter().collect();
+    shows.sort_by_key(|show| show.title.to_lowercase());
+    for show in shows {
+        let requests: Vec<&Request> = week.requests.iter().filter(|request| request.show.feed == show.feed).collect();
+        let Some(first_request) = requests.first() else {
+            quiet.push(show.title.clone());
+            continue;
+        };
+        let mut digests = Vec::new();
+        for request in &requests {
+            match digest(&episode_folder(data, request))? {
+                Some(found) => digests.push(found),
+                None => outcome.missing.push(format!("{} · {}", show.title, request.episode.title)),
+            }
+        }
+        if digests.is_empty() {
+            continue;
+        }
+        let show_dir = episode_folder(data, first_request).parent().map(Path::to_path_buf).unwrap_or_else(|| data.to_path_buf());
+        let mut result = summarize_week(&show_dir, week.monday, &show.title, &digests, provider, assistant);
+        if result.as_ref().is_err_and(limited)
+            && let Some((next, next_assistant)) = fallback.take()
+        {
+            log::warn!("{provider:?} hit its limit; switching to {next:?} for the rest of the week summaries");
+            (provider, assistant) = (next, next_assistant);
+            result = summarize_week(&show_dir, week.monday, &show.title, &digests, provider, assistant);
+        }
+        match result {
+            Ok(saved_week) => blocks.push(block(&show.title, &show.publisher, &digests, &saved_week)),
+            Err(error) if limited(&error) => {
+                log::error!("week summary of {}: {error:#}", show.title);
+                outcome.stopped = Some(Failure::Limit);
+                return Ok(outcome);
+            }
+            Err(error) => return Err(error.context(format!("week summary of {}", show.title))),
+        }
+    }
+    for missing in &outcome.missing {
+        log::warn!("not finished, left out: {missing}");
+    }
+    if blocks.is_empty() {
+        return Err(anyhow!("no finished episodes this week"));
+    }
+    let mut pages = vec![Block::Heading { level: 1, text: title(week.monday) }];
+    pages.extend(blocks.iter().flat_map(ShowBlock::blocks));
+    pages.extend(closing(&blocks, &quiet));
+    let folder = data.join("weeks").join(week.monday.to_string());
+    std::fs::create_dir_all(&folder).with_context(|| format!("creating {}", folder.display()))?;
+    let pdf = folder.join(WEEKLY_FILE);
+    std::fs::write(&pdf, report::pdf(report::HEADER, pages)?).with_context(|| format!("writing {}", pdf.display()))?;
+    log::info!("weekly report with {} show(s) written to {}", blocks.len(), pdf.display());
+    outcome.shows = blocks.len();
+    outcome.pdf = Some(pdf);
+    Ok(outcome)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn closing_lists_quiet_shows_and_the_assistants() {
+        let saved = SavedWeek { provider: Provider::Codex, model: None, episodes: vec![], reply: WeekReply { summary: String::new(), groups: vec![] } };
+        let mut first = block("A", "", &week(), &saved);
+        let second = ShowBlock { assistants: vec![(Provider::Claude, Some("claude-sonnet-5".into()))], ..first.clone() };
+        assert_eq!(closing(std::slice::from_ref(&first), &[]), [Block::Paragraph("Resúmenes hechos con Codex.".into())]);
+        first.assistants.push((Provider::Claude, Some("claude-sonnet-5".into())));
+        assert_eq!(closing(&[first, second], &["Lo Que Importa".into(), "Sin Llorar".into()]), [
+            Block::Paragraph("Sin episodios esta semana: Lo Que Importa y Sin Llorar.".into()),
+            Block::Paragraph("Resúmenes hechos con Codex (1 programa) y Claude Sonnet 5 (2 programas).".into()),
+        ]);
+    }
 
     fn digest(id: &str, published: &str, duration_s: u64, topics: &[(&str, f64)]) -> EpisodeDigest {
         EpisodeDigest {

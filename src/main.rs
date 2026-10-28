@@ -91,6 +91,8 @@ enum Command {
     Week {
         #[arg(long, help = "run every listed episode through transcription, summary and PDF, skipping finished ones; uses the window's assistant choice")]
         run: bool,
+        #[arg(long, help = "build the weekly PDF from this week's finished episodes, one block per show")]
+        report: bool,
     },
     #[command(about = "Build one PDF report from every finished summary under a run folder")]
     Report {
@@ -189,7 +191,7 @@ fn dispatch() -> Result<()> {
             log::info!("{} show(s) in {}", saved.len(), path.display());
             Ok(())
         }
-        Command::Week { run } => {
+        Command::Week { run, report } => {
             let saved = shows::load(&shows::list_path(&shows::data_dir()))?;
             let week = week::collect(&saved, chrono::Local::now());
             let mut seconds = 0;
@@ -210,7 +212,7 @@ fn dispatch() -> Result<()> {
                         log::info!("continuing the stopped queue of {} episode(s)", stopped.len());
                         stopped
                     }
-                    None => week.requests,
+                    None => week.requests.clone(),
                 };
                 let count = requests.len();
                 let stage: job::StageSink = std::sync::Arc::new(|_| {});
@@ -220,6 +222,15 @@ fn dispatch() -> Result<()> {
                 for (request, failure) in &outcome.failed {
                     log::warn!("failed: {} · {} ({failure:?})", request.show.title, request.episode.title);
                 }
+                if let Some(stop) = outcome.stopped {
+                    bail!("stopped: {stop:?}; run the same command again to continue");
+                }
+            }
+            if report {
+                let data = shows::data_dir();
+                let provider = job::settings(&data).provider;
+                let fallback = summarize::Cli::fallback_for(provider);
+                let outcome = weekly::build(&data, &week, &saved, (provider, &summarize::Cli::new(provider)), fallback.as_ref().map(|cli| (cli.provider, cli as &dyn summarize::Assistant)))?;
                 if let Some(stop) = outcome.stopped {
                     bail!("stopped: {stop:?}; run the same command again to continue");
                 }
