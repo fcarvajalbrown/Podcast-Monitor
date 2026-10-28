@@ -14,8 +14,9 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 | 2 | Summarizer through her assistant CLI, quote matching, limit-error pause | In Progress |
 | 3 | PDF report in the escritorio layout | Done |
 | 4 | Desktop window in Spanish | In Progress |
-| 5 | macOS build with Metal, reference episodes, first on-demand report | Not Started |
+| 5 | macOS build with Metal, reference episodes, first on-demand report | Deferred |
 | 6 | Free-AI path for a reader with no paid assistant | Not Started |
+| 7 | Weekly report across the show list | Not Started |
 
 ## Phase 1: Pipeline as a Windows CLI
 
@@ -74,6 +75,14 @@ Native Rust window in iced 0.14, Spanish UI strings, code and logs in English (`
 | 4 | On-demand episode run in the background: transcribe, summarize, report; progress per episode; resume after a closed app; limit-error stop explained in Spanish | Done |
 | 5 | Open PDF at the end of a run | Done |
 | 6 | Acceptance on Ep. 34 and Nada Personal driven from the window | Not Started |
+
+## Phase 5: macOS build
+
+Deferred indefinitely by Felipe after the reader's feedback: he runs the tool on his own PCs.
+
+## Phase 7: Weekly report across the show list
+
+Asked by the reader (`docs/research/reader-feedback.md`): this week's episodes of her show list in one PDF, short per show, keeping the summary and the topics by airtime in percent only. Priority set by Felipe: this phase comes next, ahead of phase 4 item 6 and phase 6. Items are approved by Felipe before they are written here.
 
 ## Phase 6: Free-AI path for a reader with no paid assistant
 
