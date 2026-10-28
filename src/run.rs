@@ -9,7 +9,7 @@ use serde::de::DeserializeOwned;
 use crate::audio;
 use crate::feed::{self, Episode};
 use crate::names::{self, Glossary, Replacements};
-use crate::transcribe::{Decoding, Segment, Transcriber};
+use crate::transcribe::{Decoding, Progress, Segment, Transcriber, print_progress};
 
 const LANGUAGE: &str = "es";
 pub const DEFAULT_BEAM_SIZE: usize = 5;
@@ -18,16 +18,33 @@ pub const DEFAULT_TEXT_CONTEXT: i32 = 0;
 
 pub struct Options {
     pub feed: String,
-    pub model: PathBuf,
     pub glossary: Option<PathBuf>,
     pub work: PathBuf,
     pub latest: usize,
-    pub threshold: f64,
     pub title: Option<String>,
+    pub transcription: Transcription,
+}
+
+pub struct Transcription {
+    pub model: PathBuf,
+    pub threshold: f64,
     pub beam_size: usize,
     pub chunk_minutes: usize,
     pub text_context: i32,
     pub glossary_prompt: bool,
+}
+
+impl Transcription {
+    pub fn with_defaults(model: PathBuf) -> Self {
+        Self {
+            model,
+            threshold: names::DEFAULT_THRESHOLD,
+            beam_size: DEFAULT_BEAM_SIZE,
+            chunk_minutes: DEFAULT_CHUNK_MINUTES,
+            text_context: DEFAULT_TEXT_CONTEXT,
+            glossary_prompt: false,
+        }
+    }
 }
 
 fn default_beam_size() -> usize {
@@ -78,12 +95,12 @@ pub fn run(options: &Options) -> Result<()> {
         let folder = show_dir.join(episode.id());
         fs::create_dir_all(&folder)?;
         eprintln!("{}", episode.title);
-        process(episode, &folder, options, glossary.as_ref(), &mut transcriber).with_context(|| format!("episode {}", episode.id()))?;
+        process(episode, &folder, &options.transcription, glossary.as_ref(), &mut transcriber, &print_progress()).with_context(|| format!("episode {}", episode.id()))?;
     }
     Ok(())
 }
 
-fn process(episode: &Episode, folder: &Path, options: &Options, glossary: Option<&Glossary>, transcriber: &mut Option<Transcriber>) -> Result<()> {
+pub fn process(episode: &Episode, folder: &Path, options: &Transcription, glossary: Option<&Glossary>, transcriber: &mut Option<Transcriber>, progress: &Progress) -> Result<()> {
     write_json(&folder.join("episode.json"), episode)?;
     let transcript_path = folder.join("transcript.json");
     let transcript: Transcript = match read_json(&transcript_path)? {
@@ -105,7 +122,7 @@ fn process(episode: &Episode, folder: &Path, options: &Options, glossary: Option
                 prompt: glossary.filter(|_| options.glossary_prompt).map(Glossary::prompt),
             };
             let started = Instant::now();
-            let segments = transcriber.as_ref().map(|t| t.transcribe(&samples, LANGUAGE, &decoding)).transpose()?.unwrap_or_default();
+            let segments = transcriber.as_ref().map(|t| t.transcribe(&samples, LANGUAGE, &decoding, progress)).transpose()?.unwrap_or_default();
             let transcript = Transcript {
                 model: options.model.file_name().map(|name| name.to_string_lossy().into_owned()).unwrap_or_default(),
                 beam_size: options.beam_size,

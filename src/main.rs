@@ -4,6 +4,7 @@ mod chunk;
 mod directory;
 mod feed;
 mod gui;
+mod job;
 mod names;
 mod quotes;
 mod report;
@@ -102,7 +103,8 @@ fn main() -> Result<()> {
         }
         Command::Run { feed, model, glossary, work, latest, threshold, title, beam_size, greedy, chunk_minutes, text_context, glossary_prompt } => {
             let beam_size = if greedy { 1 } else { beam_size };
-            run::run(&run::Options { feed, model, glossary, work, latest, threshold, title, beam_size, chunk_minutes, text_context, glossary_prompt })
+            let transcription = run::Transcription { model, threshold, beam_size, chunk_minutes, text_context, glossary_prompt };
+            run::run(&run::Options { feed, glossary, work, latest, title, transcription })
         }
         Command::Chunks { transcript, max_chars } => {
             for (index, part) in chunk::split(&chunk::load_segments(&transcript)?, max_chars).iter().enumerate() {

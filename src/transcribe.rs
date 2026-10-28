@@ -1,5 +1,6 @@
 use std::io::Write;
 use std::path::Path;
+use std::sync::Arc;
 
 use anyhow::{Context, Result, anyhow};
 use serde::{Deserialize, Serialize};
@@ -23,6 +24,15 @@ pub struct Decoding {
     pub prompt: Option<String>,
 }
 
+pub type Progress = Arc<dyn Fn(i32) + Send + Sync>;
+
+pub fn print_progress() -> Progress {
+    Arc::new(|percent| {
+        eprint!("\r  transcribing {percent:>3}%");
+        let _ = std::io::stderr().flush();
+    })
+}
+
 pub struct Transcriber {
     context: WhisperContext,
 }
@@ -37,19 +47,19 @@ impl Transcriber {
         Ok(Self { context })
     }
 
-    pub fn transcribe(&self, audio: &[f32], language: &str, decoding: &Decoding) -> Result<Vec<Segment>> {
+    pub fn transcribe(&self, audio: &[f32], language: &str, decoding: &Decoding, progress: &Progress) -> Result<Vec<Segment>> {
         let cuts = boundaries(audio, decoding.chunk_minutes * 60 * SAMPLE_RATE);
         let mut segments = Vec::new();
         for (index, pair) in cuts.windows(2).enumerate() {
             eprintln!("  chunk {}/{}", index + 1, cuts.len() - 1);
             let offset_s = pair[0] as f64 / SAMPLE_RATE as f64;
-            let part = self.transcribe_chunk(&audio[pair[0]..pair[1]], language, decoding)?;
+            let part = self.transcribe_chunk(&audio[pair[0]..pair[1]], language, decoding, progress.clone())?;
             segments.extend(part.into_iter().map(|segment| Segment { start_s: segment.start_s + offset_s, end_s: segment.end_s + offset_s, text: segment.text }));
         }
         Ok(segments)
     }
 
-    fn transcribe_chunk(&self, audio: &[f32], language: &str, decoding: &Decoding) -> Result<Vec<Segment>> {
+    fn transcribe_chunk(&self, audio: &[f32], language: &str, decoding: &Decoding, progress: Progress) -> Result<Vec<Segment>> {
         let mut state = self.context.create_state().context("creating whisper state")?;
         let strategy = if decoding.beam_size <= 1 {
             SamplingStrategy::Greedy { best_of: 1 }
@@ -67,10 +77,7 @@ impl Transcriber {
         params.set_print_progress(false);
         params.set_print_realtime(false);
         params.set_print_timestamps(false);
-        params.set_progress_callback_safe(|percent: i32| {
-            eprint!("\r  transcribing {percent:>3}%");
-            let _ = std::io::stderr().flush();
-        });
+        params.set_progress_callback_safe(move |percent: i32| progress(percent));
         state.full(params, audio).context("running whisper")?;
         eprintln!();
         state
