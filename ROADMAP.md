@@ -64,5 +64,5 @@ Native Rust window in iced 0.14 (Felipe's pick, `docs/research/gui-crates.md`), 
 | 2 | Saved show list: add by pasted feed URL, remove, kept on disk | Done |
 | 3 | Add by name search in Apple's directory, confirm step showing the publisher | Done |
 | 4 | On-demand episode run in the background: transcribe, summarize, report; progress per episode; resume after a closed app; limit-error stop explained in Spanish | Done |
-| 5 | Open PDF at the end of a run | Not Started |
+| 5 | Open PDF at the end of a run | Done |
 | 6 | Acceptance on Ep. 34 and Nada Personal driven from the window | Not Started |

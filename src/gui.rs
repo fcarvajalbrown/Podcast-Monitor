@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use chrono::Local;
@@ -44,6 +44,7 @@ const CONTINUE: &str = "Continuar";
 const PREPARING: &str = "Descargando y preparando el audio…";
 const REPORT: &str = "Armando el PDF…";
 const FAILED: &str = "El informe no se pudo terminar. Lo ya terminado quedó guardado; puedes intentarlo de nuevo con Continuar.";
+const OPEN_PDF: &str = "Abrir PDF";
 const EPISODE_COUNT: usize = 10;
 
 struct Window {
@@ -65,6 +66,8 @@ struct Window {
     unfinished: Option<Request>,
     running: Option<(Request, Stage)>,
     status: Option<String>,
+    report: Option<PathBuf>,
+    opener: fn(&Path) -> std::io::Result<()>,
 }
 
 #[derive(Debug, Clone)]
@@ -92,6 +95,7 @@ enum Message {
     Start,
     Continue,
     Run(RunEvent),
+    OpenPdf,
 }
 
 pub fn run() -> iced::Result {
@@ -135,7 +139,13 @@ fn open(data_dir: PathBuf) -> Window {
         unfinished,
         running: None,
         status: None,
+        report: None,
+        opener: open_with_system,
     }
+}
+
+fn open_with_system(path: &Path) -> std::io::Result<()> {
+    open::that(path)
 }
 
 fn search(term: String) -> Result<Vec<SavedShow>, &'static str> {
@@ -224,6 +234,7 @@ fn begin(window: &mut Window, request: Request) -> Task<Message> {
     window.unfinished = Some(request.clone());
     window.running = Some((request.clone(), Stage::Preparing));
     window.status = None;
+    window.report = None;
     let (sender, receiver) = mpsc::unbounded();
     let data_dir = window.data_dir.clone();
     let provider = window.provider;
@@ -378,8 +389,17 @@ fn update(window: &mut Window, message: Message) -> Task<Message> {
                     }
                     window.unfinished = None;
                     window.status = Some(format!("Informe listo: «{}».", request.episode.title));
+                    window.report = Some(pdf);
                 }
                 Err(failure) => window.status = Some(failure_text(&failure, window.provider)),
+            }
+        }
+        Message::OpenPdf => {
+            if let Some(pdf) = &window.report
+                && let Err(error) = (window.opener)(pdf)
+            {
+                eprintln!("opening {}: {error}", pdf.display());
+                window.status = Some(format!("No se pudo abrir el PDF. Está en {}", pdf.display()));
             }
         }
     }
@@ -499,6 +519,9 @@ fn run_panel(window: &Window) -> Element<'_, Message> {
     }
     if let Some(status) = &window.status {
         panel = panel.push(text(status.clone()));
+    }
+    if window.report.is_some() {
+        panel = panel.push(button(OPEN_PDF).on_press(Message::OpenPdf));
     }
     panel.into()
 }
@@ -685,6 +708,38 @@ mod tests {
         assert_eq!(job::unfinished(&dir).unwrap(), None);
         assert!(simulator(view(&window)).find("Informe listo: «Episodio de prueba».").is_ok());
         std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    thread_local! {
+        static OPENED: std::cell::RefCell<Vec<PathBuf>> = const { std::cell::RefCell::new(Vec::new()) };
+    }
+
+    fn record(path: &Path) -> std::io::Result<()> {
+        OPENED.with(|opened| opened.borrow_mut().push(path.to_path_buf()));
+        Ok(())
+    }
+
+    fn refuse(_path: &Path) -> std::io::Result<()> {
+        Err(std::io::Error::other("no viewer"))
+    }
+
+    #[test]
+    fn open_pdf_appears_after_a_finished_run_and_opens_that_file() {
+        let dir = data_dir("open");
+        let mut window = open(dir.clone());
+        window.opener = record;
+        assert!(simulator(view(&window)).find(OPEN_PDF).is_err());
+        window.running = Some((Request { show: radio_duna(), episode: episode() }, Stage::Report));
+        let pdf = dir.join("runs").join("nada-personal").join(episode().id()).join(job::REPORT_FILE);
+        let _ = update(&mut window, Message::Run(RunEvent::Finished(Ok(pdf.clone()))));
+        drive(&mut window, |ui| {
+            ui.click(OPEN_PDF).unwrap();
+        });
+        assert_eq!(OPENED.with(|opened| opened.borrow().clone()), [pdf.clone()]);
+
+        window.opener = refuse;
+        let _ = update(&mut window, Message::OpenPdf);
+        assert_eq!(window.status, Some(format!("No se pudo abrir el PDF. Está en {}", pdf.display())));
     }
 
     #[test]
