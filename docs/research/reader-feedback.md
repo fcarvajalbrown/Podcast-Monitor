@@ -15,7 +15,17 @@ What it asks for, read against the current PDF (Ep. 34 is 3 pages: summary, 29 t
 - Keep the summary and the topics by airtime; airtime as a percentage only, not minutes.
 - Each show short, because the report covers many shows.
 - The first reports are this week's episodes, which is the latest-week report across the show list that the PRD left out of v1.
-- Which earlier report she compares against ("el informe anterior") is not stated.
+- "El informe anterior" is the hand-made Ep. 34 report of 26 October (`work/sent/2026-10-26-animales-politicos-ep34-hand.pdf`, 3 pages), confirmed by Felipe. The window PDF is kept beside it as `2026-10-27-animales-politicos-ep34-window.pdf`.
+
+What the hand-made report had that the window PDF lacks:
+
+- A header line with hosts and guest, weekday of publication, recording time, and duration in minutes.
+- "En una línea": a one-sentence gist.
+- 9 grouped topics with minutes and percent of the episode (the window PDF has 29 fine-grained topics, minutes only).
+- A summary in paragraphs per segment, each with its time span.
+- People and parties grouped by sector, names only, instead of 43 people with mention counts.
+- 10 quotes in a minute and quote table, some marked with the speaker.
+- "Cómo se hizo": how the report was made.
 
 Show list she sent with it, 20 shows, as written:
 
