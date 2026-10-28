@@ -4,7 +4,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 
 ## Open items
 
-- None.
+- Opened as a window, the exe also shows a console, and closing that console kills the run. Fix chosen by Felipe: the window frees the console when the console belongs to it alone (FreeConsole); commands in a terminal keep printing. Done after the running weekly run.
 
 ## Phases
 
