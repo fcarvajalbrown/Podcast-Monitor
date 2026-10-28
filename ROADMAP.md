@@ -104,6 +104,7 @@ Chosen by Felipe:
 | 6 | Short per-show layout: sections and length chosen by Felipe, summary and topics in percent | Done |
 | 7 | Weekly PDF: every show of the week in one file, from a Generar informe semanal button | In Progress |
 | 8 | Bottlenecks: stage times read from the debug log | Not Started |
+| 10 | Low-memory guard, before item 9: under 2 GB free the run unloads the model and waits, showing free memory and a Reanudar ahora button; goes on at 3 GB; stops cleanly after 15 min | In Progress |
 | 9 | Acceptance: this week's report sent to the reader, copy kept in `work/sent/` | Not Started |
 
 ## Phase 6: Free-AI path for a reader with no paid assistant
