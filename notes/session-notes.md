@@ -5,7 +5,7 @@ Current state: phases 1, 3 and 7 done; the reader liked the weekly report with t
 Open flags:
 - Console fix (3644824) waits for Felipe's double-click check; ROADMAP open item.
 - Phase 4 item 6: acceptance on Ep. 34 and Nada Personal from the window, not started.
-- Greedy with flash attention not yet measured on Metal; Silero VAD run matched the baseline exactly, likely never engaged.
+- Greedy with flash attention not yet measured on Metal. Silero VAD now runs but is 40 % slower on Ep. 34; kept off by default.
 - Speech recognition misspells names missing from the glossary (Mimica, Kouyoumdjian), more visible now that summaries name speakers.
 - Weekly grouping can split one story across two themes.
 - Phase 2 item 6: limit markers not checked against a real limit message.
