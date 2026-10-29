@@ -130,7 +130,7 @@ pub fn prompt(part: &Chunk, index: usize, count: usize, glossary: Option<&Glossa
         "You are reading part {part} of {count} of a Spanish-language podcast transcript, from {start} to {end}. Every line starts with its time as [mm:ss].\n\
          \n\
          Return:\n\
-         - summary: one paragraph in Spanish on what this part covers. Describe what was said and who said it, without judging it.\n\
+         - summary: one paragraph in Spanish on what the speakers argued in this part: for each subject, the position each speaker took and the conclusion they reached, naming them. Write \"X sostuvo que la medida no resolverá el problema\", not \"hablaron de la medida\".Report the speakers' views as theirs, without adding your own judgement.\n\
          - topics: every topic discussed, with a short Spanish name and the [mm:ss] start and end of each stretch where it is discussed. A topic that comes back later gets one entry per stretch, with the same name.\n\
          - people: every person named in this part, spelled as in the names list below when they appear in it.\n\
          - quotes: up to five short passages worth quoting, each copied word for word from the transcript lines, 8 to 40 words, with the mm:ss of the line where it starts. Do not correct the transcript's spelling inside a quote.\n\

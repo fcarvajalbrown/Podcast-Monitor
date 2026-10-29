@@ -122,7 +122,7 @@ pub fn prompt(show: &str, episodes: &[EpisodeDigest]) -> String {
         "These are the summaries and topics of the episodes the Spanish-language podcast «{show}» published this week. Every topic has a label and its airtime as mm:ss.\n\
          \n\
          Return:\n\
-         - summary: three or four sentences in Spanish, at most 80 words, on what the show talked about this week as a whole. Describe what was said and who said it, without judging it.\n\
+         - summary: three or four sentences in Spanish, at most 80 words, on what the show concluded this week as a whole: the main argument or verdict on each big subject and who made it, not a list of the subjects. Report the speakers' views as theirs, without adding your own judgement.\n\
          - groups: between 5 and 8 broad themes in Spanish, each with a short name of at most six words and the labels of the topics it gathers, copied exactly. Every label goes in exactly one group. With fewer than 5 topics, one group per topic.\n"
     );
     for (index, episode) in episodes.iter().enumerate() {
