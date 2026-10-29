@@ -9,7 +9,8 @@ Episode: "Ep. 34 -La crisis de los decretos - Animales Políticos - Segunda Temp
 | Greedy | 243 | 19.3x | -27 % | 9 / 17 | 9 |
 | Flash attention and greedy | 158 | 29.7x | -53 % | 10 / 17 | 8 |
 | Q8_0 model | 306 | 15.3x | -8 % | 11 / 18 | 9 |
-| Silero VAD | 318 | 14.7x | -5 % | 10 / 18 | 7 |
+| Silero VAD (never ran, see below) | 318 | 14.7x | -5 % | 10 / 18 | 7 |
+| Flash attention, greedy and Silero VAD (working) | 222 | 21.1x | -34 % | 10 / 17 | 7 |
 
 Target after the name fix: Kast at least 16, Boric at least 7. Every variant meets it.
 
@@ -17,3 +18,12 @@ Target after the name fix: Kast at least 16, Boric at least 7. Every variant mee
 - The VAD run gave the same 1,591 segments and the same name counts as today's setting: VAD never ran. whisper.cpp applies VAD only inside `whisper_full` and `whisper_full_parallel` (`whisper.cpp:7743`, `7766` in whisper-rs-sys 0.15), which use the context's built-in state; whisper-rs 0.16 creates contexts without that state and its `WhisperState::full` calls `whisper_full_with_state`, which skips VAD, so `enable_vad` and `set_vad_model_path` are silently ignored. Its 5 % is run-to-run spread. The fix is to run Silero through whisper-rs's `WhisperVadContext` ourselves, transcribe only the speech and map the times back.
 - The two gains stack: flash attention and greedy together halve the transcription time. On last week's 52.4 min of transcription that would be about 25 min.
 - Name counts are not an accuracy measure; the words around the names were not compared.
+
+## Silero VAD once it runs
+
+After the fix (`a958569`), `tools/stt_speed/bench.sh work/stt-speed flash-greedy-vad` against flash attention and greedy (158 s, 1,484 segments):
+
+- Silero found 654 speech pieces covering 4,436 s of the 4,685 s, so it cuts only 249 s (5 %): the show is talk with almost no silence.
+- Silero itself took 54 s on the CPU (`whisper_vad_detect_speech: vad time = 54239 ms`; whisper-rs 0.16 and whisper.cpp both default the VAD context to `use_gpu: false`). Whisper on the remaining speech took about 168 s, so the run went from 158 s to 222 s, 40 % slower.
+- 1,443 segments against 1,484. Name counts after the fix are the same or one lower (Boric 7 against 8, Larraín 1 against 3, Lula 19 against 20); Kast 17 and Boric 7 still meet the target.
+- Even if Silero cost nothing, 5 % less audio cannot pay for itself on this kind of show; it would only help on audio with long silences or music.
