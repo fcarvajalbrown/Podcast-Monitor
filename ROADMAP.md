@@ -16,7 +16,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 | 4 | Desktop window in Spanish | In Progress |
 | 5 | macOS build with Metal, reference episodes, first on-demand report | Deferred |
 | 6 | Free-AI path for a reader with no paid assistant | Not Started |
-| 7 | Weekly report across the show list | In Progress |
+| 7 | Weekly report across the show list | Done |
 | 8 | App icon and window design | Not Started |
 
 ## Phase 1: Pipeline as a Windows CLI
@@ -107,7 +107,7 @@ Chosen by Felipe:
 | 8 | Bottlenecks: stage times read from the debug log | Done |
 | 10 | Low-memory guard, before item 9: under 2 GB free the run unloads the model and waits, showing free memory and a Reanudar ahora button; goes on at 3 GB; stops cleanly after 15 min | Done |
 | 11 | Week-wide topic table replacing the per-show tables, from one call over the shows' theme groups | Done |
-| 9 | Acceptance: this week's report sent to the reader, copy kept in `work/sent/` | Not Started |
+| 9 | Acceptance: this week's report sent to the reader, copy kept in `work/sent/` | Done |
 
 ## Phase 6: Free-AI path for a reader with no paid assistant
 

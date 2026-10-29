@@ -83,3 +83,7 @@ The report she read: `work/sent/2026-10-29-semanal-semana-2026-10-26-cli.pdf`. H
 > está como descriptivo. Se puede hacer conclusión de lo que dijeron más que solo decir "hablaron del triunfo de lula"?
 
 What it asks for: each show's summary should say what the panel concluded or argued, not only which topics it covered. Today the week prompt asks for "what was said and who said it, without judging it", and the summaries come back as topic lists ("conversaron sobre el triunfo de Lula").
+
+## On the weekly report with conclusions
+
+The report she read: `work/sent/2026-10-29-semanal-semana-2026-10-26-cli-conclusiones.pdf` (week-wide topic table, summaries stating each speaker's position and conclusion). Felipe relayed that she liked it. This is the first report she accepted, and it closes phase 7 item 9.
