@@ -46,3 +46,19 @@ Built Thursday 29 October from the 28 episodes already finished, with `podcast-m
 ## Summaries that state conclusions
 
 After the reader asked for conclusions instead of topic lists, the episode and week prompts now ask for each speaker's position and conclusion, named. `tools/resummarize/resummarize.sh 2026-10-26 codex` redid the 28 episode summaries from their saved transcripts (old ones kept as `summary.previous.json`, old week files as `week-2026-10-26.previous.json`), no errors and no limit; `week --report` then redid the 13 week calls and the themes call. The PDF is still 4 pages and no topic was left out of a week theme. Every show block now reads as positions ("Maldonado pidió la salida de Rabat ...; Alvarado propuso cambios de gabinete"). Week table: Rebajas de penas y justicia 32 %, Elecciones y política brasileña 17 %, Economía, pensiones y formación 13 %, Presentaciones y avisos del programa 8 %, then four themes from 5 to 8 %. Speech recognition still misspells names the glossary does not hold (Davor "Mimisa", Richard "Coyuntian", "Uneos", "Marily Luers"), and some speakers appear by first name only. Copy: `work/sent/2026-10-29-semanal-semana-2026-10-26-cli-conclusiones.pdf`.
+
+## Names added to the glossary
+
+Spellings taken from each feed's own episode description (`episode.json`): "por Ximena Jara y Davor Mimica" (Democracia en LSD), "Richard Kouyoumdjian" (Hablemos en Off), "Claudio Alvarado y Cristóbal Huneeus" (Panelistas de Pauta), "las editoras Paula Valenzuela y Marily Lüders" (Rat Pack). `Mimica`, `Ximena`, `Kouyoumdjian`, `Huneeus` and `Lüders` were added to `%APPDATA%\Podcast-Monitor\glossary.txt` (16 names before, 21 after). The release exe's `run` then redid the name fix, with no new transcription, on copies of the five episodes' saved transcripts:
+
+| Heard | Should be | Before fix | Left after fix |
+|---|---|---|---|
+| Uneus, UNEUS, Luneus, Uneos | Huneeus | 5 | 1 ("Uneos") |
+| Luers, Luder, Luthers | Lüders | 3 | 1 ("Luthers") |
+| Mimisa | Mimica | 1 | 1 |
+| Coyuntian | Kouyoumdjian | 2 | 2 |
+| Jimena | Ximena | 2 | 2 |
+
+The fix caught 6 of 13. It misses a word whose phonetic key scores under 0.85 ("mimisa" against "mimika", "uneos" against "uneeus"), one more than 2 letters shorter than the name ("Coyuntian" is 9, "Kouyoumdjian" 12), and a J heard for an X.
+
+The same reruns changed "Corte" to "Cortés" 17 times across the five episodes, with "Corte" meaning the court; the glossary has no `!Corte` keep line.
