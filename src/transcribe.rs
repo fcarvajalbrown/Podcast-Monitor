@@ -22,6 +22,7 @@ pub struct Decoding {
     pub chunk_minutes: usize,
     pub text_context: i32,
     pub prompt: Option<String>,
+    pub vad_model: Option<String>,
 }
 
 pub type Progress = Arc<dyn Fn(i32) + Send + Sync>;
@@ -38,10 +39,11 @@ pub struct Transcriber {
 }
 
 impl Transcriber {
-    pub fn load(model: &Path) -> Result<Self> {
+    pub fn load(model: &Path, flash_attn: bool) -> Result<Self> {
         let path = model.to_str().ok_or_else(|| anyhow!("model path is not valid UTF-8"))?;
         let mut params = WhisperContextParameters::default();
         params.use_gpu(true);
+        params.flash_attn(flash_attn);
         let context = WhisperContext::new_with_params(path, params)
             .with_context(|| format!("loading model {}", model.display()))?;
         Ok(Self { context })
@@ -71,6 +73,10 @@ impl Transcriber {
         params.set_n_max_text_ctx(decoding.text_context);
         if let Some(prompt) = decoding.prompt.as_deref() {
             params.set_initial_prompt(prompt);
+        }
+        if let Some(vad_model) = decoding.vad_model.as_deref() {
+            params.set_vad_model_path(Some(vad_model));
+            params.enable_vad(true);
         }
         params.set_n_threads(threads());
         params.set_print_special(false);

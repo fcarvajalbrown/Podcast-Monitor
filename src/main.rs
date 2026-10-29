@@ -64,6 +64,10 @@ enum Command {
         text_context: i32,
         #[arg(long, help = "feed the glossary names to whisper as its initial prompt; has no effect while --text-context is 0")]
         glossary_prompt: bool,
+        #[arg(long, help = "flash attention on the GPU")]
+        flash_attn: bool,
+        #[arg(long, help = "Silero VAD model; whisper skips the stretches it marks as silence")]
+        vad_model: Option<PathBuf>,
     },
     #[command(about = "Show how a transcript is split into chunks for the summarizer")]
     Chunks {
@@ -148,9 +152,9 @@ fn dispatch() -> Result<()> {
             }
             Ok(())
         }
-        Command::Run { feed, model, glossary, work, latest, threshold, title, beam_size, greedy, chunk_minutes, text_context, glossary_prompt } => {
+        Command::Run { feed, model, glossary, work, latest, threshold, title, beam_size, greedy, chunk_minutes, text_context, glossary_prompt, flash_attn, vad_model } => {
             let beam_size = if greedy { 1 } else { beam_size };
-            let transcription = run::Transcription { model, threshold, beam_size, chunk_minutes, text_context, glossary_prompt };
+            let transcription = run::Transcription { model, threshold, beam_size, chunk_minutes, text_context, glossary_prompt, flash_attn, vad_model };
             run::run(&run::Options { feed, glossary, work, latest, title, transcription })
         }
         Command::Chunks { transcript, max_chars } => {

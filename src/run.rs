@@ -32,6 +32,8 @@ pub struct Transcription {
     pub chunk_minutes: usize,
     pub text_context: i32,
     pub glossary_prompt: bool,
+    pub flash_attn: bool,
+    pub vad_model: Option<PathBuf>,
 }
 
 impl Transcription {
@@ -43,6 +45,8 @@ impl Transcription {
             chunk_minutes: DEFAULT_CHUNK_MINUTES,
             text_context: DEFAULT_TEXT_CONTEXT,
             glossary_prompt: false,
+            flash_attn: false,
+            vad_model: None,
         }
     }
 }
@@ -113,13 +117,14 @@ pub fn process(episode: &Episode, folder: &Path, options: &Transcription, glossa
             log::info!("  decoding {}", audio_path.display());
             let samples = audio::load_for_whisper(&audio_path)?;
             if transcriber.is_none() {
-                *transcriber = Some(Transcriber::load(&options.model)?);
+                *transcriber = Some(Transcriber::load(&options.model, options.flash_attn)?);
             }
             let decoding = Decoding {
                 beam_size: options.beam_size,
                 chunk_minutes: options.chunk_minutes,
                 text_context: options.text_context,
                 prompt: glossary.filter(|_| options.glossary_prompt).map(Glossary::prompt),
+                vad_model: options.vad_model.as_ref().map(|path| path.to_string_lossy().into_owned()),
             };
             let started = Instant::now();
             let segments = transcriber.as_ref().map(|t| t.transcribe(&samples, LANGUAGE, &decoding, progress)).transpose()?.unwrap_or_default();
