@@ -60,3 +60,18 @@ Against `feeds-test-list.md`: these are the 23 test shows minus Entender es Todo
 - 0 episodes so far this week from Lo Que Importa, Sin Llorar, CIPER en tus Oídos and Expediente Mónica.
 - Cómo te lo explico, Contracorriente and Comentarios de Tomás Mosciatti still resolve to the wrong show or the stale re-upload listed in `feeds-test-list.md`, so their 0 means nothing.
 - At the Ep. 34 window speed on the RTX 2050 (4,685 s of audio in 395 s, about 12x), 18.7 h of audio is about 1.6 h of transcription, before the summaries.
+
+## On the first weekly report
+
+The report she read: `work/sent/2026-10-28-semanal-semana-2026-10-26-window.pdf`. Her words, 28 October 16:17, as relayed by Felipe:
+
+> Los encuentro iguales kjahsa
+>
+> igual, la distribución debería ser en total de todos los programas hablados
+>
+> porque así se sabe cuál es el tema de la semana
+
+What it asks for:
+
+- The topic distribution should be one total across all the shows, so the report shows the topic of the week. Today each show block has its own topics in percent.
+- "Los encuentro iguales" (she finds them the same): what "them" refers to is not yet confirmed by Felipe.
