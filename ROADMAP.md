@@ -79,7 +79,7 @@ Native Rust window in iced 0.14, Spanish UI strings, code and logs in English (`
 
 ## Phase 5: macOS build
 
-Back in scope: Felipe set the platforms to Windows and macOS on Apple Silicon, M1 and later (first deferred after the reader's feedback). Items are approved by Felipe before they are written here. The new transcription default (greedy with flash attention, `docs/research/stt-speed-ep34-rtx2050.md`) is measured on Vulkan only, not yet on Metal.
+Back in scope: Felipe set the platforms to Windows and macOS on Apple Silicon, M1 and later (first deferred after the reader's feedback). Order set by Felipe: this phase starts after phase 4 item 6, so the Mac build ports a window already accepted on Windows. Items are approved by Felipe before they are written here. The new transcription default (greedy with flash attention, `docs/research/stt-speed-ep34-rtx2050.md`) is measured on Vulkan only, not yet on Metal.
 
 ## Phase 7: Weekly report across the show list
 
