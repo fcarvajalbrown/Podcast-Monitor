@@ -64,3 +64,5 @@ The fix caught 6 of 13. It misses a word whose phonetic key scores under 0.85 ("
 The same reruns changed "Corte" to "Cortés" 17 times across the five episodes, with "Corte" meaning the court; the glossary has no `!Corte` keep line.
 
 After the heard-as lines (`25b3ec2`, `docs/research/heard-as-replacements.md`), the glossary reads `Mimica = Mimisa`, `Ximena = Jimena`, `Kouyoumdjian = Coyuntian`, `Huneeus = Uneos` and `Lüders = Luthers`. A rerun of the fix on the same five copies caught all 13: Huneeus 5, Lüders 3, Kouyoumdjian 2, Ximena 2, Mimica 1. Across the week's 28 saved transcripts the five heard forms occur 7 times, all in these episodes and all meaning the named person. The saved `transcript.fixed.json` and summaries in the app-data runs were not redone.
+
+The "Cortes" swap was the same bug: all 3 were "las Cortes", the courts. With `!Corte` and `!Cortes` added to the glossary, a rerun of the fix on the five copies leaves every such word as heard: Corte 17, Cortés 11, Cortes 3, the same as the raw transcripts. The heard-as names still fix all 13.
