@@ -106,7 +106,7 @@ Chosen by Felipe:
 | 7 | Weekly PDF: every show of the week in one file, from a Generar informe semanal button | Done |
 | 8 | Bottlenecks: stage times read from the debug log | Done |
 | 10 | Low-memory guard, before item 9: under 2 GB free the run unloads the model and waits, showing free memory and a Reanudar ahora button; goes on at 3 GB; stops cleanly after 15 min | Done |
-| 11 | Week-wide topic table replacing the per-show tables, from one call over the shows' theme groups | In Progress |
+| 11 | Week-wide topic table replacing the per-show tables, from one call over the shows' theme groups | Done |
 | 9 | Acceptance: this week's report sent to the reader, copy kept in `work/sent/` | Not Started |
 
 ## Phase 6: Free-AI path for a reader with no paid assistant
