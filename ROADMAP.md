@@ -6,6 +6,9 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 
 - Console fix built, check pending by Felipe: opened by double-click, the exe frees the console it owns alone (`GetConsoleProcessList` count 1, then `FreeConsole`), and Codex and Claude calls start with `CREATE_NO_WINDOW` so they open no console of their own. Done once a double-click shows only the window.
 
+- Silero VAD did not engage: the Ep. 34 run with `--vad-model` matched the baseline exactly (1,591 segments, same name counts, `docs/research/stt-speed-ep34-rtx2050.md`). Find why, then measure it working against greedy with flash attention. Comes first, as it changes the transcripts the name fix reads.
+- Names the summaries misspell, missing from the glossary (Davor Mimica as "Mimisa", Richard Kouyoumdjian as "Coyuntian", and others in `docs/research/weekly-run.md`): add them and check the name fix catches them on this week's transcripts. After the VAD item; both ahead of phase 4 item 6.
+
 ## Phases
 
 | Phase | What | Status |
