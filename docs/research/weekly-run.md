@@ -62,3 +62,5 @@ Spellings taken from each feed's own episode description (`episode.json`): "por 
 The fix caught 6 of 13. It misses a word whose phonetic key scores under 0.85 ("mimisa" against "mimika", "uneos" against "uneeus"), one more than 2 letters shorter than the name ("Coyuntian" is 9, "Kouyoumdjian" 12), and a J heard for an X.
 
 The same reruns changed "Corte" to "Cortés" 17 times across the five episodes, with "Corte" meaning the court; the glossary has no `!Corte` keep line.
+
+After the heard-as lines (`25b3ec2`, `docs/research/heard-as-replacements.md`), the glossary reads `Mimica = Mimisa`, `Ximena = Jimena`, `Kouyoumdjian = Coyuntian`, `Huneeus = Uneos` and `Lüders = Luthers`. A rerun of the fix on the same five copies caught all 13: Huneeus 5, Lüders 3, Kouyoumdjian 2, Ximena 2, Mimica 1. Across the week's 28 saved transcripts the five heard forms occur 7 times, all in these episodes and all meaning the named person. The saved `transcript.fixed.json` and summaries in the app-data runs were not redone.

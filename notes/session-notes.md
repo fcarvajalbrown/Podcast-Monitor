@@ -6,7 +6,8 @@ Open flags:
 - Console fix (3644824) waits for Felipe's double-click check; ROADMAP open item.
 - Phase 4 item 6: acceptance on Ep. 34 and Nada Personal from the window, not started.
 - Greedy with flash attention not yet measured on Metal. Silero VAD now runs but is 40 % slower on Ep. 34; kept off by default.
-- Speech recognition misspells names missing from the glossary (Mimica, Kouyoumdjian), more visible now that summaries name speakers.
+- Glossary takes heard-as lines (`Name = heard, heard`); this week's five misspelled names are in, but the saved fixed transcripts and summaries of the week were not redone.
+- "Corte" becomes "Cortés" in the name fix (17 times this week); ROADMAP open item.
 - Weekly grouping can split one story across two themes.
 - Phase 2 item 6: limit markers not checked against a real limit message.
 - No ad filter: ads rank as topics and as picker picks.

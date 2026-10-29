@@ -5,7 +5,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 ## Open items
 
 - Console fix built, check pending by Felipe: opened by double-click, the exe frees the console it owns alone (`GetConsoleProcessList` count 1, then `FreeConsole`), and Codex and Claude calls start with `CREATE_NO_WINDOW` so they open no console of their own. Done once a double-click shows only the window.
-- Names the summaries misspell, missing from the glossary (Davor Mimica as "Mimisa", Richard Kouyoumdjian as "Coyuntian", and others in `docs/research/weekly-run.md`): add them and check the name fix catches them on this week's transcripts. Ahead of phase 4 item 6.
+- "Corte" (the court) becomes "Cortés" in the name fix: 17 times in five episodes of the week of 26 October (`docs/research/weekly-run.md`); the glossary has no `!Corte` line.
 
 ## Phases
 
