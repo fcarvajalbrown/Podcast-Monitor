@@ -12,7 +12,7 @@ glossary=$data/glossary.txt
 for week in "$data"/runs/*/week-"$monday".json; do
   [ -f "$week" ] || continue
   show_dir=$(dirname "$week")
-  for id in $(python -I -c 'import json,sys; print("\n".join(json.load(open(sys.argv[1], encoding="utf-8"))["episodes"]))' "$week"); do
+  for id in $(python -I -c 'import json,sys; print("\n".join(json.load(open(sys.argv[1], encoding="utf-8"))["episodes"]))' "$week" | tr -d '\r'); do
     folder=$show_dir/$id
     if [ ! -f "$folder/summary.previous.json" ] && [ -f "$folder/summary.json" ]; then
       mv "$folder/summary.json" "$folder/summary.previous.json"
