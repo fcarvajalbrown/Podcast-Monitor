@@ -6,6 +6,7 @@ usage() { echo "usage: bench.sh <out dir> <variant>... (baseline flash greedy q8
 out=$1
 shift
 [ "$1" = all ] && set -- baseline flash greedy q8 vad
+mkdir -p "$out"
 
 root=$(cd "$(dirname "$0")/../.." && pwd)
 exe=${PM_EXE:-$(cygpath -u "$USERPROFILE")/.pmt/release/podcast-monitor.exe}
