@@ -59,7 +59,7 @@ pub struct ShowBlock {
     pub episodes: Vec<Option<DateTime<FixedOffset>>>,
     pub duration_s: u64,
     pub summary: String,
-    pub shares: Vec<(String, u32)>,
+    pub themes: Vec<(String, f64)>,
     pub assistants: Vec<(Provider, Option<String>)>,
 }
 
@@ -135,13 +135,10 @@ pub fn prompt(show: &str, episodes: &[EpisodeDigest]) -> String {
     text
 }
 
-pub fn shares(episodes: &[EpisodeDigest], groups: &[Group]) -> Vec<(String, u32)> {
-    let total: u64 = episodes.iter().map(|episode| episode.duration_s).sum();
-    let seconds = |label: &str| -> f64 {
-        episodes.iter().enumerate().flat_map(|(index, episode)| episode.topics.iter().map(move |topic| (topic_label(index, &topic.name), topic.seconds))).filter(|(name, _)| name == label).map(|(_, seconds)| seconds).sum()
-    };
+fn grouped_seconds(labelled: &[(String, f64)], groups: &[Group]) -> Vec<(String, f64)> {
+    let seconds = |label: &str| -> f64 { labelled.iter().filter(|(name, _)| name == label).map(|(_, seconds)| seconds).sum() };
     let mut placed: Vec<String> = Vec::new();
-    let mut shares: Vec<(String, f64)> = Vec::new();
+    let mut sums: Vec<(String, f64)> = Vec::new();
     for group in groups {
         let mut sum = 0.0;
         for label in &group.topics {
@@ -151,17 +148,108 @@ pub fn shares(episodes: &[EpisodeDigest], groups: &[Group]) -> Vec<(String, u32)
                 placed.push(label);
             }
         }
-        shares.push((group.name.trim().to_string(), sum));
+        sums.push((group.name.trim().to_string(), sum));
     }
-    for (index, episode) in episodes.iter().enumerate() {
-        for topic in &episode.topics {
-            if !placed.contains(&topic_label(index, &topic.name)) {
-                log::warn!("topic left out of every group: {}", topic_label(index, &topic.name));
-            }
+    for (label, _) in labelled {
+        if !placed.contains(label) {
+            log::warn!("topic left out of every group: {label}");
         }
     }
-    shares.sort_by(|a, b| b.1.total_cmp(&a.1));
-    shares.into_iter().filter(|(_, sum)| *sum > 0.0).map(|(name, sum)| (name, if total == 0 { 0 } else { (100.0 * sum / total as f64).round() as u32 })).collect()
+    sums.sort_by(|a, b| b.1.total_cmp(&a.1));
+    sums.into_iter().filter(|(_, sum)| *sum > 0.0).collect()
+}
+
+fn percents(sums: Vec<(String, f64)>, total_s: u64) -> Vec<(String, u32)> {
+    sums.into_iter().map(|(name, sum)| (name, if total_s == 0 { 0 } else { (100.0 * sum / total_s as f64).round() as u32 })).collect()
+}
+
+pub fn show_themes(episodes: &[EpisodeDigest], groups: &[Group]) -> Vec<(String, f64)> {
+    let labelled: Vec<(String, f64)> = episodes.iter().enumerate().flat_map(|(index, episode)| episode.topics.iter().map(move |topic| (topic_label(index, &topic.name), topic.seconds))).collect();
+    grouped_seconds(&labelled, groups)
+}
+
+pub fn shares(episodes: &[EpisodeDigest], groups: &[Group]) -> Vec<(String, u32)> {
+    percents(show_themes(episodes, groups), episodes.iter().map(|episode| episode.duration_s).sum())
+}
+
+pub fn theme_label(show: usize, name: &str) -> String {
+    format!("P{}: {}", show + 1, name)
+}
+
+fn show_labels(blocks: &[ShowBlock]) -> Vec<(String, f64)> {
+    blocks.iter().enumerate().flat_map(|(index, block)| block.themes.iter().map(move |(name, seconds)| (theme_label(index, name), *seconds))).collect()
+}
+
+pub fn week_shares(blocks: &[ShowBlock], groups: &[Group]) -> Vec<(String, u32)> {
+    percents(grouped_seconds(&show_labels(blocks), groups), blocks.iter().map(|block| block.duration_s).sum())
+}
+
+pub fn themes_schema() -> Value {
+    let text = json!({ "type": "string" });
+    json!({
+        "type": "object",
+        "properties": {
+            "groups": { "type": "array", "items": {
+                "type": "object",
+                "properties": { "name": text, "topics": { "type": "array", "items": text } },
+                "required": ["name", "topics"],
+                "additionalProperties": false,
+            } },
+        },
+        "required": ["groups"],
+        "additionalProperties": false,
+    })
+}
+
+pub fn themes_prompt(blocks: &[ShowBlock]) -> String {
+    let mut text = String::from(
+        "These are the themes that several Spanish-language podcasts covered this week, show by show. Every theme has a label and its airtime as mm:ss.\n\
+         \n\
+         Return:\n\
+         - groups: between 5 and 8 broad themes of the whole week across all the shows, in Spanish, each with a short name of at most six words and the labels of the themes it gathers, copied exactly. Gather the same story told by different shows into one group. Every label goes in exactly one group.\n",
+    );
+    for (index, block) in blocks.iter().enumerate() {
+        text.push_str(&format!("\nShow {} ({}):\n", index + 1, block.show));
+        for (name, seconds) in &block.themes {
+            text.push_str(&format!("- {} ({})\n", theme_label(index, name), crate::chunk::clock(*seconds)));
+        }
+    }
+    text
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SavedThemes {
+    pub provider: Provider,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub model: Option<String>,
+    pub labels: Vec<String>,
+    pub groups: Vec<Group>,
+}
+
+#[derive(Deserialize)]
+struct ThemesReply {
+    groups: Vec<Group>,
+}
+
+pub fn summarize_themes(folder: &Path, blocks: &[ShowBlock], provider: Provider, assistant: &dyn Assistant) -> Result<SavedThemes> {
+    let path = folder.join("themes.json");
+    let labels: Vec<String> = show_labels(blocks).into_iter().map(|(label, _)| label).collect();
+    if let Some(saved) = read_json::<SavedThemes>(&path)?.filter(|saved| saved.labels == labels) {
+        log::info!("week themes already done");
+        return Ok(saved);
+    }
+    log::info!("grouping the week's themes across {} show(s)", blocks.len());
+    let reply = assistant.ask(&themes_prompt(blocks), &themes_schema())?;
+    let reply: ThemesReply = serde_json::from_value(reply).context("reading the assistant's themes reply")?;
+    let saved = SavedThemes { provider, model: assistant.model().map(String::from), labels, groups: reply.groups };
+    write_json(&path, &saved)?;
+    Ok(saved)
+}
+
+pub fn share_table(shares: &[(String, u32)]) -> Block {
+    let mut rows = vec![vec!["Tema".to_string(), "% del tiempo".to_string()]];
+    rows.extend(shares.iter().map(|(name, percent)| vec![name.clone(), if *percent == 0 { "<1 %".into() } else { format!("{percent} %") }]));
+    Block::Table(rows)
 }
 
 pub fn week_path(show_dir: &Path, monday: NaiveDate) -> PathBuf {
@@ -193,7 +281,7 @@ pub fn block(show: &str, publisher: &str, episodes: &[EpisodeDigest], week: &Sav
         episodes: episodes.iter().map(|episode| episode.published).collect(),
         duration_s: episodes.iter().map(|episode| episode.duration_s).sum(),
         summary: week.reply.summary.trim().into(),
-        shares: shares(episodes, &week.reply.groups),
+        themes: show_themes(episodes, &week.reply.groups),
         assistants,
     }
 }
@@ -226,11 +314,6 @@ impl ShowBlock {
         let mut blocks = vec![Block::Heading { level: 2, text: self.show.clone() }, Block::Paragraph(self.details())];
         if !self.summary.is_empty() {
             blocks.push(Block::Paragraph(self.summary.clone()));
-        }
-        if !self.shares.is_empty() {
-            let mut rows = vec![vec!["Tema".to_string(), "% del tiempo".to_string()]];
-            rows.extend(self.shares.iter().map(|(name, percent)| vec![name.clone(), if *percent == 0 { "<1 %".into() } else { format!("{percent} %") }]));
-            blocks.push(Block::Table(rows));
         }
         blocks
     }
@@ -338,11 +421,33 @@ pub fn build(data: &Path, week: &Week, saved: &[SavedShow], first: Choice, mut f
     if blocks.is_empty() {
         return Err(anyhow!("no finished episodes this week"));
     }
-    let mut pages = vec![Block::Heading { level: 1, text: title(week.monday) }];
-    pages.extend(blocks.iter().flat_map(ShowBlock::blocks));
-    pages.extend(closing(&blocks, &quiet));
     let folder = data.join("weeks").join(week.monday.to_string());
     std::fs::create_dir_all(&folder).with_context(|| format!("creating {}", folder.display()))?;
+    let mut themes = summarize_themes(&folder, &blocks, provider, assistant);
+    if themes.as_ref().is_err_and(limited)
+        && let Some((next, next_assistant)) = fallback.take()
+    {
+        log::warn!("{provider:?} hit its limit; switching to {next:?} for the week themes");
+        (provider, assistant) = (next, next_assistant);
+        themes = summarize_themes(&folder, &blocks, provider, assistant);
+    }
+    let themes = match themes {
+        Ok(themes) => themes,
+        Err(error) if limited(&error) => {
+            log::error!("week themes: {error:#}");
+            outcome.stopped = Some(Failure::Limit);
+            return Ok(outcome);
+        }
+        Err(error) => return Err(error.context("week themes")),
+    };
+    let mut pages = vec![Block::Heading { level: 1, text: title(week.monday) }];
+    let shares = week_shares(&blocks, &themes.groups);
+    if !shares.is_empty() {
+        pages.push(Block::Heading { level: 2, text: "Temas de la semana".into() });
+        pages.push(share_table(&shares));
+    }
+    pages.extend(blocks.iter().flat_map(ShowBlock::blocks));
+    pages.extend(closing(&blocks, &quiet));
     let pdf = folder.join(WEEKLY_FILE);
     std::fs::write(&pdf, report::pdf(report::HEADER, pages)?).with_context(|| format!("writing {}", pdf.display()))?;
     log::info!("weekly report with {} show(s) written to {}", blocks.len(), pdf.display());
@@ -431,8 +536,20 @@ mod tests {
             Block::Heading { level: 2, text: "Programa".into() },
             Block::Paragraph("Radio. 2 episodios (lunes 26 y martes 27 de octubre), 33 min.".into()),
             Block::Paragraph("La semana.".into()),
-            Block::Table(vec![vec!["Tema".into(), "% del tiempo".into()], vec!["Decretos".into(), "45 %".into()], vec!["Cierre".into(), "3 %".into()]]),
         ]);
+        assert_eq!(block.themes, [("Decretos".to_string(), 900.0), ("Cierre".to_string(), 50.0)]);
+    }
+
+    #[test]
+    fn week_shares_merge_show_themes_over_all_airtime() {
+        let saved = SavedWeek { provider: Provider::Codex, model: None, episodes: vec![], reply: WeekReply { summary: String::new(), groups: vec![group("Decretos", &["E2: Decretos"]), group("Brasil", &["E1: Lula", "E2: Brasil"])] } };
+        let first = block("A", "", &week(), &saved);
+        let second = ShowBlock { show: "B".into(), duration_s: 2000, themes: vec![("Gobierno".into(), 500.0), ("Brasil y Lula".into(), 100.0)], ..first.clone() };
+        let blocks = [first, second];
+        let groups = vec![group("Decretos del gobierno", &["P1: Decretos (15:00)", "P2: Gobierno"]), group("Brasil", &["P1: Brasil", "P2: Brasil y Lula"])];
+        assert_eq!(week_shares(&blocks, &groups), [("Decretos del gobierno".to_string(), 35), ("Brasil".to_string(), 15)]);
+        assert!(themes_prompt(&blocks).contains("Show 2 (B):\n- P2: Gobierno (08:20)"));
+        assert_eq!(share_table(&[("Brasil".into(), 0)]), Block::Table(vec![vec!["Tema".into(), "% del tiempo".into()], vec!["Brasil".into(), "<1 %".into()]]));
     }
 
     #[test]
