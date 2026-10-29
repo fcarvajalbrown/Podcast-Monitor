@@ -13,6 +13,7 @@ use crate::transcribe::{Decoding, Progress, Segment, Transcriber, print_progress
 
 const LANGUAGE: &str = "es";
 pub const DEFAULT_BEAM_SIZE: usize = 5;
+pub const APP_BEAM_SIZE: usize = 1;
 pub const DEFAULT_CHUNK_MINUTES: usize = 0;
 pub const DEFAULT_TEXT_CONTEXT: i32 = 0;
 
@@ -41,11 +42,11 @@ impl Transcription {
         Self {
             model,
             threshold: names::DEFAULT_THRESHOLD,
-            beam_size: DEFAULT_BEAM_SIZE,
+            beam_size: APP_BEAM_SIZE,
             chunk_minutes: DEFAULT_CHUNK_MINUTES,
             text_context: DEFAULT_TEXT_CONTEXT,
             glossary_prompt: false,
-            flash_attn: false,
+            flash_attn: true,
             vad_model: None,
         }
     }
@@ -176,6 +177,14 @@ pub fn write_json<T: Serialize>(path: &Path, value: &T) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn app_transcribes_greedy_with_flash_attention() {
+        let options = Transcription::with_defaults(PathBuf::from("model.bin"));
+        assert_eq!(options.beam_size, 1);
+        assert!(options.flash_attn);
+        assert!(options.vad_model.is_none());
+    }
 
     #[test]
     fn json_roundtrip_and_missing_file() {
