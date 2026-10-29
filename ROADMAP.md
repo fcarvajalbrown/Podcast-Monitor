@@ -93,6 +93,7 @@ Chosen by Felipe:
 - The weekly report has one block per show, covering that show's episodes of the week together.
 - Each block: a header line (show, publisher, episodes with their days, total duration), a 3 to 4 line summary of the week, and 5 to 8 grouped topics with percent of airtime only. No people, no quotes.
 - A closing line in the PDF says which assistant summarized which show, an exception Felipe made for this report. The weekly run starts on Codex.
+- After the reader's feedback on the first weekly report (`docs/research/reader-feedback.md`): one "Temas de la semana" table at the top, percent of all the week's airtime across every show, replaces the per-show topic tables. Built by one more assistant call that merges each show's saved theme groups into 5 to 8 week themes.
 
 | # | Item | Status |
 |---|---|---|
@@ -105,6 +106,7 @@ Chosen by Felipe:
 | 7 | Weekly PDF: every show of the week in one file, from a Generar informe semanal button | Done |
 | 8 | Bottlenecks: stage times read from the debug log | Done |
 | 10 | Low-memory guard, before item 9: under 2 GB free the run unloads the model and waits, showing free memory and a Reanudar ahora button; goes on at 3 GB; stops cleanly after 15 min | Done |
+| 11 | Week-wide topic table replacing the per-show tables, from one call over the shows' theme groups | In Progress |
 | 9 | Acceptance: this week's report sent to the reader, copy kept in `work/sent/` | Not Started |
 
 ## Phase 6: Free-AI path for a reader with no paid assistant
