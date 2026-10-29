@@ -74,4 +74,4 @@ The report she read: `work/sent/2026-10-28-semanal-semana-2026-10-26-window.pdf`
 What it asks for:
 
 - The topic distribution should be one total across all the shows, so the report shows the topic of the week. Today each show block has its own topics in percent.
-- "Los encuentro iguales" (she finds them the same): what "them" refers to is not yet confirmed by Felipe.
+- "Los encuentro iguales" (she finds them the same): read by Felipe as the weekly report being no different from the earlier on-demand reports.
