@@ -14,6 +14,7 @@ const COMMON_MIN: usize = 2;
 pub struct Glossary {
     names: Vec<(String, Vec<char>)>,
     keep: HashSet<String>,
+    heard: HashMap<String, String>,
 }
 
 impl Glossary {
@@ -25,15 +26,23 @@ impl Glossary {
     pub fn parse(text: &str) -> Self {
         let mut names = Vec::new();
         let mut keep = HashSet::new();
+        let mut heard = HashMap::new();
         for line in text.lines().map(str::trim).filter(|line| !line.is_empty()) {
-            match line.strip_prefix('!') {
-                Some(word) => {
-                    keep.insert(word.trim().to_string());
-                }
-                None => names.push((line.to_string(), phonetic_key(line))),
+            if let Some(word) = line.strip_prefix('!') {
+                keep.insert(word.trim().to_string());
+                continue;
             }
+            let (name, forms) = line.split_once('=').map_or((line, ""), |(name, forms)| (name.trim(), forms));
+            for form in forms.split(',').map(str::trim).filter(|form| !form.is_empty()) {
+                if words(form).count() == 1 && words(form).next() == Some(form) {
+                    heard.insert(form.to_lowercase(), name.to_string());
+                } else {
+                    log::warn!("glossary: heard form {form:?} for {name} is not one word, skipped");
+                }
+            }
+            names.push((name.to_string(), phonetic_key(name)));
         }
-        Self { names, keep }
+        Self { names, keep, heard }
     }
 
     pub fn prompt(&self) -> String {
@@ -62,6 +71,10 @@ pub fn correct(segments: &[Segment], glossary: &Glossary, threshold: f64) -> (Ve
         .iter()
         .map(|segment| {
             let text = map_words(&segment.text, |word| {
+                if let Some(name) = glossary.heard.get(&word.to_lowercase()).filter(|name| name.as_str() != word) {
+                    *replacements.entry((word.to_string(), name.clone())).or_default() += 1;
+                    return Some(name.clone());
+                }
                 if !starts_uppercase(word) || word.chars().count() < MIN_WORD_CHARS || common.contains(&word.to_lowercase()) || glossary.keep.contains(word) {
                     return None;
                 }
@@ -253,6 +266,27 @@ mod tests {
         let (fixed, replacements) = correct(&[segment("Dijo Ferreyra, y luego Montesinos.")], &glossary, DEFAULT_THRESHOLD);
         assert_eq!(fixed[0].text, "Dijo Ferreira, y luego Montecinos.");
         assert_eq!(replacements.values().sum::<usize>(), 2);
+    }
+
+    #[test]
+    fn heard_forms_replace_whole_words_in_any_case() {
+        let glossary = Glossary::parse("Huneeus = Uneos, Luneus
+Mimica = Mimisa
+Kast
+");
+        let input = [segment("Cristóbal Uneos, UNEOS y luneus. Davor Mimisa, Uneoso.")];
+        let (fixed, replacements) = correct(&input, &glossary, DEFAULT_THRESHOLD);
+        assert_eq!(fixed[0].text, "Cristóbal Huneeus, Huneeus y Huneeus. Davor Mimica, Uneoso.");
+        assert_eq!(replacements.values().sum::<usize>(), 4);
+        assert_eq!(glossary.prompt(), "Huneeus, Mimica, Kast");
+    }
+
+    #[test]
+    fn heard_forms_of_several_words_are_skipped() {
+        let glossary = Glossary::parse("Kouyoumdjian = Coyun Tian, Coyuntian
+");
+        let (fixed, _) = correct(&[segment("Coyun Tian y Coyuntian")], &glossary, DEFAULT_THRESHOLD);
+        assert_eq!(fixed[0].text, "Coyun Tian y Kouyoumdjian");
     }
 
     #[test]
