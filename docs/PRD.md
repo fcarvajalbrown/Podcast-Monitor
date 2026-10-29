@@ -13,7 +13,7 @@ The report's reader needs to know what specialized political podcasts are puttin
 ## 3. Users
 
 - **Reader:** reads a weekly PDF covering this week's episodes of her show list, short per show, on phone or PC; she can still ask for one episode on demand.
-- **Operator and maintainer:** Felipe runs the transcription on his RTX 3060 (12 GB) PC or his RTX 2050 laptop, builds the app, and keeps the show list and glossary seeds. This replaced the reader running everything on her 8 GB M1: a full back catalogue of the 23-show list (7,303 h of audio in the 20 shows with a feed) came to an estimated 78-117 days of compute on the M1 and 27.5 days on the RTX 2050. Until then the summarizer uses Felipe's own assistant CLI login on his machine. Felipe keeps running it: the macOS build is deferred indefinitely (Felipe, after the reader's feedback in `docs/research/reader-feedback.md`), and finding the run's bottlenecks is part of the work.
+- **Operator and maintainer:** Felipe runs the transcription on his RTX 3060 (12 GB) PC or his RTX 2050 laptop, builds the app, and keeps the show list and glossary seeds. This replaced the reader running everything on her 8 GB M1: a full back catalogue of the 23-show list (7,303 h of audio in the 20 shows with a feed) came to an estimated 78-117 days of compute on the M1 and 27.5 days on the RTX 2050. Until then the summarizer uses Felipe's own assistant CLI login on his machine. Felipe keeps running it, and finding the run's bottlenecks is part of the work. The macOS build, first deferred after the reader's feedback (`docs/research/reader-feedback.md`), is back in scope: Felipe set the platforms to Windows and macOS on Apple Silicon, M1 and later.
 
 ## 4. Goals and Non-goals
 
@@ -39,11 +39,11 @@ Non-goals:
 | Must | PDF output in the "Desde el escritorio de Felipe Carvajal Brown" layout (`felipe_skill_voice/scripts/gen_pdf_desk.py` is the reference) |
 | Must | Names glossary with phonetic post-correction of transcripts at similarity 0.85; the same glossary is sent to the summarizer with each chunk so summaries and people lists use the right names where the transcript stays wrong; quotes keep the transcript's words; glossary built from an editable hand list, names in each show's episode titles and descriptions, and Chamber of Deputies and Senate open data, with a per-show exception list |
 
-Out of v1: the macOS build (deferred indefinitely), Whisper initial-prompt glossary (no gain on two episodes, see `docs/research/name-correction.md`), the YouTube fallback (no v1 show needs it; it returns with the three no-feed shows), date-range runs, publisher transcripts (every episode is transcribed locally, even when the feed carries a transcript), and the three pilot shows with no official feed (Cómo te lo explico, Contracorriente, Comentarios de Tomás Mosciatti).
+Out of v1: Whisper initial-prompt glossary (no gain on two episodes, see `docs/research/name-correction.md`), the YouTube fallback (no v1 show needs it; it returns with the three no-feed shows), date-range runs, publisher transcripts (every episode is transcribed locally, even when the feed carries a transcript), and the three pilot shows with no official feed (Cómo te lo explico, Contracorriente, Comentarios de Tomás Mosciatti).
 
 ## 6. Technical Architecture
 
-- **Language and packaging:** Rust. Windows portable exe on Felipe's PCs; macOS on Apple Silicon is deferred indefinitely.
+- **Language and packaging:** Rust. Platforms set by Felipe: Windows (portable exe) and macOS on Apple Silicon, M1 and later. No Intel Mac build.
 - **Speech-to-text:** Whisper large-v3-turbo through whisper.cpp (whisper-rs). GPU on Vulkan for Windows and Metal for Mac. Voxtral Mini was dropped from consideration.
 - **Name correction:** glossary plus Spanish phonetic key and similarity threshold 0.85, on capitalized words only, skipping words that also appear in lowercase in the same transcript. At 0.75 it turned María into Arias 27 times on a Nada Personal episode.
 - **Interface:** native Rust window (egui or similar, no web stack), Spanish UI strings; code, identifiers and logs in English.
@@ -99,7 +99,7 @@ Ordered dependency first, each phase building on the one before.
 2. Summarizer through her assistant CLI (`claude -p` and `codex exec` behind one interface), glossary sent with each chunk, quote matching, limit-error pause.
 3. PDF report in the escritorio layout.
 4. Desktop window in Spanish: show list, search with confirm, the two run modes, progress, Open PDF.
-5. macOS build with Metal: deferred indefinitely.
+5. macOS build with Metal, Apple Silicon M1 and later.
 6. Free-AI path by copy and paste.
 7. Weekly report across the show list, next after phase 4.
 

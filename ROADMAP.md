@@ -14,7 +14,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 | 2 | Summarizer through her assistant CLI, quote matching, limit-error pause | In Progress |
 | 3 | PDF report in the escritorio layout | Done |
 | 4 | Desktop window in Spanish | In Progress |
-| 5 | macOS build with Metal, reference episodes, first on-demand report | Deferred |
+| 5 | macOS build with Metal, reference episodes, first on-demand report | Not Started |
 | 6 | Free-AI path for a reader with no paid assistant | Not Started |
 | 7 | Weekly report across the show list | Done |
 | 8 | App icon and window design | Not Started |
@@ -79,7 +79,7 @@ Native Rust window in iced 0.14, Spanish UI strings, code and logs in English (`
 
 ## Phase 5: macOS build
 
-Deferred indefinitely by Felipe after the reader's feedback: he runs the tool on his own PCs.
+Back in scope: Felipe set the platforms to Windows and macOS on Apple Silicon, M1 and later (first deferred after the reader's feedback). Items are approved by Felipe before they are written here. The new transcription default (greedy with flash attention, `docs/research/stt-speed-ep34-rtx2050.md`) is measured on Vulkan only, not yet on Metal.
 
 ## Phase 7: Weekly report across the show list
 
