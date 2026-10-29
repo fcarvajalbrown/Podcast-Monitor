@@ -168,6 +168,7 @@ pub fn show_themes(episodes: &[EpisodeDigest], groups: &[Group]) -> Vec<(String,
     grouped_seconds(&labelled, groups)
 }
 
+#[cfg(test)]
 pub fn shares(episodes: &[EpisodeDigest], groups: &[Group]) -> Vec<(String, u32)> {
     percents(show_themes(episodes, groups), episodes.iter().map(|episode| episode.duration_s).sum())
 }
