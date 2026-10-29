@@ -14,6 +14,6 @@ Episode: "Ep. 34 -La crisis de los decretos - Animales Políticos - Segunda Temp
 Target after the name fix: Kast at least 16, Boric at least 7. Every variant meets it.
 
 - Flash attention is off by default in whisper-rs 0.16 (`WhisperContextParameters::default`), which likely explains the earlier gap against whisper-cli (354 s against 424 s).
-- The VAD run gave the same 1,591 segments and the same name counts as today's setting, so VAD most likely did not engage; its 5 % is within run-to-run spread. Not investigated.
+- The VAD run gave the same 1,591 segments and the same name counts as today's setting: VAD never ran. whisper.cpp applies VAD only inside `whisper_full` and `whisper_full_parallel` (`whisper.cpp:7743`, `7766` in whisper-rs-sys 0.15), which use the context's built-in state; whisper-rs 0.16 creates contexts without that state and its `WhisperState::full` calls `whisper_full_with_state`, which skips VAD, so `enable_vad` and `set_vad_model_path` are silently ignored. Its 5 % is run-to-run spread. The fix is to run Silero through whisper-rs's `WhisperVadContext` ourselves, transcribe only the speech and map the times back.
 - The two gains stack: flash attention and greedy together halve the transcription time. On last week's 52.4 min of transcription that would be about 25 min.
 - Name counts are not an accuracy measure; the words around the names were not compared.
