@@ -75,3 +75,11 @@ What it asks for:
 
 - The topic distribution should be one total across all the shows, so the report shows the topic of the week. Today each show block has its own topics in percent.
 - "Los encuentro iguales" (she finds them the same): read by Felipe as the weekly report being no different from the earlier on-demand reports.
+
+## On the weekly report with the week-wide topic table
+
+The report she read: `work/sent/2026-10-29-semanal-semana-2026-10-26-cli.pdf`. Her words, as relayed by Felipe:
+
+> está como descriptivo. Se puede hacer conclusión de lo que dijeron más que solo decir "hablaron del triunfo de lula"?
+
+What it asks for: each show's summary should say what the panel concluded or argued, not only which topics it covered. Today the week prompt asks for "what was said and who said it, without judging it", and the summaries come back as topic lists ("conversaron sobre el triunfo de Lula").
