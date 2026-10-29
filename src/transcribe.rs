@@ -4,10 +4,11 @@ use std::sync::Arc;
 
 use anyhow::{Context, Result, anyhow};
 use serde::{Deserialize, Serialize};
-use whisper_rs::{FullParams, SamplingStrategy, WhisperContext, WhisperContextParameters};
+use whisper_rs::{FullParams, SamplingStrategy, WhisperContext, WhisperContextParameters, WhisperVadContext, WhisperVadContextParams, WhisperVadParams};
 
 const SAMPLE_RATE: usize = 16_000;
 const SEARCH_S: usize = 20;
+const SPEECH_GAP: usize = SAMPLE_RATE / 10;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Segment {
@@ -50,6 +51,20 @@ impl Transcriber {
     }
 
     pub fn transcribe(&self, audio: &[f32], language: &str, decoding: &Decoding, progress: &Progress) -> Result<Vec<Segment>> {
+        let Some(vad_model) = decoding.vad_model.as_deref() else {
+            return self.transcribe_all(audio, language, decoding, progress);
+        };
+        let pieces = speech_pieces(vad_model, audio)?;
+        let speech = join_speech(audio, &pieces);
+        log::info!("  speech {:.0} s of {:.0} s in {} pieces", speech.len() as f64 / SAMPLE_RATE as f64, audio.len() as f64 / SAMPLE_RATE as f64, pieces.len());
+        let segments = self.transcribe_all(&speech, language, decoding, progress)?;
+        Ok(segments
+            .into_iter()
+            .map(|segment| Segment { start_s: original_time(&pieces, segment.start_s), end_s: original_time(&pieces, segment.end_s), text: segment.text })
+            .collect())
+    }
+
+    fn transcribe_all(&self, audio: &[f32], language: &str, decoding: &Decoding, progress: &Progress) -> Result<Vec<Segment>> {
         let cuts = boundaries(audio, decoding.chunk_minutes * 60 * SAMPLE_RATE);
         let mut segments = Vec::new();
         for (index, pair) in cuts.windows(2).enumerate() {
@@ -73,10 +88,6 @@ impl Transcriber {
         params.set_n_max_text_ctx(decoding.text_context);
         if let Some(prompt) = decoding.prompt.as_deref() {
             params.set_initial_prompt(prompt);
-        }
-        if let Some(vad_model) = decoding.vad_model.as_deref() {
-            params.set_vad_model_path(Some(vad_model));
-            params.enable_vad(true);
         }
         params.set_n_threads(threads());
         params.set_print_special(false);
@@ -104,6 +115,62 @@ impl Transcriber {
             })
             .collect()
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct Piece {
+    joined_start: usize,
+    original_start: usize,
+    len: usize,
+}
+
+fn speech_pieces(vad_model: &str, audio: &[f32]) -> Result<Vec<Piece>> {
+    let mut params = WhisperVadContextParams::new();
+    params.set_n_threads(threads());
+    let mut context = WhisperVadContext::new(vad_model, params).with_context(|| format!("loading VAD model {vad_model}"))?;
+    let spans = context
+        .segments_from_samples(WhisperVadParams::new(), audio)
+        .context("running VAD")?
+        .map(|span| (cs_to_sample(span.start), cs_to_sample(span.end)))
+        .collect::<Vec<_>>();
+    Ok(layout(&spans, audio.len()))
+}
+
+fn cs_to_sample(centiseconds: f32) -> usize {
+    (centiseconds.max(0.0) as f64 * SAMPLE_RATE as f64 / 100.0).round() as usize
+}
+
+fn layout(spans: &[(usize, usize)], audio_len: usize) -> Vec<Piece> {
+    let mut pieces: Vec<Piece> = Vec::new();
+    for &(start, end) in spans {
+        let start = start.min(audio_len);
+        let end = end.min(audio_len);
+        if end <= start {
+            continue;
+        }
+        let joined_start = pieces.last().map_or(0, |last| last.joined_start + last.len + SPEECH_GAP);
+        pieces.push(Piece { joined_start, original_start: start, len: end - start });
+    }
+    pieces
+}
+
+fn join_speech(audio: &[f32], pieces: &[Piece]) -> Vec<f32> {
+    let mut joined = Vec::with_capacity(pieces.last().map_or(0, |last| last.joined_start + last.len));
+    for piece in pieces {
+        joined.resize(piece.joined_start, 0.0);
+        joined.extend_from_slice(&audio[piece.original_start..piece.original_start + piece.len]);
+    }
+    joined
+}
+
+fn original_time(pieces: &[Piece], joined_s: f64) -> f64 {
+    let sample = (joined_s * SAMPLE_RATE as f64).max(0.0) as usize;
+    let index = pieces.partition_point(|piece| piece.joined_start <= sample);
+    let Some(piece) = index.checked_sub(1).map(|index| pieces[index]) else {
+        return joined_s;
+    };
+    let within = (sample - piece.joined_start).min(piece.len);
+    (piece.original_start + within) as f64 / SAMPLE_RATE as f64
 }
 
 fn boundaries(audio: &[f32], chunk_samples: usize) -> Vec<usize> {
@@ -151,6 +218,24 @@ mod tests {
         assert_eq!(cuts.last(), Some(&audio.len()));
         assert!((quiet_start..quiet_start + 2 * SAMPLE_RATE).contains(&cuts[1]));
         assert!(cuts.windows(2).all(|pair| pair[1] > pair[0]));
+    }
+
+    #[test]
+    fn speech_is_joined_with_short_gaps_and_times_map_back() {
+        let audio: Vec<f32> = (0..20 * SAMPLE_RATE).map(|i| i as f32).collect();
+        let spans = [(2 * SAMPLE_RATE, 4 * SAMPLE_RATE), (10 * SAMPLE_RATE, 13 * SAMPLE_RATE), (19 * SAMPLE_RATE, 25 * SAMPLE_RATE), (5, 5)];
+        let pieces = layout(&spans, audio.len());
+        assert_eq!(pieces.len(), 3);
+        assert_eq!(pieces[1].joined_start, 2 * SAMPLE_RATE + SPEECH_GAP);
+        assert_eq!(pieces[2].len, SAMPLE_RATE);
+        let joined = join_speech(&audio, &pieces);
+        assert_eq!(joined.len(), 6 * SAMPLE_RATE + 2 * SPEECH_GAP);
+        assert_eq!(joined[pieces[1].joined_start], audio[10 * SAMPLE_RATE]);
+        assert_eq!(joined[2 * SAMPLE_RATE], 0.0);
+        assert_eq!(original_time(&pieces, 1.0), 3.0);
+        assert_eq!(original_time(&pieces, 2.05), 4.0);
+        assert_eq!(original_time(&pieces, 2.1 + 1.5), 11.5);
+        assert_eq!(original_time(&pieces, 5.2 + 0.5), 19.5);
     }
 
     #[test]
