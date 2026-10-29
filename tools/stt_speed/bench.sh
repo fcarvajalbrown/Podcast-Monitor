@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-usage() { echo "usage: bench.sh <out dir> <variant>... (baseline flash greedy flash-greedy q8 vad, or all)" >&2; exit 1; }
+usage() { echo "usage: bench.sh <out dir> <variant>... (baseline flash greedy flash-greedy q8 vad flash-greedy-vad, or all)" >&2; exit 1; }
 [ $# -ge 2 ] || usage
 out=$1
 shift
@@ -25,6 +25,7 @@ for variant in "$@"; do
     flash-greedy) args+=(--flash-attn --greedy) ;;
     q8) args=(--model "$models/ggml-large-v3-turbo-q8_0.bin") ;;
     vad) args+=(--vad-model "$models/ggml-silero-v5.1.2.bin") ;;
+    flash-greedy-vad) args+=(--flash-attn --greedy --vad-model "$models/ggml-silero-v5.1.2.bin") ;;
     *) usage ;;
   esac
   work=$out/$variant
