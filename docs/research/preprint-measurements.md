@@ -54,6 +54,6 @@ Judged by Felipe from the segment list (he did not listen to this set); every ro
 
 - 25 of 30 changes correct: precision 83.3 %, Wilson 95 % interval 66.4 % to 92.7 %, against 98.6 % in-sample.
 - Fuzzy: 24 of 26 correct. The two wrong ones are "Ricos" to Ríos inside the telenovela title "Los Ricos También Lloran".
-- Heard-as: 1 of 4 correct. The heard-as line `Ximena = Jimena` turned a real Jimena Jara, named in Los Columnistas de Mesa Central, into Ximena three times. `heard-as-replacements.md` had flagged this risk ("Jimena" is itself a real first name); the held-out set shows it happening.
+- Heard-as: 1 of 4 correct. The heard-as line `Ximena = Jimena` turned a real Jimena Jara, named in Los Columnistas de Mesa Central, into Ximena three times. She is Jimena Jara Quilodrán, lawyer and former Undersecretary of Cultures and the Arts (es.wikipedia.org/wiki/Jimena_Jara, link from Felipe), a different person from the Democracia en LSD co-host Ximena Jara. `heard-as-replacements.md` had flagged this risk ("Jimena" is itself a real first name); the held-out set shows it happening.
 - "Pepe Aria" to Arias counted correct by Felipe: Chilean speech drops the final s. Web searches did not identify the person.
 - In-sample and held-out pooled: 94 of 100, 94.0 % (87.5 % to 97.2 %), but the two sets should be reported apart, since the in-sample one was used to build the glossary.
