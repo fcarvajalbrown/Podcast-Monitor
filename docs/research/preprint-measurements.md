@@ -47,3 +47,13 @@ Judged by Felipe: Kast (42) and Rabat (7) from their segments, the other 21 by e
 
 - Quotes: 80 returned by Codex, 0 dropped, largest gap to the stated minute 5 s. Across all runs that is 369 quotes and 0 drops (rule of three: under about 0.8 % at 95 %).
 - Name fix: 30 changes (26 fuzzy, 4 heard-as): Kast 20, Ximena 3, Rabat 4, Ríos 2, Bellolio 1, Arias 1. Both "Ricos" to Ríos changes sit in the telenovela title "Los Ricos También Lloran". Felipe judges them by ear (`tools/judge_clips/clips.py`, `work/preprint/clips-heldout/all.mp3`).
+
+### Held-out verdicts
+
+Judged by Felipe from the segment list (he did not listen to this set); every row is in `preprint-judged-heldout.tsv`.
+
+- 25 of 30 changes correct: precision 83.3 %, Wilson 95 % interval 66.4 % to 92.7 %, against 98.6 % in-sample.
+- Fuzzy: 24 of 26 correct. The two wrong ones are "Ricos" to Ríos inside the telenovela title "Los Ricos También Lloran".
+- Heard-as: 1 of 4 correct. The heard-as line `Ximena = Jimena` turned a real Jimena Jara, named in Los Columnistas de Mesa Central, into Ximena three times. `heard-as-replacements.md` had flagged this risk ("Jimena" is itself a real first name); the held-out set shows it happening.
+- "Pepe Aria" to Arias counted correct by Felipe: Chilean speech drops the final s. Web searches did not identify the person.
+- In-sample and held-out pooled: 94 of 100, 94.0 % (87.5 % to 97.2 %), but the two sets should be reported apart, since the in-sample one was used to build the glossary.

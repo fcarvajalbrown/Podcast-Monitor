@@ -1,0 +1,31 @@
+number	folder	start_s	heard	fixed	kind	verdict	segment
+01	columnistas-pagina-13\2026-10-28-escobar-y-valdivieso-por-una-ia-que-ayude-con-la-carga-menta	2688	Ricos	Ríos	fuzzy	wrong	Recuerda esa teleserie Los Ricos También Lloran
+02	columnistas-pagina-13\2026-10-28-escobar-y-valdivieso-por-una-ia-que-ayude-con-la-carga-menta	2691	Ricos	Ríos	fuzzy	wrong	Los Ricos También Lloran
+03	el-shot-con-juanma-astorga\2026-10-29-el-shot-29-de-octubre-de-2026	450	CAST	Kast	fuzzy	correct	CAST pidió invertir hoy y no en 2030, el mismo día en que Quirós anticipó meses de actividad económica negativa.
+04	el-villegas-actualidad-y-esas-cosas\2026-10-29-quiroz-promete-crecimiento-pero-cuando	995	Kass	Kast	fuzzy	correct	Nos quedamos en que el presidente Kass le pide a los inversionistas
+05	el-villegas-actualidad-y-esas-cosas\2026-10-29-quiroz-promete-crecimiento-pero-cuando	1088	Kass	Kast	fuzzy	correct	Entonces, no basta con la arenga, no basta con saber que el gobierno de presidente Kass
+06	hablemos-en-off\2026-10-29-vocero-de-gobierno-enfrenta-acusacion-constitucional-contra	417	Rabato	Rabat	fuzzy	correct	porque cuando le pregunté al ministro Rabato
+07	lo-que-importa-con-daniel-matamala\2026-10-28-tormenta-en-la-moneda-lo-que-importa-t03e33	596	Kass	Kast	fuzzy	correct	Íbamos a tener más, pero lamentablemente en su momento el presidente electo, José Antonio Kass,
+08	lo-que-importa-con-daniel-matamala\2026-10-28-tormenta-en-la-moneda-lo-que-importa-t03e33	2381	Kaste	Kast	fuzzy	correct	La defensa de los niños, de las niñas, palabras del presidente Kaste que jamás se indultaría.
+09	lo-que-importa-con-daniel-matamala\2026-10-28-tormenta-en-la-moneda-lo-que-importa-t03e33	2744	Kass	Kast	fuzzy	correct	Y creo que eso es lo que está pagando caro, finalmente, el gobierno del presidente Kass y la ciudadanía.
+10	lo-que-importa-con-daniel-matamala\2026-10-28-tormenta-en-la-moneda-lo-que-importa-t03e33	2749	Kass	Kast	fuzzy	correct	Y lo más doloroso para mí es que lo está pagando directamente el presidente José Antonio Kass, permeando el resto de su gabinete, porque no está golpeando solamente al ministro Rabat.
+11	lo-que-importa-con-daniel-matamala\2026-10-28-tormenta-en-la-moneda-lo-que-importa-t03e33	2813	Kass	Kast	fuzzy	correct	al gobierno del presidente José Antonio Kass
+12	lo-que-importa-con-daniel-matamala\2026-10-28-tormenta-en-la-moneda-lo-que-importa-t03e33	2937	Kass	Kast	fuzzy	correct	Menos en un tema tan delicado que compromete la credibilidad del presidente José Antonio Kass.
+13	lo-que-importa-con-daniel-matamala\2026-10-28-tormenta-en-la-moneda-lo-que-importa-t03e33	3009	Kass	Kast	fuzzy	correct	Y yo de verdad creo que al presidente José Antonio Kass,
+14	lo-que-importa-con-daniel-matamala\2026-10-28-tormenta-en-la-moneda-lo-que-importa-t03e33	3915	Belolio	Bellolio	heard-as	correct	Los lunes a las 20 horas un capítulo de Animales Políticos junto a Cristóbal Belolio.
+15	los-columnistas-de-mesa-central\2026-10-29-cifras-de-desempleo-y-crisis-por-rabat-marcan-el-debate-en-l	760	Jimena	Ximena	heard-as	wrong	Vamos a ver qué pasa con Jimena Jara, con Hernán Larrayn,
+16	los-columnistas-de-mesa-central\2026-10-29-cifras-de-desempleo-y-crisis-por-rabat-marcan-el-debate-en-l	1031	Jimena	Ximena	heard-as	wrong	Jimena Jata.
+17	los-columnistas-de-mesa-central\2026-10-29-cifras-de-desempleo-y-crisis-por-rabat-marcan-el-debate-en-l	1058	CAST	Kast	fuzzy	correct	Y ayer lo único que vimos, por lo menos reporteado, fue aplausos a Quiroz, aplausos a CAST,
+18	los-columnistas-de-mesa-central\2026-10-29-cifras-de-desempleo-y-crisis-por-rabat-marcan-el-debate-en-l	1304	Kass	Kast	fuzzy	correct	y me dice que terminada la sesión, el presidente Kass tomó teléfono
+19	los-columnistas-de-mesa-central\2026-10-29-cifras-de-desempleo-y-crisis-por-rabat-marcan-el-debate-en-l	1319	Kass	Kast	fuzzy	correct	¿Kass va a mantener a Rabat?
+20	los-columnistas-de-mesa-central\2026-10-29-cifras-de-desempleo-y-crisis-por-rabat-marcan-el-debate-en-l	1345	Kass	Kast	fuzzy	correct	asesores de Kass, porque yo creo que
+21	los-columnistas-de-mesa-central\2026-10-29-cifras-de-desempleo-y-crisis-por-rabat-marcan-el-debate-en-l	1357	Kass	Kast	fuzzy	correct	fíjate en una frase que dijo Kass
+22	los-columnistas-de-mesa-central\2026-10-29-cifras-de-desempleo-y-crisis-por-rabat-marcan-el-debate-en-l	1780	Jimena	Ximena	heard-as	wrong	Jimena Jata.
+23	nada-personal\2026-10-28-tensa-sesion-especial-en-la-camara-por-reduccion-de-condenas	749	Rabata	Rabat	fuzzy	correct	¿Qué norma de la Constitución es la que, a juicio de ustedes, infringió el ministro Rabata?
+24	nada-personal\2026-10-28-tensa-sesion-especial-en-la-camara-por-reduccion-de-condenas	3326	Kass	Kast	fuzzy	correct	Pero bueno, básicamente lo que hace Kass
+25	polos-opuestos\2026-10-29-polos-opuestos-barbara-briceno-francisco-vidal-y-diego-schal	1280	Aria	Arias	fuzzy	correct	mira, me escribe Pepe Aria, nuestro compañerísimo
+26	rat-pack-de-mesa-central\2026-10-29-el-balance-de-enade-y-la-presion-sobre-el-ministro-rabat-mar	758	Arrabat	Rabat	fuzzy	correct	el rumor muy fuerte de que el ministro Arrabat se iba a ir ayer.
+27	rat-pack-de-mesa-central\2026-10-29-el-balance-de-enade-y-la-presion-sobre-el-ministro-rabat-mar	1343	Kass	Kast	fuzzy	correct	¿por qué el presidente Kass no lo ha sacado?
+28	sin-llorar\2026-10-28-la-peor-crisis-del-gobierno-por-que-kast-no-saca-a-rabat	838	CAST	Kast	fuzzy	correct	¿Y se transformó como en un amigo de CAST?
+29	sin-llorar\2026-10-28-la-peor-crisis-del-gobierno-por-que-kast-no-saca-a-rabat	919	Kass	Kast	fuzzy	correct	no lo conocía, el presidente Kass,
+30	sin-llorar\2026-10-28-la-peor-crisis-del-gobierno-por-que-kast-no-saca-a-rabat	2802	Cass	Kast	fuzzy	correct	acuérdate que Cass no calentaba a nadie y ahora
