@@ -24,3 +24,7 @@ With the app's current glossary (26 lines: 21 names, 6 of them with heard-as for
 
 - 70 is under the 140 judged changes the plan aimed at for a ±5 point interval; at 70 the interval is about ±7 points if precision is near 90 %.
 - These numbers are in-sample: Mimica, Ximena, Kouyoumdjian, Huneeus, Lüders and all six heard-as forms were added after reading these same transcripts (`weekly-run.md`), so they cannot show how the glossary does on episodes it has not seen.
+
+## Held-out set
+
+Chosen by Felipe: the glossary is frozen as `preprint-glossary-frozen.txt` (a copy of the app's glossary on 30 October), and the 16 episodes of the week the weekly run never touched (published Wednesday 28 to Thursday 29 October, plus SIN LLORAR and Lo Que Importa) go through `week --run` with it. No name is added to the glossary from those transcripts before their changes are judged, so they test the glossary on episodes it has not seen.
