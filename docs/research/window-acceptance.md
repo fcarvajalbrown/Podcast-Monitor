@@ -14,3 +14,12 @@ Setup: release build of `podcast-monitor.exe` (113.3 MB) with no command, so it 
 - Felipe ran the second pass on purpose to try Codex and accepted Ep. 34 with the Codex summary.
 - Abrir PDF opened the file in the system viewer (a LibreOffice lock file appeared next to it).
 - Memory: not sampled during the transcription; the idle window afterwards used 110 MB.
+
+## Ep. 34 again, release build of 29 October
+
+- The weekly run had left a finished summary and PDF in the episode folder, so the first press of Generar informe skipped every stage (0.0 s). The folder was renamed to `...-segunda-t.bak-weekly` and the run started fresh.
+- 243 s from Generar informe to the PDF: download and decode 12 s, transcription 183 s (greedy with flash attention), names under 1 s, Codex 41 s, PDF under 1 s.
+- PDF 4 pages; `tools/pdf_check/quotes.py` finds 5 of 5 quotes at their printed minute; Kast 17, Boric 8.
+- The glossary in use no longer had Bellolio, so the summary printed "Belolio"; `Bellolio = Belolio`, Matamala and Contardo were added afterwards.
+- Abrir PDF opened the report in the system viewer (Felipe).
+- Started through Explorer as a double-click starts it: only the window, no console.
