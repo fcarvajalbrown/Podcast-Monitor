@@ -298,4 +298,26 @@ Kast
         assert_eq!(fixed[1].text, "Salas casas casas Casas");
         assert!(replacements.is_empty());
     }
+
+    #[test]
+    #[ignore]
+    fn lists_every_change_the_fix_makes_on_saved_transcripts() {
+        #[derive(serde::Deserialize)]
+        struct Transcript {
+            segments: Vec<Segment>,
+        }
+        let root = std::path::PathBuf::from(std::env::var("PM_RUNS").expect("PM_RUNS names a run folder"));
+        let glossary = Glossary::load(Path::new(&std::env::var("PM_GLOSSARY").expect("PM_GLOSSARY names a glossary"))).unwrap();
+        println!("folder\tstart_s\theard\tfixed\tkind\tsegment");
+        for folder in crate::assemble::episode_folders(&root).unwrap() {
+            let Some(transcript) = crate::run::read_json::<Transcript>(&folder.join("transcript.json")).unwrap() else { continue };
+            let (fixed, _) = correct(&transcript.segments, &glossary, DEFAULT_THRESHOLD);
+            for (before, after) in transcript.segments.iter().zip(&fixed) {
+                for (heard, name) in words(&before.text).zip(words(&after.text)).filter(|(heard, name)| heard != name) {
+                    let kind = if glossary.heard.contains_key(&heard.to_lowercase()) { "heard-as" } else { "fuzzy" };
+                    println!("{}\t{:.0}\t{heard}\t{name}\t{kind}\t{}", folder.strip_prefix(&root).unwrap().display(), before.start_s, before.text.trim().replace(['\t', '\n'], " "));
+                }
+            }
+        }
+    }
 }

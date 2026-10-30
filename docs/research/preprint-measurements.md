@@ -15,3 +15,12 @@ Plan set by Felipe (ROADMAP open items): every quote checked against its transcr
 - Every quote returned was found verbatim (after folding case, accents and punctuation) and within 8 s of the minute the model gave. The check never had to drop a quote on this corpus, so it shows that Codex quoted faithfully here, not that the check catches errors; the unit test with an invented quote is the only drop seen.
 - With 0 drops in 280 quotes, the rule of three puts the drop rate under about 1.1 % at 95 % confidence for this summarizer and prompt.
 - Every summary in the corpus is from Codex; Claude was not measured.
+
+## Name-fix changes
+
+`names::tests::lists_every_change_the_fix_makes_on_saved_transcripts`, run with `PM_RUNS=<runs folder> PM_GLOSSARY=<glossary> -- --ignored --nocapture`, reruns the fix at 0.85 on every saved `transcript.json` and prints each changed word with its segment.
+
+With the app's current glossary (26 lines: 21 names, 6 of them with heard-as forms, two keep lines) the fix makes 70 changes across the 28 episodes: 59 fuzzy, 11 heard-as. Kast takes 42 of them (Kass 26, Cass 9, CAST 4, Cast 3), then Rabat 9, Bellolio 4, Huneeus 5, Lüders 3, Kouyoumdjian 2, Ximena 2, and one each of Mimica, Ríos, Lula, Faúndez and Contardo.
+
+- 70 is under the 140 judged changes the plan aimed at for a ±5 point interval; at 70 the interval is about ±7 points if precision is near 90 %.
+- These numbers are in-sample: Mimica, Ximena, Kouyoumdjian, Huneeus, Lüders and all six heard-as forms were added after reading these same transcripts (`weekly-run.md`), so they cannot show how the glossary does on episodes it has not seen.
