@@ -75,7 +75,9 @@ Native Rust window in iced 0.14, Spanish UI strings, code and logs in English (`
 | 3 | Add by name search in Apple's directory, confirm step showing the publisher | Done |
 | 4 | On-demand episode run in the background: transcribe, summarize, report; progress per episode; resume after a closed app; limit-error stop explained in Spanish | Done |
 | 5 | Open PDF at the end of a run | Done |
-| 6 | Acceptance on Ep. 34 and Nada Personal driven from the window | Not Started |
+| 6 | Acceptance on Ep. 34 and Nada Personal driven from the window | In Progress |
+
+Item 6 so far: Ep. 34 run from the window with Codex into a fresh folder (the weekly run's folder kept as `.bak-weekly`): 243 s, transcription 183 s, Codex 41 s; 4-page PDF, 5 of 5 quotes found at their minute by `tools/pdf_check/quotes.py`, Kast 17, Boric 8. "Cristóbal Belolio" in the people table where the feed has Bellolio. Nada Personal and the Abrir PDF viewer launch still to do.
 
 ## Phase 5: macOS build
 
