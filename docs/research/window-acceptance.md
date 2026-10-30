@@ -23,3 +23,12 @@ Setup: release build of `podcast-monitor.exe` (113.3 MB) with no command, so it 
 - The glossary in use no longer had Bellolio, so the summary printed "Belolio"; `Bellolio = Belolio`, Matamala and Contardo were added afterwards.
 - Abrir PDF opened the report in the system viewer (Felipe).
 - Started through Explorer as a double-click starts it: only the window, no console.
+
+## Nada Personal of 26 October, release build of 29 October
+
+- Folder renamed to `...-machado-a-ve.bak-weekly` first, so the run started fresh.
+- 200 s from Generar informe to the PDF: download 8 s, decode 12 s, transcription 147 s, names under 1 s, Codex 33 s.
+- Name fix: Cass and Kass to Kast (2 each), Rios to Ríos (1).
+- PDF 3 pages; `tools/pdf_check/quotes.py` finds 4 of 4 quotes at their printed minute (the reply gave four of the five allowed).
+- Lula 24, Machado 10, Kast 6, against 23, 10 and 7 in the beam-5 CLI run of phase 2.
+- Seen in the PDF: ads rank as topics ("Publicidad y mensajes de auspiciadores" 05:47, "Publicidad de telefonía móvil"), as in the open flag; "Dan 1" in the people table.
