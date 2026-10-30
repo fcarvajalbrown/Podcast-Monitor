@@ -300,6 +300,14 @@ Kast
     }
 
     #[test]
+    fn sentence_opening_lunes_stays_while_luneus_becomes_huneeus() {
+        let glossary = Glossary::parse("Huneeus = Uneos\n");
+        assert!(ratio(&phonetic_key("Lunes"), &phonetic_key("Huneeus")) < DEFAULT_THRESHOLD);
+        let (fixed, _) = correct(&[segment("Lunes en la mañana, Cristóbal Luneus.")], &glossary, DEFAULT_THRESHOLD);
+        assert_eq!(fixed[0].text, "Lunes en la mañana, Cristóbal Huneeus.");
+    }
+
+    #[test]
     #[ignore]
     fn lists_every_change_the_fix_makes_on_saved_transcripts() {
         #[derive(serde::Deserialize)]

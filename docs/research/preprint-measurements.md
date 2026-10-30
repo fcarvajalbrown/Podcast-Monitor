@@ -28,3 +28,7 @@ With the app's current glossary (26 lines: 21 names, 6 of them with heard-as for
 ## Held-out set
 
 Chosen by Felipe: the glossary is frozen as `preprint-glossary-frozen.txt` (a copy of the app's glossary on 30 October), and the 16 episodes of the week the weekly run never touched (published Wednesday 28 to Thursday 29 October, plus SIN LLORAR and Lo Que Importa) go through `week --run` with it. No name is added to the glossary from those transcripts before their changes are judged, so they test the glossary on episodes it has not seen.
+
+### "Lunes" and Huneeus
+
+Felipe asked whether a heard "Lunes" (Monday) could be turned into Huneeus. The fix only looks at capitalized words, so the 49 "lunes" in the saved transcripts are never candidates; none of the 30 transcripts has a capitalized "Lunes", so the corpus never tested it. With the app's phonetic key, "Lunes" scores 0.800 against Huneeus, under the 0.85 threshold, while "Luneus" scores 0.909; a sentence-opening "Lunes" is left alone (`names::tests::sentence_opening_lunes_stays_while_luneus_becomes_huneeus`). The margin is 0.05, so a lower threshold would start taking it.
