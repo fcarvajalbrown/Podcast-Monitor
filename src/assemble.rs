@@ -169,4 +169,25 @@ mod tests {
         assert!(fs::read(&out).unwrap().starts_with(b"%PDF"));
         fs::remove_dir_all(&root).unwrap();
     }
+
+    #[test]
+    #[ignore]
+    fn lists_every_summary_quote_against_its_transcript() {
+        let root = PathBuf::from(std::env::var("PM_RUNS").expect("PM_RUNS names a run folder"));
+        let file = std::env::var("PM_SUMMARY").unwrap_or_else(|_| "summary.json".into());
+        println!("folder\tasked\tfound\tgap_s\ttext");
+        for folder in episode_folders(&root).unwrap() {
+            let Some(summary) = read_json::<Summary>(&folder.join(&file)).unwrap() else { continue };
+            let segments = read_json::<Segments>(&folder.join("transcript.fixed.json")).unwrap().expect("transcript.fixed.json").segments;
+            let index = Index::new(&segments);
+            for quote in summary.merged().quotes {
+                let asked = crate::chunk::seconds(&quote.minute).unwrap_or(f64::NAN);
+                let (found, gap) = match index.find(&quote.text, &quote.minute) {
+                    Some(hit) => (format!("{:.0}", hit.start_s), format!("{:.0}", (hit.start_s - asked).abs())),
+                    None => ("-".into(), "-".into()),
+                };
+                println!("{}\t{}\t{found}\t{gap}\t{}", folder.strip_prefix(&root).unwrap().display(), quote.minute, quote.text.replace(['\t', '\n'], " "));
+            }
+        }
+    }
 }
