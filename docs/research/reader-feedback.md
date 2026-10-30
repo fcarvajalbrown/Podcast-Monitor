@@ -105,3 +105,5 @@ Spelling and grammar:
 - "Contardo situó su pérdida de vínculos populares desde la Concertación": "su" reads as Contardo's, meant as the left's.
 - Not checked against a source: "Pepa Hoffman", "Sedini", "Felipe Huarte", "George Jackson" in the people table.
 - Quotes keep the transcript's words by design ("Y eso no es la tele y es un recorte, un reel").
+
+Glossary after this check: `Bellolio = Belolio`, `Matamala` and `Contardo` added. "Belolio" is the only spelling of Bellolio in the 29 saved transcripts (6 times). A dry run of `tools/stt_compare/phonetic_fix.py --threshold 0.85` with only Matamala and Contardo (no length-gap rule, so it over-counts against the app) changed one word in all 29: "Contarto" to Contardo in Ep. 34.
