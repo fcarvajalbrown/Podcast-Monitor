@@ -63,3 +63,18 @@ Judged by Felipe from the segment list (he did not listen to this set); every ro
 Scaled up by Felipe from 10 episodes to the whole week, run overnight when he says: `python -I tools/stt_speed/week_bench.py work/speed-week` transcribes all 44 episodes published since 26 October (33.0 h of audio) with beam 5 and with greedy plus flash attention, the order alternating per episode so heat does not favour one setting, then Ep. 34 five times in each setting for the run-to-run spread. Audio is hard-linked from the app-data runs (no download), no glossary, summary or PDF; every transcript is saved as it finishes and a rerun of the same command skips finished ones. Timings go to `work/speed-week/results.tsv`. Estimate about 4.5 h on the RTX 2050. Smoke test: El Shot of 29 October, 1,360 s of audio in 52 s (26.1x) with greedy and flash attention.
 
 Safety nets for the unattended night, asked by Felipe: each run is killed past audio/3 + 300 s and tried twice, then marked failed and skipped; `results.tsv` and `progress.json` are rewritten after every run (written to a part file and renamed); Windows is kept awake through `SetThreadExecutionState`; the script waits while the laptop is on battery, while free RAM is under 2 GB, or when the GPU reaches 85 C until it is back under 70 C, and records the GPU temperature before each run; it stops cleanly under 2 GB of free disk; empty transcripts and speeds outside 3x to 80x are flagged. The kill was tested with a 5 s limit: the run was stopped, marked failed, and no process was left.
+
+## Speed: overnight result
+
+Run of 29 to 30 October, 02:25 to 06:44, RTX 2050, large-v3-turbo, release build. 98 runs, 0 failed, 0 flagged (no empty transcript, no speed outside 3x to 80x). Summary by `python -I tools/stt_speed/summarize.py work/speed-week/results.tsv`.
+
+| Setting | Episodes | Audio | Compute | Pooled speed | Per episode (median, range) |
+|---|---|---|---|---|---|
+| beam 5 | 44 | 33.13 h | 2.26 h | 14.67x | 14.59x (13.45 to 16.24), sd 0.62 |
+| greedy + flash attention | 44 | 33.13 h | 1.21 h | 27.44x | 27.49x (25.28 to 30.86), sd 1.12 |
+
+Paired by episode, greedy with flash attention was faster in all 44: compute time ratio median 1.87 (1.79 to 1.94, sd 0.03). Segment count, greedy over beam 5: median 0.99 (0.84 to 1.20); this says nothing about accuracy, which this run did not measure.
+
+Repeats, Ep. 34 (4,685 s of audio) five times each: beam 5 14.71x to 14.76x (sd 0.02), greedy + flash attention 28.24x to 28.65x (sd 0.17). Run-to-run spread is well under 2 %, so the spread across the 44 episodes comes from the episodes, not noise. The first week run of Ep. 34 with beam 5 took 323.1 s against 317.3 to 318.6 s in the repeats; it started with the GPU at 48 C, the only run below 57 C.
+
+GPU temperature before each run: 57 C to 59 C for every run but that first one; the 85 C wait never triggered.
