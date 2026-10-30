@@ -85,6 +85,8 @@ Native Rust window in iced 0.14, Spanish UI strings, code and logs in English (`
 
 Back in scope: Felipe set the platforms to Windows and macOS on Apple Silicon, M1 and later (first deferred after the reader's feedback). Order set by Felipe: this phase starts after phase 4 item 6, so the Mac build ports a window already accepted on Windows. Items are approved by Felipe before they are written here. The new transcription default (greedy with flash attention, `docs/research/stt-speed-ep34-rtx2050.md`) is measured on Vulkan only, not yet on Metal.
 
+No Mac needed to start, set by Felipe: the build runs on GitHub Actions macOS runners. GitHub's hosted Apple Silicon runners have no Metal device (Apple Virtualization Framework limit, GitHub larger-runner docs and runner-images discussion 6138), so Actions can build and test the Metal exe but cannot measure Metal speed; that needs a real Mac.
+
 ## Phase 7: Weekly report across the show list
 
 Asked by the reader (`docs/research/reader-feedback.md`): this week's episodes of her show list in one PDF, short per show, keeping the summary and the topics by airtime in percent only. Priority set by Felipe: this phase comes next, ahead of phase 4 item 6 and phase 6. Items are approved by Felipe before they are written here.
