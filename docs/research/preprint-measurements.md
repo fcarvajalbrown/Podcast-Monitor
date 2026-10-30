@@ -40,3 +40,10 @@ Judged by Felipe: Kast (42) and Rabat (7) from their segments, the other 21 by e
 - 69 of 70 changes correct: precision 98.6 %, Wilson 95 % interval 92.3 % to 99.7 %.
 - The one wrong change is fuzzy: "El diputado republicano Felipe Ross" became Ríos. Ross is the deputy's real name. A `!Ross` keep line would stop it, but the glossary stays frozen until the held-out set is judged.
 - Ximena Jara and Davor Mimica checked as the show's co-hosts on its Patreon page and Rephonic listing. Mimisa to Mimica is counted correct because the rule is the right person's name, not the sound (Felipe's call).
+
+## Held-out set results
+
+`week --run` with the frozen glossary finished all 44 episodes of the week, 0 failed; 16 of them are new (the held-out set). Both audits rerun over the runs folder and filtered to those 16:
+
+- Quotes: 80 returned by Codex, 0 dropped, largest gap to the stated minute 5 s. Across all runs that is 369 quotes and 0 drops (rule of three: under about 0.8 % at 95 %).
+- Name fix: 30 changes (26 fuzzy, 4 heard-as): Kast 20, Ximena 3, Rabat 4, Ríos 2, Bellolio 1, Arias 1. Both "Ricos" to Ríos changes sit in the telenovela title "Los Ricos También Lloran". Felipe judges them by ear (`tools/judge_clips/clips.py`, `work/preprint/clips-heldout/all.mp3`).
