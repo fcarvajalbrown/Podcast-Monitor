@@ -32,3 +32,11 @@ Chosen by Felipe: the glossary is frozen as `preprint-glossary-frozen.txt` (a co
 ### "Lunes" and Huneeus
 
 Felipe asked whether a heard "Lunes" (Monday) could be turned into Huneeus. The fix only looks at capitalized words, so the 49 "lunes" in the saved transcripts are never candidates; none of the 30 transcripts has a capitalized "Lunes", so the corpus never tested it. With the app's phonetic key, "Lunes" scores 0.800 against Huneeus, under the 0.85 threshold, while "Luneus" scores 0.909; a sentence-opening "Lunes" is left alone (`names::tests::sentence_opening_lunes_stays_while_luneus_becomes_huneeus`). The margin is 0.05, so a lower threshold would start taking it.
+
+### In-sample verdicts
+
+Judged by Felipe: Kast (42) and Rabat (7) from their segments, the other 21 by ear from `tools/judge_clips/clips.py` (one file, a spoken number before each clip). Every row is in `preprint-judged-insample.tsv`.
+
+- 69 of 70 changes correct: precision 98.6 %, Wilson 95 % interval 92.3 % to 99.7 %.
+- The one wrong change is fuzzy: "El diputado republicano Felipe Ross" became Ríos. Ross is the deputy's real name. A `!Ross` keep line would stop it, but the glossary stays frozen until the held-out set is judged.
+- Ximena Jara and Davor Mimica checked as the show's co-hosts on its Patreon page and Rephonic listing. Mimisa to Mimica is counted correct because the rule is the right person's name, not the sound (Felipe's call).
