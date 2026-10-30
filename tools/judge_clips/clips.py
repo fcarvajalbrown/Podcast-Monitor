@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 PAD_S = 1.0
+GAP_S = 0.6
 
 
 def segment_end(transcript, start):
@@ -19,6 +20,7 @@ def main():
     parser.add_argument("runs", help="run folder the audit read")
     parser.add_argument("out", help="folder for the clips and index.tsv")
     parser.add_argument("--skip", nargs="*", default=[], help="corrected names whose changes need no clip")
+    parser.add_argument("--announce", help="folder of spoken numbers probe_00.wav, probe_01.wav ... (render_dialogue.py probe); joins each before its clip into all.mp3")
     args = parser.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")
     out = Path(args.out)
@@ -37,6 +39,18 @@ def main():
         print(f"{number:02}  {heard} -> {fixed}  {text[:100]}")
     with open(out / "index.tsv", "w", encoding="utf-8", newline="") as handle:
         csv.writer(handle, delimiter="\t").writerows([["number", "heard", "fixed", "kind", "folder", "start_s", "segment"], *index])
+    if args.announce:
+        join(out, Path(args.announce), len(index))
+
+
+def join(out, announce, count):
+    inputs = []
+    for number in range(1, count + 1):
+        inputs += ["-i", str(announce / f"probe_{number - 1:02}.wav"), "-i", str(out / f"{number:02}.mp3")]
+    parts = "".join(f"[{i}:a]aresample=24000,aformat=channel_layouts=mono,apad=pad_dur={GAP_S}[a{i}];" for i in range(2 * count))
+    chain = "".join(f"[a{i}]" for i in range(2 * count))
+    subprocess.run(["ffmpeg", "-v", "error", "-y", *inputs, "-filter_complex", f"{parts}{chain}concat=n={2 * count}:v=0:a=1[all]", "-map", "[all]", "-b:a", "96k", str(out / "all.mp3")], check=True)
+    print(f"{count} clips joined into {out / 'all.mp3'}")
 
 
 if __name__ == "__main__":
