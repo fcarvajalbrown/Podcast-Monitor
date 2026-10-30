@@ -78,3 +78,9 @@ Paired by episode, greedy with flash attention was faster in all 44: compute tim
 Repeats, Ep. 34 (4,685 s of audio) five times each: beam 5 14.71x to 14.76x (sd 0.02), greedy + flash attention 28.24x to 28.65x (sd 0.17). Run-to-run spread is well under 2 %, so the spread across the 44 episodes comes from the episodes, not noise. The first week run of Ep. 34 with beam 5 took 323.1 s against 317.3 to 318.6 s in the repeats; it started with the GPU at 48 C, the only run below 57 C.
 
 GPU temperature before each run: 57 C to 59 C for every run but that first one; the 85 C wait never triggered.
+
+## Accuracy of greedy + flash attention against beam 5
+
+No human reference transcript exists, so the two settings are compared with each other (Felipe's choice). `python -I tools/stt_compare/agreement.py work/speed-week/beam5 work/speed-week/flash-greedy work/preprint/agreement` aligns the word sequences of the 44 overnight episodes with difflib, case and punctuation folded and accents kept. Of 318,009 beam 5 words, 13,133 differ (4.13 %), in 6,913 places; 30 places run over 10 words, holding 823 of the differing words. Per episode in `work/preprint/agreement/per-episode.tsv`.
+
+Which one is right where they differ: 60 places drawn at random (seed 20261030), A and B shuffled per place, judged by Felipe from the words around them, not from audio (his choice). The key is in `key.tsv`.
