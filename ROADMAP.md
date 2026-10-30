@@ -5,6 +5,8 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 ## Open items
 
 - Episode report not yet reshaped to the reader's comments: topics in minutes (she asked percent only), 28 topics, 41 people with 10 at 0, 4 pages for Ep. 34 (`docs/research/reader-feedback.md`). Scope to be set with Felipe.
+- The weekly report the reader approved (`work/sent/2026-10-29-semanal-semana-2026-10-26-cli-conclusiones.pdf`) stays as it is: Felipe set it as the report that matters most, read every Monday early morning.
+- Glossary improvements get a session of their own to study them, set by Felipe.
 
 ## Phases
 
