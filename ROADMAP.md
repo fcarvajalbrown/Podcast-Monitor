@@ -8,6 +8,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 - The weekly report the reader approved (`work/sent/2026-10-29-semanal-semana-2026-10-26-cli-conclusiones.pdf`) stays as it is: Felipe set it as the report that matters most, read every Monday early morning.
 - Glossary improvements get a session of their own to study them, set by Felipe.
 - Preprint of the measured results (speech-to-text speed, heard-as name fix, quote checks) on TechRxiv and engrXiv, chosen by Felipe; arXiv is out for lack of a sponsor. A session for it is set for 30 October 10:00.
+- Preprint measurements set by Felipe before writing, on the 28 saved episodes of the week of 26 October: every quote checked against its transcript, every name-fix change judged by hand by Felipe, 10 episodes timed in both speed settings plus 3 repeats of one. No word error rate, so the paper claims names, quotes and speed only.
 
 ## Phases
 
