@@ -87,3 +87,21 @@ What it asks for: each show's summary should say what the panel concluded or arg
 ## On the weekly report with conclusions
 
 The report she read: `work/sent/2026-10-29-semanal-semana-2026-10-26-cli-conclusiones.pdf` (week-wide topic table, summaries stating each speaker's position and conclusion). Felipe relayed that she liked it. This is the first report she accepted, and it closes phase 7 item 9.
+
+## Ep. 34 window PDF of 29 October against her comments
+
+The file: `runs/animales-politicos/2026-10-26-ep-34-.../informe.pdf` from the phase 4 item 6 run, 4 pages. None of her comments asks for a single page; she asked for each show "bien corto" and for topics by airtime "sólo por porcentaje".
+
+- Topics by airtime are in minutes (28 rows), where she asked for percent only; the hand-made report had 9 grouped topics.
+- People mentioned: 41 rows with counts, 10 of them at 0 mentions.
+- Summary: one paragraph of about 330 words.
+- The on-demand episode report was never reshaped after her feedback; only the weekly report was (phase 7).
+
+Spelling and grammar:
+
+- "Belolio" three times in the summary and once in the people table; the feed's descriptions and her show list write Bellolio. Bellolio, Matamala and Contardo are not in the glossary.
+- Episode title "Ep. 34 -La crisis de los decretos - Animales Políticos - Segunda Temporada" is the feed's title as published, missing space and repeated show name included.
+- "comentaron la presión sobre Chile para sumarse a una coalición contra los carteles y las próximas elecciones legislativas estadounidenses" reads as a coalition against the elections.
+- "Contardo situó su pérdida de vínculos populares desde la Concertación": "su" reads as Contardo's, meant as the left's.
+- Not checked against a source: "Pepa Hoffman", "Sedini", "Felipe Huarte", "George Jackson" in the people table.
+- Quotes keep the transcript's words by design ("Y eso no es la tele y es un recorte, un reel").
