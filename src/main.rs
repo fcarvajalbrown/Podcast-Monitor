@@ -98,6 +98,8 @@ enum Command {
         run: bool,
         #[arg(long, help = "build the weekly PDF from this week's finished episodes, one block per show")]
         report: bool,
+        #[arg(long, help = "use the week starting on this Monday (YYYY-MM-DD), up to its Sunday 23:59, instead of the current week")]
+        monday: Option<chrono::NaiveDate>,
     },
     #[command(about = "Build one PDF report from every finished summary under a run folder")]
     Report {
@@ -213,9 +215,9 @@ fn dispatch() -> Result<()> {
             log::info!("{} show(s) in {}", saved.len(), path.display());
             Ok(())
         }
-        Command::Week { run, report } => {
+        Command::Week { run, report, monday } => {
             let saved = shows::load(&shows::list_path(&shows::data_dir()))?;
-            let week = week::collect(&saved, chrono::Local::now());
+            let week = week::collect(&saved, week::end_of(monday, chrono::Local::now())?);
             let mut seconds = 0;
             for request in &week.requests {
                 seconds += request.episode.duration_s;

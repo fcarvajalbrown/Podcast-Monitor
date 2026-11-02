@@ -15,6 +15,16 @@ pub fn monday(today: NaiveDate) -> NaiveDate {
     today - Days::new(u64::from(today.weekday().num_days_from_monday()))
 }
 
+pub fn end_of(monday: Option<NaiveDate>, now: DateTime<Local>) -> anyhow::Result<DateTime<Local>> {
+    let Some(start) = monday else { return Ok(now) };
+    if start.weekday() != chrono::Weekday::Mon {
+        anyhow::bail!("{start} is a {}, not a Monday", start.weekday());
+    }
+    let sunday_night = (start + Days::new(6)).and_hms_opt(23, 59, 59).and_then(|time| time.and_local_timezone(Local).earliest());
+    let end = sunday_night.ok_or_else(|| anyhow::anyhow!("no local time for the Sunday after {start}"))?;
+    Ok(end.min(now))
+}
+
 pub fn in_week<Tz: TimeZone>(episode: &Episode, monday: NaiveDate, now: &DateTime<Tz>) -> bool {
     episode.published.as_ref().is_some_and(|published| {
         let local = published.with_timezone(&now.timezone());
@@ -65,6 +75,16 @@ mod tests {
 
     fn episode(guid: &str, published: Option<DateTime<FixedOffset>>) -> Episode {
         Episode { guid: guid.into(), title: guid.into(), published, duration_s: 60, audio_url: String::new(), description: String::new() }
+    }
+
+    #[test]
+    fn end_of_a_past_week_is_its_sunday_night() {
+        let now = Local.with_ymd_and_hms(2026, 11, 2, 0, 43, 0).unwrap();
+        let end = end_of(NaiveDate::from_ymd_opt(2026, 10, 26), now).unwrap();
+        assert_eq!(end, Local.with_ymd_and_hms(2026, 11, 1, 23, 59, 59).unwrap());
+        assert_eq!(monday(end.date_naive()), NaiveDate::from_ymd_opt(2026, 10, 26).unwrap());
+        assert!(end_of(NaiveDate::from_ymd_opt(2026, 10, 27), now).is_err());
+        assert_eq!(end_of(None, now).unwrap(), now);
     }
 
     #[test]
