@@ -15,11 +15,16 @@ pub fn monday(today: NaiveDate) -> NaiveDate {
     today - Days::new(u64::from(today.weekday().num_days_from_monday()))
 }
 
-pub fn end_of(monday: Option<NaiveDate>, now: DateTime<Local>) -> anyhow::Result<DateTime<Local>> {
-    let Some(start) = monday else { return Ok(now) };
+pub fn checked_monday(start: NaiveDate) -> anyhow::Result<NaiveDate> {
     if start.weekday() != chrono::Weekday::Mon {
         anyhow::bail!("{start} is a {}, not a Monday", start.weekday());
     }
+    Ok(start)
+}
+
+pub fn end_of(monday: Option<NaiveDate>, now: DateTime<Local>) -> anyhow::Result<DateTime<Local>> {
+    let Some(start) = monday else { return Ok(now) };
+    checked_monday(start)?;
     let sunday_night = (start + Days::new(6)).and_hms_opt(23, 59, 59).and_then(|time| time.and_local_timezone(Local).earliest());
     let end = sunday_night.ok_or_else(|| anyhow::anyhow!("no local time for the Sunday after {start}"))?;
     Ok(end.min(now))
@@ -33,20 +38,27 @@ pub fn in_week<Tz: TimeZone>(episode: &Episode, monday: NaiveDate, now: &DateTim
 }
 
 pub fn pick<Tz: TimeZone>(show: &SavedShow, episodes: Vec<Episode>, now: &DateTime<Tz>) -> Vec<Request> {
-    let first = monday(now.date_naive());
+    pick_from(show, episodes, monday(now.date_naive()), now)
+}
+
+pub fn pick_from<Tz: TimeZone>(show: &SavedShow, episodes: Vec<Episode>, first: NaiveDate, now: &DateTime<Tz>) -> Vec<Request> {
     let mut picked: Vec<Episode> = episodes.into_iter().filter(|episode| in_week(episode, first, now)).collect();
     picked.sort_by(|a, b| b.published.cmp(&a.published));
     picked.into_iter().map(|episode| Request { show: show.clone(), episode }).collect()
 }
 
 pub fn collect(shows: &[SavedShow], now: DateTime<Local>) -> Week {
+    collect_from(shows, monday(now.date_naive()), now)
+}
+
+pub fn collect_from(shows: &[SavedShow], first: NaiveDate, now: DateTime<Local>) -> Week {
     let mut sorted = shows.to_vec();
     sorted.sort_by_key(|show| show.title.to_lowercase());
-    let mut week = Week { monday: monday(now.date_naive()), requests: Vec::new(), failed: Vec::new() };
+    let mut week = Week { monday: first, requests: Vec::new(), failed: Vec::new() };
     for show in sorted {
         match feed::fetch(&show.feed) {
             Ok(fetched) => {
-                let picked = pick(&show, fetched.episodes, &now);
+                let picked = pick_from(&show, fetched.episodes, first, &now);
                 log::debug!("{}: {} episode(s) since {}", show.title, picked.len(), week.monday);
                 week.requests.extend(picked);
             }
@@ -85,6 +97,14 @@ mod tests {
         assert_eq!(monday(end.date_naive()), NaiveDate::from_ymd_opt(2026, 10, 26).unwrap());
         assert!(end_of(NaiveDate::from_ymd_opt(2026, 10, 27), now).is_err());
         assert_eq!(end_of(None, now).unwrap(), now);
+    }
+
+    #[test]
+    fn a_past_monday_to_now_keeps_the_new_monday_morning() {
+        let show = SavedShow { title: "Show".into(), publisher: String::new(), feed: String::new() };
+        let episodes = vec![episode("sunday", Some(at(25, 22))), episode("monday", Some(at(26, 4))), episode("tuesday", Some(at(27, 4)))];
+        let picked: Vec<String> = pick_from(&show, episodes, NaiveDate::from_ymd_opt(2026, 10, 19).unwrap(), &at(27, 1)).into_iter().map(|request| request.episode.guid).collect();
+        assert_eq!(picked, ["monday", "sunday"]);
     }
 
     #[test]

@@ -100,6 +100,8 @@ enum Command {
         report: bool,
         #[arg(long, help = "use the week starting on this Monday (YYYY-MM-DD), up to its Sunday 23:59, instead of the current week")]
         monday: Option<chrono::NaiveDate>,
+        #[arg(long, requires = "monday", help = "with --monday, run up to now instead of stopping at that week's Sunday 23:59")]
+        to_now: bool,
     },
     #[command(about = "Build one PDF report from every finished summary under a run folder")]
     Report {
@@ -215,9 +217,13 @@ fn dispatch() -> Result<()> {
             log::info!("{} show(s) in {}", saved.len(), path.display());
             Ok(())
         }
-        Command::Week { run, report, monday } => {
+        Command::Week { run, report, monday, to_now } => {
             let saved = shows::load(&shows::list_path(&shows::data_dir()))?;
-            let week = week::collect(&saved, week::end_of(monday, chrono::Local::now())?);
+            let now = chrono::Local::now();
+            let week = match (monday, to_now) {
+                (Some(start), true) => week::collect_from(&saved, week::checked_monday(start)?, now),
+                _ => week::collect(&saved, week::end_of(monday, now)?),
+            };
             let mut seconds = 0;
             for request in &week.requests {
                 seconds += request.episode.duration_s;
