@@ -17,13 +17,21 @@ def region_load(rows, window_days):
     }
 
 
-def run_budget(args, load):
+def show_load(row, window_days):
+    weeks = window_days / 7
+    return {
+        "episodes_per_week": round(row["since_episodes"] / weeks, 2),
+        "audio_hours_per_week": round(row["since_hours"] / weeks, 2),
+    }
+
+
+def run_budget(args, load, regions=1):
     command = [
         sys.executable, str(BUDGET),
         "--corpus", args.corpus, "--prices", args.prices, "--scenarios", args.scenarios,
         "--episodes-per-week", str(load["episodes_per_week"]),
         "--audio-hours-per-week", str(load["audio_hours_per_week"]),
-        "--regions", "1", "--no-national",
+        "--regions", str(regions), "--no-national",
     ]
     return json.loads(subprocess.run(command, capture_output=True, text=True, encoding="utf-8", check=True).stdout)
 
@@ -50,6 +58,7 @@ def main():
     parser.add_argument("--scenarios", required=True)
     parser.add_argument("--scenario", default="high", help="budget scenario to report; high transcribes every episode")
     parser.add_argument("--out", required=True)
+    parser.add_argument("--per-show-out", help="also cost each live show alone, episodes only with no reports, into this JSON")
     args = parser.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")
 
@@ -62,7 +71,16 @@ def main():
             entry.update(provider_grid(run_budget(args, load), args.scenario))
         regions.append(entry)
         print(json.dumps(entry, ensure_ascii=False))
-    Path(args.out).write_text(json.dumps({"scenario": args.scenario, "regions": regions}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    Path(args.out).write_text(json.dumps({"scenario": args.scenario, "regions": regions}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+    if args.per_show_out:
+        shows = []
+        for region, rows in feeds["regions"].items():
+            for row in rows:
+                if not row.get("since_episodes") or row.get("national"):
+                    continue
+                load = show_load(row, feeds["window_days"])
+                shows.append({"region": region, "show": row["name"], **load, **provider_grid(run_budget(args, load, regions=0), args.scenario)})
+        Path(args.per_show_out).write_text(json.dumps({"scenario": args.scenario, "reports": "excluded", "shows": shows}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
 
 
 if __name__ == "__main__":

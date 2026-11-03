@@ -81,3 +81,52 @@ supplied by Felipe from a search-engine summary, since the official page renders
 browser; k3.1-pro is cheaper than k3 at these prices. Transcription is the same in every column:
 7.54 a month for Biobío and 20.20 for the seven regions together, on 33.0 audio hours a week. The
 nine regions with no live show cost nothing in this sample.
+
+## Cost per episode and per show
+
+Per average episode of about 43 minutes, transcribed with qwen3-asr-flash and analysed by the model
+in the column, reports excluded. Transcription is 0.10 of every figure.
+
+| Provider | Low | Medium | High |
+| --- | --- | --- | --- |
+| OpenAI | 0.11 | 0.22 | 1.34 |
+| Qwen | 0.10 | 0.15 | 0.34 |
+| Kimi | 0.47 (k3) | | 0.35 (k3.1-pro) |
+
+USD a month for each sample show alone, its own episodes and audio hours, reports excluded (the
+region's daily and weekly reports are in the table above). Results in
+`tools/region_discovery/show-costs.json`, from `cost_regions.py --per-show-out`.
+
+| Region | Show | Episodes a week | Audio hours a week |
+| --- | --- | --- | --- |
+| Biobío | Radio UdeC | 17.5 | 12.1 |
+| Biobío | Audiocuentos | 1.3 | 0.2 |
+| Valparaíso | Radio Ritoque | 10.3 | 7.9 |
+| Valparaíso | Programas de ChilenaFM de San Antonio | 0.5 | 0.1 |
+| Metropolitana | Santiago Adicto | 4.7 | 5.0 |
+| Metropolitana | Traficantes de Cultura | 2.6 | 1.5 |
+| Metropolitana | Caldo de cultivo | 0.1 | 0.1 |
+| Los Lagos | PL Podcast | 13.3 | 3.3 |
+| Los Lagos | Sin Escamas | 0.1 | 0.1 |
+| O'Higgins | Aquí lo conversamos | 1.9 | 2.3 |
+| O'Higgins | FUSAT Contigo | 0.8 | 0.2 |
+| Ñuble | Radio LA FONTANA | 0.6 | 0.1 |
+| Ñuble | Nación X | 0.1 | 0.0 |
+| Magallanes | Voces de Alianza | 0.2 | 0.1 |
+
+| Show | OpenAI low | OpenAI medium | OpenAI high | Qwen low | Qwen medium | Qwen high | Kimi low | Kimi high |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Radio UdeC | 8.33 | 16.76 | 101.09 | 7.69 | 11.34 | 25.80 | 35.50 | 26.13 |
+| Audiocuentos | 0.20 | 0.82 | 6.99 | 0.16 | 0.42 | 1.48 | 2.19 | 1.50 |
+| Radio Ritoque | 5.36 | 10.31 | 59.80 | 4.99 | 7.13 | 15.61 | 21.30 | 15.81 |
+| Programas de ChilenaFM de San Antonio | 0.12 | 0.34 | 2.61 | 0.10 | 0.20 | 0.59 | 0.85 | 0.59 |
+| Santiago Adicto | 3.28 | 5.53 | 28.03 | 3.11 | 4.08 | 7.94 | 10.53 | 8.03 |
+| Traficantes de Cultura | 1.05 | 2.29 | 14.67 | 0.95 | 1.49 | 3.61 | 5.04 | 3.66 |
+| Caldo de cultivo | 0.06 | 0.12 | 0.70 | 0.06 | 0.08 | 0.18 | 0.25 | 0.18 |
+| PL Podcast | 2.72 | 9.13 | 73.22 | 2.24 | 5.01 | 16.00 | 23.37 | 16.25 |
+| Sin Escamas | 0.06 | 0.12 | 0.70 | 0.06 | 0.08 | 0.18 | 0.25 | 0.18 |
+| Aquí lo conversamos | 1.48 | 2.38 | 11.39 | 1.41 | 1.80 | 3.35 | 4.38 | 3.38 |
+| FUSAT Contigo | 0.15 | 0.55 | 4.50 | 0.12 | 0.30 | 0.97 | 1.43 | 0.99 |
+| Radio LA FONTANA | 0.12 | 0.40 | 3.19 | 0.10 | 0.22 | 0.70 | 1.02 | 0.71 |
+| Nación X | 0.02 | 0.08 | 0.66 | 0.02 | 0.05 | 0.14 | 0.21 | 0.15 |
+| Voces de Alianza | 0.09 | 0.20 | 1.30 | 0.08 | 0.13 | 0.32 | 0.44 | 0.32 |
