@@ -1,0 +1,67 @@
+{
+  "chars_per_token": {
+    "low": 3.0,
+    "central": 3.5,
+    "high": 4.0,
+    "status": "unmeasured",
+    "note": "range carried from Propuesta-Tokens spec/workload.json; no provider tokenizer was run, and the three providers tokenize Spanish differently"
+  },
+  "sensitivity_multipliers": [0.5, 0.75, 1.0, 1.25, 1.5],
+  "metadata_output_chars": {
+    "value": 1727,
+    "status": "assumption",
+    "note": "the smallest analysis reply measured across the 59 episodes; a title plus description of about 862 chars cannot support the 4,417-char mean of a transcript analysis, so the measured floor is used as the metadata-path output"
+  },
+  "instruction_overhead_chars": {
+    "value": 1129,
+    "status": "measured",
+    "note": "the summarizer's fixed instructions plus the 221-char glossary, as sent today"
+  },
+  "report_output_chars": {
+    "per_unit_synthesis": 5378,
+    "cross_cutting": 9441,
+    "status": "measured",
+    "note": "per_unit_synthesis is the mean of the 16 per-show weekly summaries of the week of 26 October; cross_cutting is the week-wide themes reply"
+  },
+  "reports": {
+    "daily_per_region": true,
+    "daily_national": true,
+    "weekly_per_region": true,
+    "weekly_national": true,
+    "weekly_cross_regional": true,
+    "regions": 16,
+    "days_per_week": 7
+  },
+  "scenarios": [
+    {
+      "id": "low",
+      "label": "LOW: metadata and descriptions only, no audio leaves the feed",
+      "transcript_share": 0.0,
+      "asr": false,
+      "providers_per_episode": 1,
+      "verification_share": 0.0,
+      "cache_hit_share": 0.0,
+      "retry_share": 0.02
+    },
+    {
+      "id": "medium",
+      "label": "MEDIUM: transcripts for half the episodes, single provider, sampled verification",
+      "transcript_share": 0.5,
+      "asr": true,
+      "providers_per_episode": 1,
+      "verification_share": 0.1,
+      "cache_hit_share": 0.0,
+      "retry_share": 0.03
+    },
+    {
+      "id": "high",
+      "label": "HIGH: transcripts for every episode, all three providers on every episode, full verification",
+      "transcript_share": 1.0,
+      "asr": true,
+      "providers_per_episode": 3,
+      "verification_share": 1.0,
+      "cache_hit_share": 0.0,
+      "retry_share": 0.05
+    }
+  ]
+}
