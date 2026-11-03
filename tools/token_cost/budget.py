@@ -202,6 +202,8 @@ def main():
     parser.add_argument("--sensitivity-model", default="gpt-6-luna")
     parser.add_argument("--sensitivity-scenario", default="medium")
     parser.add_argument("--regions", type=int, default=None)
+    parser.add_argument("--no-national", action="store_true", help="cost only the regions' own reports, without the national daily and weekly")
+    parser.add_argument("--audio-hours-per-week", type=float, default=None, help="measured audio hours a week, replacing the corpus mean episode length for transcription")
     parser.add_argument("--out", default=None)
     args = parser.parse_args()
 
@@ -214,12 +216,19 @@ def main():
         scenarios["reports"]["weekly_per_region"] = args.regions > 0
         scenarios["reports"]["weekly_cross_regional"] = args.regions > 1
 
+    if args.no_national:
+        scenarios["reports"]["daily_national"] = False
+        scenarios["reports"]["weekly_national"] = False
+
     inventory = None
     if args.inventory:
         inventory = inventory_from(args.inventory, args.min_episodes_per_week)
     episodes = args.episodes_per_week if args.episodes_per_week else (inventory or {}).get("episodes_per_week")
     if not episodes:
         raise SystemExit("give --episodes-per-week or --inventory")
+
+    if args.audio_hours_per_week is not None:
+        corpus["per_episode"]["duration_s"]["mean"] = args.audio_hours_per_week * 3600 / episodes
 
     result = {
         "episodes_per_week": episodes,
