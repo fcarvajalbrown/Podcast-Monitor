@@ -1,0 +1,89 @@
+{
+  "region": "Biobío",
+  "searched_on": "2026-11-03",
+  "note": "Código Chile was also recorded under Metropolitana; it broadcasts on 88.5 for Gran Concepción",
+  "queries": [
+    "podcast Concepción Biobío",
+    "podcast noticias región del Biobío",
+    "podcast entrevistas Concepción Talcahuano Los Ángeles",
+    "podcast cultura Concepción Chile",
+    "Radio UdeC podcast programas",
+    "podcast Spotify Concepción Biobío política actualidad",
+    "podcast Universidad del Bío-Bío Universidad Católica de la Santísima Concepción",
+    "podcast Biobío forestal industria economía regional Sabes.cl Diario Concepción"
+  ],
+  "candidates": [
+    {
+      "name": "Radio UdeC",
+      "publisher": "Radio Universidad de Concepción",
+      "genre_seen": "society and culture",
+      "evidence": "https://rephonic.com/podcasts/radio-udec-podcast"
+    },
+    {
+      "name": "Señales del Futuro",
+      "publisher": "Radio UdeC",
+      "genre_seen": "research interviews",
+      "evidence": "https://noticias.udec.cl/tag/medios-udec"
+    },
+    {
+      "name": "Podcast UdeC",
+      "publisher": "Periodismo UdeC",
+      "genre_seen": "science",
+      "evidence": "https://podnews.net/podcast/it6y0"
+    },
+    {
+      "name": "Acordes Urbanos",
+      "publisher": "Universidad de Concepción",
+      "genre_seen": "music and dialogue",
+      "evidence": "https://noticias.udec.cl/etiqueta/facultad-de-humanidades-y-arte/page/5/"
+    },
+    {
+      "name": "Plaza Perú: Derechos Humanos desde el Biobío",
+      "publisher": "Corporación Colectiva-Justicia en Derechos Humanos and Universidad de Concepción",
+      "genre_seen": "current affairs and culture",
+      "evidence": "https://rephonic.com/podcasts/plaza-peru-derechos-humanos-desde-el-biobio"
+    },
+    {
+      "name": "El Mundo en la Casa",
+      "publisher": "",
+      "genre_seen": "music",
+      "evidence": "https://podnews.net/podcast/isp9h"
+    },
+    {
+      "name": "UCSC Radio",
+      "publisher": "Universidad Católica de la Santísima Concepción",
+      "genre_seen": "university and health",
+      "evidence": "https://www.podengine.ai/podcasts/ucsc-radio"
+    },
+    {
+      "name": "Ciencia Inesperada",
+      "publisher": "Universidad Católica de la Santísima Concepción",
+      "genre_seen": "science",
+      "evidence": "https://g5noticias.cl/2025/07/03/lanzan-ciencia-inesperada-el-podcast-que-revela-la-ciencia-que-no-sabias-que-se-hacia-en-la-ucsc/"
+    },
+    {
+      "name": "Código Chile",
+      "publisher": "",
+      "genre_seen": "current affairs interviews, Gran Concepción",
+      "evidence": "https://www.audible.com.au/podcast/Codigo-Chile/B0B1VTFT67"
+    },
+    {
+      "name": "Ruperto Concha",
+      "publisher": "Bío Bío",
+      "genre_seen": "commentary",
+      "evidence": "https://www.ivoox.com/en/podcast-ruperto-concha_sq_f120127_1.html"
+    },
+    {
+      "name": "Audiocuentos",
+      "publisher": "",
+      "genre_seen": "comedy and current affairs, Cañete",
+      "evidence": "https://rephonic.com/podcasts/audiocuentos"
+    },
+    {
+      "name": "Cine Club UdeC",
+      "publisher": "",
+      "genre_seen": "film",
+      "evidence": "https://podcastai.com/shows/5puqg2-cine-club-udec"
+    }
+  ]
+}
