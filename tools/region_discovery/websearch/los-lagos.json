@@ -1,0 +1,88 @@
+{
+  "region": "Los Lagos",
+  "searched_on": "2026-11-03",
+  "queries": [
+    "podcast Puerto Montt Los Lagos",
+    "podcast noticias región de Los Lagos Osorno",
+    "podcast entrevistas Puerto Montt Osorno Castro Chiloé",
+    "podcast cultura Chiloé",
+    "radio Puerto Montt Osorno podcast programa Interradio Frutillar",
+    "podcast Spotify Los Lagos Chile Puerto Varas",
+    "podcast Universidad de Los Lagos Universidad San Sebastián Puerto Montt",
+    "podcast salmonicultura pesca acuicultura sur de Chile"
+  ],
+  "candidates": [
+    {
+      "name": "Podcast de Patagonia Radio 94.1 FM",
+      "publisher": "Patagonia Radio, Puerto Montt",
+      "genre_seen": "regional news and business",
+      "evidence": "https://rephonic.com/podcasts/patagoniaradio"
+    },
+    {
+      "name": "PL Podcast",
+      "publisher": "Paislobo Prensa",
+      "genre_seen": "daily regional news",
+      "evidence": "https://rephonic.com/podcasts/paislobo-podcast"
+    },
+    {
+      "name": "Resumen Informativo",
+      "publisher": "Christian Lobo",
+      "genre_seen": "daily regional news",
+      "evidence": "https://audioboom.com/posts/8331621-resumen-informativo-podcast-7-de-julio-de-2023"
+    },
+    {
+      "name": "Ruta de la Innovación",
+      "publisher": "Centro de Innovación Regional Los Lagos",
+      "genre_seen": "innovation interviews",
+      "evidence": "https://podcastai.com/shows/zbhgr3-ruta-de-la-innovacion"
+    },
+    {
+      "name": "Hablemos de Innovación",
+      "publisher": "Centro de Innovación Regional Los Lagos",
+      "genre_seen": "business",
+      "evidence": "https://podnews.net/podcast/i11hou"
+    },
+    {
+      "name": "Territorio Teatral",
+      "publisher": "Red Territorio Teatral",
+      "genre_seen": "theatre",
+      "evidence": "https://podcastai.com/shows/dy4vx7-red-territorio-teatral"
+    },
+    {
+      "name": "Me lo dijo un chucao",
+      "publisher": "",
+      "genre_seen": "southern stories",
+      "evidence": "https://g5noticias.cl/2025/11/02/me-lo-dijo-un-chucao-el-nuevo-podcast-que-rescata-las-historias-del-sur-de-chile/"
+    },
+    {
+      "name": "Revista Territorio Sur",
+      "publisher": "MONGEPE",
+      "genre_seen": "Chiloé indigenous communities",
+      "evidence": "https://www.ivoox.com/en/podcast-revista-territorio-sur_sq_f1311526_1.html"
+    },
+    {
+      "name": "Interradio Chile",
+      "publisher": "Interradio Chile, Frutillar",
+      "genre_seen": "local and regional current affairs",
+      "evidence": "https://www.ivoox.com/en/podcast-podcast-interradio-chile_sq_f114166_1.html"
+    },
+    {
+      "name": "Camino a Los Lagos",
+      "publisher": "LosLagos.Travel",
+      "genre_seen": "travel",
+      "evidence": "https://rephonic.com/podcasts/camino-a-los-lagos"
+    },
+    {
+      "name": "Sin Escamas",
+      "publisher": "Salmonexpert",
+      "genre_seen": "salmon industry",
+      "evidence": "https://rephonic.com/podcasts/sin-escamas-experiencias-con-salmon"
+    },
+    {
+      "name": "Paraíso Enjaulado",
+      "publisher": "",
+      "genre_seen": "environment reporting",
+      "evidence": "https://www.audible.co.uk/podcast/Paraiso-Enjaulado/episodes/B0FHBJTNWB"
+    }
+  ]
+}
