@@ -1,0 +1,88 @@
+{
+  "region": "Magallanes y de la Antártica Chilena",
+  "searched_on": "2026-11-03",
+  "queries": [
+    "podcast Punta Arenas Magallanes",
+    "podcast noticias región de Magallanes",
+    "podcast entrevistas Punta Arenas Puerto Natales Porvenir",
+    "podcast cultura historia Magallanes Tierra del Fuego",
+    "radio Punta Arenas podcast programa Radio Polar La Prensa Austral",
+    "podcast Spotify Magallanes Chile",
+    "podcast Universidad de Magallanes UMAG",
+    "podcast Antártica hidrógeno verde energía Magallanes"
+  ],
+  "candidates": [
+    {
+      "name": "Patagonia Podcaster",
+      "publisher": "",
+      "genre_seen": "daily regional news",
+      "evidence": "https://www.millionpodcasts.com/magallanes-podcasts/"
+    },
+    {
+      "name": "Cappuccino a media mañana",
+      "publisher": "Radio Camelot FM 88.1 Puerto Natales",
+      "genre_seen": "morning show",
+      "evidence": "https://podcast.feedspot.com/magallanes_podcasts/"
+    },
+    {
+      "name": "Entrevistas 90s PUQ Punta Arenas",
+      "publisher": "",
+      "genre_seen": "local interviews",
+      "evidence": "https://www.millionpodcasts.com/magallanes-podcasts/"
+    },
+    {
+      "name": "Escuchemos un Tema",
+      "publisher": "",
+      "genre_seen": "regional music interviews",
+      "evidence": "https://podcast.feedspot.com/magallanes_podcasts/"
+    },
+    {
+      "name": "Primera Línea - Nuevo Mundo",
+      "publisher": "Radio Nuevo Mundo",
+      "genre_seen": "current affairs, Punta Arenas",
+      "evidence": "https://podcast.feedspot.com/magallanes_podcasts/"
+    },
+    {
+      "name": "Bajo Cero Multimedia",
+      "publisher": "Bajo Cero Multimedia",
+      "genre_seen": "regional media",
+      "evidence": "https://podcast.feedspot.com/magallanes_podcasts/"
+    },
+    {
+      "name": "Destacados en Magallanes",
+      "publisher": "",
+      "genre_seen": "regional history interviews",
+      "evidence": "https://www.millionpodcasts.com/magallanes-podcasts/"
+    },
+    {
+      "name": "Voces de Alianza",
+      "publisher": "",
+      "genre_seen": "unknown",
+      "evidence": "https://podcast.feedspot.com/magallanes_podcasts/"
+    },
+    {
+      "name": "Fueguino Radio",
+      "publisher": "Fueguino Radio, Porvenir",
+      "genre_seen": "local news",
+      "evidence": "https://www.ivoox.com/en/podcast-podcast-fueguino-radio_sq_f166957_1.html"
+    },
+    {
+      "name": "El Club de los Coléricos",
+      "publisher": "Radio Soberanía",
+      "genre_seen": "music",
+      "evidence": "https://www.ivoox.com/en/podcast-club-colericos_sq_f1302100_1.html"
+    },
+    {
+      "name": "Asociativamente Hablando",
+      "publisher": "",
+      "genre_seen": "tourism interviews",
+      "evidence": "https://rephonic.com/podcasts/asociativamente-hablando"
+    },
+    {
+      "name": "Journey to Patagonia",
+      "publisher": "Reserva Las Torres",
+      "genre_seen": "travel",
+      "evidence": "https://podcasts.apple.com/cz/podcast/journey-to-patagonia/id1667973675"
+    }
+  ]
+}
