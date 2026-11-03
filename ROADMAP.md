@@ -128,7 +128,7 @@ Asked by Felipe: a reader without Claude or ChatGPT subscriptions can use ChatGP
 
 ## Phase 8: App icon and window design
 
-Asked by Felipe as future work: the app icon and a window design modelled on Cuña-Cutter (`C:\Projects\Cuña-Cutter`: `assets/brand/`, PRD section 7, ADR 0008). Items are ordered when the phase starts.
+Asked by Felipe as future work, then pressed after seeing the model download in the window: "we really need a new UI and fucking favicon". The app icon and a window design modelled on Cuña-Cutter (`C:\Projects\Cuña-Cutter`: `assets/brand/`, PRD section 7, ADR 0008). Items are ordered when the phase starts.
 
 | # | Item | Status |
 |---|---|---|
@@ -149,7 +149,7 @@ Asked by Felipe: a public download page at https://podcastmonitor.copiapolabs.cl
 
 | # | Item | Status |
 |---|---|---|
-| 1 | Model download on first run: the window fetches `ggml-large-v3-turbo.bin` into the app-data folder, with progress | In Progress |
+| 1 | Model download on first run: the window fetches `ggml-large-v3-turbo.bin` into the app-data folder, with progress | Done |
 | 2 | Version shown in the window | Not Started |
 | 3 | First release: CHANGELOG entry, git tag, Windows installer built with Inno Setup | Not Started |
 | 4 | Page in Spanish with Cuña-Cutter's layout and colours, guide, out of indexes | Not Started |
