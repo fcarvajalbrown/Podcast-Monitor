@@ -1,0 +1,246 @@
+{
+  "term_patterns": [
+    "{place}",
+    "radio {place}",
+    "noticias {place}",
+    "politica {place}"
+  ],
+  "national_terms": [
+    "politica chile",
+    "actualidad chile",
+    "analisis politico chile",
+    "entrevista politica chile",
+    "municipal chile",
+    "regiones de chile",
+    "noticias chile",
+    "radio chile"
+  ],
+  "regions": [
+    {
+      "id": "CL-AP",
+      "name": "Arica y Parinacota",
+      "term_place": "Arica",
+      "match": [
+        "Arica",
+        "Parinacota",
+        "Putre"
+      ]
+    },
+    {
+      "id": "CL-TA",
+      "name": "Tarapaca",
+      "term_place": "Iquique",
+      "match": [
+        "Tarapaca",
+        "Iquique",
+        "Alto Hospicio",
+        "Pozo Almonte"
+      ]
+    },
+    {
+      "id": "CL-AN",
+      "name": "Antofagasta",
+      "term_place": "Antofagasta",
+      "match": [
+        "Antofagasta",
+        "Calama",
+        "Tocopilla",
+        "Mejillones"
+      ]
+    },
+    {
+      "id": "CL-AT",
+      "name": "Atacama",
+      "term_place": "Copiapo",
+      "match": [
+        "Atacama",
+        "Copiapo",
+        "Vallenar",
+        "Chanaral",
+        "Huasco"
+      ]
+    },
+    {
+      "id": "CL-CO",
+      "name": "Coquimbo",
+      "term_place": "La Serena",
+      "match": [
+        "Coquimbo",
+        "La Serena",
+        "Ovalle",
+        "Illapel",
+        "Vicuna"
+      ]
+    },
+    {
+      "id": "CL-VS",
+      "name": "Valparaiso",
+      "term_place": "Valparaiso",
+      "match": [
+        "Valparaiso",
+        "Vina del Mar",
+        "Quillota",
+        "San Antonio",
+        "Quilpue",
+        "Villa Alemana",
+        "San Felipe",
+        "Los Andes"
+      ]
+    },
+    {
+      "id": "CL-RM",
+      "name": "Metropolitana de Santiago",
+      "term_place": "Santiago",
+      "match": [
+        "Metropolitana",
+        "Santiago",
+        "Maipu",
+        "Puente Alto",
+        "Nunoa",
+        "Providencia",
+        "La Florida",
+        "Melipilla",
+        "Talagante"
+      ]
+    },
+    {
+      "id": "CL-LI",
+      "name": "Libertador General Bernardo O'Higgins",
+      "term_place": "Rancagua",
+      "match": [
+        "O'Higgins",
+        "OHiggins",
+        "Rancagua",
+        "San Fernando",
+        "Santa Cruz",
+        "Pichilemu",
+        "Rengo"
+      ]
+    },
+    {
+      "id": "CL-ML",
+      "name": "Maule",
+      "term_place": "Talca",
+      "match": [
+        "Maule",
+        "Talca",
+        "Curico",
+        "Linares",
+        "Cauquenes",
+        "Constitucion"
+      ]
+    },
+    {
+      "id": "CL-NB",
+      "name": "Nuble",
+      "term_place": "Chillan",
+      "match": [
+        "Nuble",
+        "Chillan",
+        "San Carlos",
+        "Bulnes",
+        "Quirihue"
+      ]
+    },
+    {
+      "id": "CL-BI",
+      "name": "Biobio",
+      "term_place": "Concepcion",
+      "match": [
+        "Biobio",
+        "Bio Bio",
+        "Concepcion",
+        "Talcahuano",
+        "Los Angeles",
+        "Coronel",
+        "Chiguayante",
+        "Lota",
+        "Arauco"
+      ]
+    },
+    {
+      "id": "CL-AR",
+      "name": "La Araucania",
+      "term_place": "Temuco",
+      "match": [
+        "Araucania",
+        "Temuco",
+        "Villarrica",
+        "Angol",
+        "Padre Las Casas",
+        "Pucon",
+        "Nueva Imperial"
+      ]
+    },
+    {
+      "id": "CL-LR",
+      "name": "Los Rios",
+      "term_place": "Valdivia",
+      "match": [
+        "Los Rios",
+        "Valdivia",
+        "La Union",
+        "Panguipulli",
+        "Rio Bueno"
+      ]
+    },
+    {
+      "id": "CL-LL",
+      "name": "Los Lagos",
+      "term_place": "Puerto Montt",
+      "match": [
+        "Los Lagos",
+        "Puerto Montt",
+        "Osorno",
+        "Castro",
+        "Ancud",
+        "Chiloe",
+        "Puerto Varas"
+      ]
+    },
+    {
+      "id": "CL-AI",
+      "name": "Aysen del General Carlos Ibanez del Campo",
+      "term_place": "Coyhaique",
+      "match": [
+        "Aysen",
+        "Aisen",
+        "Coyhaique",
+        "Puerto Aysen",
+        "Chile Chico",
+        "Cochrane"
+      ]
+    },
+    {
+      "id": "CL-MA",
+      "name": "Magallanes y la Antartica Chilena",
+      "term_place": "Punta Arenas",
+      "match": [
+        "Magallanes",
+        "Punta Arenas",
+        "Puerto Natales",
+        "Porvenir",
+        "Antartica"
+      ]
+    }
+  ],
+  "genre_sets": {
+    "strict": [
+      "Noticias",
+      "Noticias diarias",
+      "Comentarios de noticias",
+      "Politica",
+      "Gobierno"
+    ],
+    "broad": [
+      "Noticias",
+      "Noticias diarias",
+      "Comentarios de noticias",
+      "Politica",
+      "Gobierno",
+      "Sociedad y cultura",
+      "Economia y empresa",
+      "Historia"
+    ]
+  }
+}
