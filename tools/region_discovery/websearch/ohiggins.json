@@ -1,0 +1,70 @@
+{
+  "region": "Libertador General Bernardo O'Higgins",
+  "searched_on": "2026-11-03",
+  "queries": [
+    "podcast Rancagua O'Higgins",
+    "podcast noticias región de O'Higgins",
+    "podcast entrevistas Rancagua San Fernando Santa Cruz",
+    "podcast cultura Rancagua Colchagua",
+    "radio Rancagua podcast programa",
+    "podcast Spotify región de O'Higgins Chile",
+    "podcast Universidad de O'Higgins",
+    "podcast vino agricultura Valle de Colchagua Cachapoal"
+  ],
+  "candidates": [
+    {
+      "name": "TVN O'Higgins",
+      "publisher": "TVN",
+      "genre_seen": "daily regional news",
+      "evidence": "https://rephonic.com/podcasts/tvn-ohiggins"
+    },
+    {
+      "name": "Aquí lo conversamos",
+      "publisher": "Diario El Marino",
+      "genre_seen": "regional politics and culture interviews",
+      "evidence": "https://rephonic.com/podcasts/aqui-lo-conversamos"
+    },
+    {
+      "name": "Ya viene Yakarta",
+      "publisher": "Universidad de O'Higgins",
+      "genre_seen": "oral history",
+      "evidence": "https://radionuevomundo.cl/2024/04/presentan-podcast-ya-viene-yakarta-relatos-en-primera-persona-sobre-vidas-que-cambiaron-de-golpe/?print=pdf"
+    },
+    {
+      "name": "Terapia Celeste",
+      "publisher": "",
+      "genre_seen": "football club",
+      "evidence": "https://rephonic.com/podcasts/terapia-celeste-quinta-temporada"
+    },
+    {
+      "name": "La verdadera historia de la batalla de Rancagua",
+      "publisher": "El Rancagüino",
+      "genre_seen": "history",
+      "evidence": "https://www.elrancaguino.cl/2026/10/01/podcast-la-verdadera-historia-de-la-batalla-de-rancagua/"
+    },
+    {
+      "name": "FUSAT Contigo",
+      "publisher": "Radio Rancagua",
+      "genre_seen": "health interviews",
+      "evidence": "https://rephonic.com/podcasts/programacion-radio-fusat-2021"
+    },
+    {
+      "name": "Voces Urbanas",
+      "publisher": "Radio Aukan San Fernando",
+      "genre_seen": "local news",
+      "evidence": "https://www.ivoox.com/en/podcast-voces-urbanas_sq_f1315447_1.html"
+    },
+    {
+      "name": "Frente Cívico San Fernando",
+      "publisher": "",
+      "genre_seen": "local civic interviews",
+      "evidence": "https://www.ivoox.com/en/podcast-podcast-frente-civico-san-fernando_sq_f146447_1.html"
+    },
+    {
+      "name": "Ciencia Abierta: Inteligencia Artificial",
+      "publisher": "PAR Explora O'Higgins, Universidad de O'Higgins",
+      "genre_seen": "science",
+      "evidence": "https://rephonic.com/podcasts/ciencia-abierta-inteligencia-artificial"
+    }
+  ]
+}
