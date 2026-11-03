@@ -1,0 +1,21 @@
+{
+  "region": "Coquimbo",
+  "searched_on": "2026-11-03",
+  "queries": [
+    "podcast La Serena Coquimbo",
+    "podcast noticias región de Coquimbo",
+    "podcast entrevistas La Serena Ovalle",
+    "podcast cultura La Serena",
+    "radio La Serena podcast programa",
+    "podcast Spotify región de Coquimbo Chile",
+    "podcast Universidad de La Serena Universidad Católica del Norte Coquimbo",
+    "podcast agricultura Valle de Elqui Limarí"
+  ],
+  "candidates": [
+    {"name": "Mujer Innovadora", "publisher": "", "genre_seen": "entrepreneurship interviews", "evidence": "https://podcastrepublic.net/podcast/1880650423"},
+    {"name": "Susurro de lo oculto", "publisher": "Sebastián Fredes", "genre_seen": "culture", "evidence": "https://www.tvr.cl/categoria/region-coquimbo"},
+    {"name": "Cabras De Cerro", "publisher": "Holistica Radio", "genre_seen": "culture", "evidence": "https://www.podengine.ai/podcasts/cabras-de-cerro"},
+    {"name": "Ritmo Caliente", "publisher": "Eileen Karmy, Martín Farías, Rodrigo Alarcón", "genre_seen": "music history", "evidence": "https://rephonic.com/podcasts/ritmo-caliente"},
+    {"name": "De la Tierra al Universo", "publisher": "Universidad de La Serena", "genre_seen": "science", "evidence": "https://www.spreaker.com/podcast/uls-de-la-tierra-al-universo--5171244"}
+  ]
+}
