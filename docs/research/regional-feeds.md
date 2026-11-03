@@ -41,8 +41,11 @@ Finanzas, Tomás Va A Morir and Expertas en Nada.
 Nine regions have no live show: Arica y Parinacota, Tarapacá, Antofagasta, Atacama, Coquimbo, Maule,
 La Araucanía, Los Ríos and Aysén.
 
-## Open
+## Regional fit
 
-Whether each show in the table is local to its region and inside the show list's genre mix has not
-been confirmed yet. Doubtful cases: Voces de Alianza (genre unknown), Nación X (weak evidence of a
-tie to Ñuble), Traficantes de Cultura (publisher and city not shown), and FUSAT Contigo (health).
+Felipe confirmed all 14 shows as regional on 3 November ("they are what people are talking on the
+region, everything is politics"). Four were in doubt from their own feed descriptions: Voces de
+Alianza, a Schoenstatt talk show on faith and national topics; Traficantes de Cultura, interviews
+with authors and filmmakers; Nación X, a comics talk show; and FUSAT Contigo, a Rancagua hospital's
+weekly health interviews on Radio Rancagua 99.5. A show counts for the region where the web search
+found it, whatever its genre.
