@@ -1,0 +1,185 @@
+{
+  "region": "Metropolitana de Santiago",
+  "searched_on": "2026-11-03",
+  "note": "the 16 shows already on the reader's list are Santiago-based and count for this region too",
+  "queries": [
+    "mejores podcast chilenos actualidad política Santiago 2026",
+    "ranking podcast Chile Spotify Apple noticias 2026",
+    "podcast entrevistas Chile conversación más escuchados",
+    "podcast cultura Santiago de Chile",
+    "podcast radios Santiago Cooperativa ADN Bío Bío Duna programas podcast",
+    "podcast comunas Santiago municipal local noticias Puente Alto Maipú",
+    "podcast Radio Universidad de Chile Radio UC Universidad de Santiago",
+    "podcast economía negocios Chile Santiago Diario Financiero Emol"
+  ],
+  "candidates": [
+    {
+      "name": "Punto Aparte",
+      "publisher": "Cony Stipicic",
+      "genre_seen": "daily current affairs",
+      "evidence": "https://podcastrepublic.net/podcast/1896591786"
+    },
+    {
+      "name": "Informe Chile",
+      "publisher": "Christian Jorquera",
+      "genre_seen": "current affairs interviews",
+      "evidence": "https://www.audible.in/podcast/Informe-Chile/B0G1DMT47T"
+    },
+    {
+      "name": "Polarizados",
+      "publisher": "",
+      "genre_seen": "political debate",
+      "evidence": "https://www.podengine.ai/podcasts/polarizados"
+    },
+    {
+      "name": "Política, Pan y Vino",
+      "publisher": "",
+      "genre_seen": "politics and culture",
+      "evidence": "https://www.podengine.ai/podcasts/politica-pan-y-vino"
+    },
+    {
+      "name": "Beers&Politics",
+      "publisher": "El Líbero",
+      "genre_seen": "politics",
+      "evidence": "https://beersandpolitics.com/tag/podcast/page/2/"
+    },
+    {
+      "name": "Entrevistas T13",
+      "publisher": "T13",
+      "genre_seen": "news interviews",
+      "evidence": "https://rephonic.com/podcasts/entrevistas-t13"
+    },
+    {
+      "name": "Entender es Todo",
+      "publisher": "The Clinic",
+      "genre_seen": "current affairs",
+      "evidence": "https://rephonic.com/podcasts/entender-es-todo"
+    },
+    {
+      "name": "El Café Diario",
+      "publisher": "La Tercera",
+      "genre_seen": "daily current affairs",
+      "evidence": "https://www.latercera.com/la-tercera-sabado/noticia/spotify-y-la-tercera-se-unen-en-el-podcast-el-cafe-diario/62K4WQSUQFBZZLESJXRTMVZP4E/"
+    },
+    {
+      "name": "Política para Adultos",
+      "publisher": "",
+      "genre_seen": "politics",
+      "evidence": "https://www.latercera.com/etiqueta/podcast/"
+    },
+    {
+      "name": "Una Nueva Mañana",
+      "publisher": "Cooperativa",
+      "genre_seen": "morning interviews",
+      "evidence": "https://cooperativa.cl/programas"
+    },
+    {
+      "name": "Esa es la Idea",
+      "publisher": "Cooperativa",
+      "genre_seen": "talk",
+      "evidence": "https://cooperativa.cl/programas"
+    },
+    {
+      "name": "Santiago Adicto",
+      "publisher": "Radio Duna",
+      "genre_seen": "city and culture",
+      "evidence": "https://rephonic.com/podcasts/radio-duna-santiago-adicto"
+    },
+    {
+      "name": "Purísima Podcast",
+      "publisher": "El Mostrador and Universidad Andrés Bello",
+      "genre_seen": "culture",
+      "evidence": "https://www.elmostrador.cl/cultura/2022/05/17/purisima-podcast-el-nuevo-programa-de-cultura-y-pensamiento"
+    },
+    {
+      "name": "+Municipal Podcast",
+      "publisher": "Teatro Municipal de Santiago",
+      "genre_seen": "culture",
+      "evidence": "https://www.elmostrador.cl/cultura/2023/04/25/teatro-municipal-de-santiago-estrena-su-primer-canal-de-podcast/"
+    },
+    {
+      "name": "Caldo de cultivo",
+      "publisher": "Centro Cultural de España en Santiago",
+      "genre_seen": "culture",
+      "evidence": "https://podnews.net/podcast/iubju"
+    },
+    {
+      "name": "Traficantes de Cultura",
+      "publisher": "",
+      "genre_seen": "culture interviews",
+      "evidence": "https://podcastai.com/shows/bcn89b-traffickers-de-cultura"
+    },
+    {
+      "name": "Santiago en 100 Palabras",
+      "publisher": "Iberoamericana Radio Chile",
+      "genre_seen": "literature",
+      "evidence": "https://rephonic.com/podcasts/santiago-en-100-palabras"
+    },
+    {
+      "name": "Radio Universidad de Chile",
+      "publisher": "Radio Universidad de Chile",
+      "genre_seen": "daily news",
+      "evidence": "https://rephonic.com/podcasts/radio-universidad-de-chile"
+    },
+    {
+      "name": "Actualidad Latinoamericana",
+      "publisher": "Diario Financiero",
+      "genre_seen": "business news",
+      "evidence": "https://www.df.cl/podcast-actualidad-latinoamericana-editores-de-chile-mexico-colombia"
+    },
+    {
+      "name": "Primer Click DF",
+      "publisher": "Diario Financiero",
+      "genre_seen": "technology and business",
+      "evidence": "https://www.fynsa.com/en/newsletter/los-7-podcasts-clave-sobre-economia-negocios-y-finanzas-para-2025/"
+    },
+    {
+      "name": "Money Talks",
+      "publisher": "La Tercera",
+      "genre_seen": "business interviews",
+      "evidence": "https://rephonic.com/podcasts/money-talks-29"
+    },
+    {
+      "name": "Con Peras y Finanzas",
+      "publisher": "",
+      "genre_seen": "personal finance",
+      "evidence": "https://poderato.com/shows/con-peras-y-finanzas/-trabajo-gratis-remunerado-proyecto-de-subsidio-boric-y-aranceles-noticias-peras-y-finanzas-19"
+    },
+    {
+      "name": "Código Chile",
+      "publisher": "",
+      "genre_seen": "economy and society",
+      "evidence": "https://www.audible.in/podcast/Codigo-Chile/episodes/B0B1VTR38N"
+    },
+    {
+      "name": "Tomás Va A Morir",
+      "publisher": "",
+      "genre_seen": "comedy talk",
+      "evidence": "https://www.24horas.cl/tendencias/tecnologia-y-ciencias/revelan-ranking-de-los-podcasts-mas-escuchados-en-chile"
+    },
+    {
+      "name": "Expertas en Nada",
+      "publisher": "Elisa Zulueta and Paloma Salas",
+      "genre_seen": "comedy talk",
+      "evidence": "https://www.eldinamo.cl/entretencion/2023/09/24/los-10-podcasts-mas-escuchados-en-chile-en-spotify/"
+    },
+    {
+      "name": "Media Semana",
+      "publisher": "",
+      "genre_seen": "comedy talk",
+      "evidence": "https://www.24horas.cl/tendencias/tecnologia-y-ciencias/revelan-ranking-de-los-podcasts-mas-escuchados-en-chile"
+    },
+    {
+      "name": "Soluciones Municipales",
+      "publisher": "Asociación Chilena de Municipalidades",
+      "genre_seen": "municipal government",
+      "evidence": "https://www.cnnchile.com/tag/chpapell-roan/page/56/"
+    },
+    {
+      "name": "PolitiCAST",
+      "publisher": "",
+      "genre_seen": "civic explainers",
+      "evidence": "https://beersandpolitics.com/tag/podcast/page/2/"
+    }
+  ]
+}
