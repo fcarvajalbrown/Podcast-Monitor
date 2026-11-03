@@ -16,7 +16,7 @@ use crate::summarize::{self, Provider};
 use crate::week::{self, Span, Week};
 use crate::weekly;
 
-const TITLE: &str = "Podcast-Monitor";
+const TITLE: &str = concat!("Podcast-Monitor ", env!("CARGO_PKG_VERSION"));
 const SHOWS_HEADING: &str = "Programas guardados";
 const NO_SHOWS: &str = "Todavía no hay programas guardados.";
 const ADD_HEADING: &str = "Agregar un programa";
@@ -1108,6 +1108,12 @@ mod tests {
         assert!(simulator(view(&window)).find(MODEL_READY).is_ok());
         assert!(simulator(view(&window)).find(DOWNLOAD_MODEL).is_err());
         std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn the_title_carries_the_version() {
+        assert_eq!(TITLE, format!("Podcast-Monitor {}", env!("CARGO_PKG_VERSION")));
+        assert!(TITLE.ends_with(" 0.1.0"));
     }
 
     #[test]
