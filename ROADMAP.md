@@ -150,7 +150,7 @@ Asked by Felipe: a public download page at https://podcastmonitor.copiapolabs.cl
 | # | Item | Status |
 |---|---|---|
 | 1 | Model download on first run: the window fetches `ggml-large-v3-turbo.bin` into the app-data folder, with progress | Done |
-| 2 | Version shown in the window | Not Started |
+| 2 | Version shown in the window title, "Podcast-Monitor 0.1.0" from Cargo.toml; first public release is 0.1.0, set by Felipe | Done |
 | 3 | First release: CHANGELOG entry, git tag, Windows installer built with Inno Setup | Not Started |
 | 4 | Page in Spanish with Cuña-Cutter's layout and colours, guide, out of indexes | Not Started |
 | 5 | Upload to podcastmonitor.copiapolabs.cl, every link checked | Not Started |
