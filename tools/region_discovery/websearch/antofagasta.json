@@ -1,0 +1,24 @@
+{
+  "region": "Antofagasta",
+  "searched_on": "2026-11-03",
+  "queries": [
+    "podcast Antofagasta",
+    "podcast noticias región de Antofagasta",
+    "podcast entrevistas Antofagasta Calama",
+    "podcast cultura Antofagasta",
+    "radio Antofagasta podcast programa",
+    "podcast Spotify Antofagasta Chile",
+    "podcast Universidad de Antofagasta Universidad Católica del Norte",
+    "podcast minería Antofagasta"
+  ],
+  "candidates": [
+    {"name": "La República de las Letras Antofagasta", "publisher": "", "genre_seen": "literature", "evidence": "https://rephonic.com/podcasts/la-republica-de-la-letras-antofagasta"},
+    {"name": "Cuando el Desierto Habla", "publisher": "OyeDí", "genre_seen": "science and society", "evidence": "https://www.audible.co.uk/podcast/CUANDO-EL-DESIERTO-HABLA/B0DJK63LFV"},
+    {"name": "Audio Rutas de Barrio", "publisher": "OyeDí", "genre_seen": "local history", "evidence": "https://www.audible.in/podcast/AUDIO-RUTAS-DE-BARRIO-Antofagasta-Chile/B0DWFQL2Z3"},
+    {"name": "En Antofa Se Puede", "publisher": "Colegio de Arquitectos de Antofagasta", "genre_seen": "heritage interviews", "evidence": "https://podcast.feedspot.com/antofagasta_podcasts/"},
+    {"name": "Diario Mural", "publisher": "", "genre_seen": "unknown", "evidence": "https://podcast.feedspot.com/antofagasta_podcasts/"},
+    {"name": "Energía y Minería Verde", "publisher": "Norte y Energía", "genre_seen": "mining and energy interviews", "evidence": "https://www.portalminero.com/lanzan-nuevo-podcast-sobre-energias-limpias-en-la-region-de-antofagasta"},
+    {"name": "Entre Minas Antofagasta", "publisher": "", "genre_seen": "mining and energy", "evidence": "https://www.guiaminera.cl/entre-minas-antofagasta-debuta-con-foco-en-mujeres-que-innovan-en-mineria-y-energia/"},
+    {"name": "Iglesia Cristiana Antofagasta", "publisher": "Iglesia Cristiana Antofagasta", "genre_seen": "religion", "evidence": "https://podcast.feedspot.com/antofagasta_podcasts/"}
+  ]
+}

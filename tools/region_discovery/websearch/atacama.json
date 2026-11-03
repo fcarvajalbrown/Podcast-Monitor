@@ -1,0 +1,20 @@
+{
+  "region": "Atacama",
+  "searched_on": "2026-11-03",
+  "queries": [
+    "podcast Copiapó Atacama",
+    "podcast noticias región de Atacama",
+    "podcast entrevistas Copiapó Vallenar",
+    "podcast cultura Copiapó",
+    "radio Copiapó podcast programa",
+    "podcast Spotify región de Atacama Chile",
+    "podcast Universidad de Atacama",
+    "podcast minería Atacama Copiapó"
+  ],
+  "candidates": [
+    {"name": "Noticias de Atacama en audio", "publisher": "Mario Huerta", "genre_seen": "regional news", "evidence": "https://www.ivoox.com/en/podcast-noticias-atacama-audio-mario-huerta_sq_f1305675_1.html"},
+    {"name": "Radio Recreo", "publisher": "Radio Recreo", "genre_seen": "local legends", "evidence": "https://www.ivoox.com/en/podcast-radio-recreo_sq_f1328355_1.html"},
+    {"name": "Ni Tan Spoiler", "publisher": "", "genre_seen": "film talk, community media", "evidence": "https://www.audible.com.au/podcast/Ni-Tan-Spoiler/episodes/B08JL5CBKR"},
+    {"name": "Negocios con historia", "publisher": "", "genre_seen": "local business", "evidence": "https://ecosistemastartup.com/?p=51557"}
+  ]
+}
