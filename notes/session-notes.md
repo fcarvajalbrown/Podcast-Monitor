@@ -2,13 +2,8 @@
 
 Current state: phases 1, 3, 4 and 7 done; the reader liked the weekly report with the week-wide topic table and conclusion summaries (`work/sent/2026-10-29-semanal-semana-2026-10-26-cli-conclusiones.pdf`). Platforms are Windows and macOS on Apple Silicon M1 and later; phase 5 (macOS) is next. The app transcribes greedy with flash attention (334 s to 158 s on Ep. 34, `docs/research/stt-speed-ep34-rtx2050.md`); `tools/stt_speed/bench.sh` compares variants, `tools/resummarize/resummarize.sh <monday>` redoes a week's summaries from saved transcripts. The window has a Generar / Continuar informe semanal button; `podcast-monitor week [--run] [--report]` does the same from a terminal. Week of 26 October through Monday 2 November 07:00: `podcast-monitor week --monday 2026-10-26 --to-now --run --report` (release build, Codex): 58 episodes, 0 failed, El Shot and El Villegas of 2 November added at Felipe's request; Codex never hit its limit, so the Claude fallback was not tested. PDF at `%APPDATA%\Podcast-Monitor\weeks\2026-10-26\informe-semanal.pdf` (16 shows, 5 pages), copy `work/sent/2026-11-02-semanal-semana-2026-10-26-cli-hasta-lunes-2.pdf`. Debug logs in `%APPDATA%\Podcast-Monitor\logs\`; `tools/log_stages/stages.py <log>` times each stage. Build with `tools/build/cargo-windows.cmd <args> -j 2` from bash. See `ROADMAP.md`, `docs/ROADMAP-HISTORY.md`, `docs/research/weekly-run.md`.
 
-Cost study (RSS only, chat 10): `docs/research/api-costs.md` and `docs/research/regional-feeds.md`; the SYNCOAI version is PR #1 in `credentials-synco` (branch `docs/budget-per-region`) and the watermarked PDF `Desktop\monitoreo-podcasts-regional-costos.pdf`. The 14 regional shows are a budget sample, not the monitoring selection.
-
 Open flags:
-- PR #1 in `credentials-synco` waits for Felipe's merge; the SYNCOAI session pulls after it.
-- Kimi prices came from a search-engine summary; check them in the console. Then drop the PENDIENTE watermark.
-- IONOS invoice price to check: the measured VPS does not match the S+ listing used for the upgrade difference.
-- Inspiron 15 Gaming 5577 against a paid VPS, not analysed yet (ROADMAP).
+- Download site at podcastmonitor.copiapolabs.cl, like Cuña-Cutter's (ROADMAP open item).
 - The week button counts from the Monday of today, so on a Monday it finds 0 episodes; `week --monday <date>` covers a past week from the CLI. The window change to the last 7 days is a ROADMAP open item.
 - Codex limit message still not seen: if the Claude fallback misses it, Felipe chose to fix the matching first, then rerun.
 - Preprint session set for 30 October 10:00 (Windows popup task `PreprintReminder`); venues TechRxiv and engrXiv, ROADMAP open item.
