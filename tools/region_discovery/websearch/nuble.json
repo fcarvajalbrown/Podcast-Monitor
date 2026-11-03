@@ -1,0 +1,58 @@
+{
+  "region": "Ñuble",
+  "searched_on": "2026-11-03",
+  "queries": [
+    "podcast Chillán Ñuble",
+    "podcast noticias región de Ñuble",
+    "podcast entrevistas Chillán San Carlos Bulnes",
+    "podcast cultura Chillán",
+    "radio Chillán podcast programa La Discusión",
+    "podcast Spotify Ñuble Chile",
+    "podcast Universidad del Bío-Bío Chillán Universidad de Concepción campus Chillán",
+    "podcast agro campo Ñuble agricultura"
+  ],
+  "candidates": [
+    {
+      "name": "Radio LA FONTANA",
+      "publisher": "La Fontana",
+      "genre_seen": "regional news and interviews",
+      "evidence": "https://rephonic.com/podcasts/lo-tienes-que-saber"
+    },
+    {
+      "name": "Ñuble Cine 5, el podcast",
+      "publisher": "TVN",
+      "genre_seen": "film interviews",
+      "evidence": "https://rephonic.com/podcasts/nuble-cine-5-el-podcast"
+    },
+    {
+      "name": "TVR Ñuble",
+      "publisher": "TVR Ñuble",
+      "genre_seen": "regional TV feed",
+      "evidence": "https://podnews.net/podcast/ivzzx"
+    },
+    {
+      "name": "No Más AFP Ñuble",
+      "publisher": "",
+      "genre_seen": "civic",
+      "evidence": "https://www.ivoox.com/en/podcast-no-mas-afp-nuble_sq_f1319978_1.html"
+    },
+    {
+      "name": "Entre Sancarlinos",
+      "publisher": "",
+      "genre_seen": "comedy talk",
+      "evidence": "https://rephonic.com/podcasts/entre-sancarlinos"
+    },
+    {
+      "name": "Cien años al aire",
+      "publisher": "",
+      "genre_seen": "radio history interviews",
+      "evidence": "https://podcastai.com/shows/umeck6-cien-anos-al-aire"
+    },
+    {
+      "name": "Nación X",
+      "publisher": "",
+      "genre_seen": "culture",
+      "evidence": "https://www.podengine.ai/podcasts/nacion-x"
+    }
+  ]
+}
