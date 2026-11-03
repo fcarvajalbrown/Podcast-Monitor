@@ -1,0 +1,47 @@
+{
+  "region": "Aysén del General Carlos Ibáñez del Campo",
+  "searched_on": "2026-11-03",
+  "note": "Entre Mate & Canto appears as a radio listing that describes itself as a podcast; the feed check will show whether an RSS feed exists",
+  "queries": [
+    "podcast Coyhaique Aysén",
+    "podcast noticias región de Aysén",
+    "podcast entrevistas Coyhaique Puerto Aysén Chile Chico",
+    "podcast cultura Patagonia Aysén",
+    "radio Coyhaique podcast programa Radio Santa María",
+    "podcast Spotify Aysén Patagonia chilena",
+    "podcast Universidad de Aysén",
+    "podcast Carretera Austral naturaleza ganadería Aysén"
+  ],
+  "candidates": [
+    {
+      "name": "Mate con Punta",
+      "publisher": "FM Arcoíris 99.3 Coyhaique",
+      "genre_seen": "culture and local events, interviews",
+      "evidence": "https://www.ivoox.com/en/podcast-mate-punta_sq_f1313796_1.html"
+    },
+    {
+      "name": "Entre Mate & Canto",
+      "publisher": "",
+      "genre_seen": "folk music and local heritage",
+      "evidence": "https://streema.com/radios/Entre_Mate_and_Canto"
+    },
+    {
+      "name": "Atlas Textil",
+      "publisher": "Pulso Austral",
+      "genre_seen": "artisan interviews",
+      "evidence": "https://radio.uchile.cl/2025/02/09/podcast-atlas-textil-un-viaje-sonoro-por-las-historias-de-vida-y-oficio-de-creadoras-de-la-patagonia/"
+    },
+    {
+      "name": "Navegando el Litoral",
+      "publisher": "GORE Aysén, FUSUPO and CIEP",
+      "genre_seen": "fishing and coast",
+      "evidence": "https://www.elciudadano.com/?p=1022252"
+    },
+    {
+      "name": "Artesanas rurales de la Patagonia",
+      "publisher": "Ministerio de las Culturas",
+      "genre_seen": "rural crafts",
+      "evidence": "https://www.cultura.gob.cl/agendacultural/artesanas-rurales-de-la-patagonia-llegan-a-spotify/"
+    }
+  ]
+}
