@@ -1,0 +1,52 @@
+{
+  "region": "La Araucanía",
+  "searched_on": "2026-11-03",
+  "queries": [
+    "podcast Temuco Araucanía",
+    "podcast noticias región de La Araucanía",
+    "podcast entrevistas Temuco Angol Villarrica",
+    "podcast mapuche mapudungun cultura",
+    "radio Temuco podcast programa",
+    "podcast Spotify Araucanía Chile actualidad",
+    "podcast Universidad de La Frontera Universidad Católica de Temuco",
+    "podcast agricultura campo turismo Araucanía Pucón"
+  ],
+  "candidates": [
+    {
+      "name": "Recado Confidencial",
+      "publisher": "Ricardo Olave",
+      "genre_seen": "current affairs, Mapuche topics",
+      "evidence": "https://www.e-publicacoes.uerj.br/transversos/article/download/68608/43188/245314"
+    },
+    {
+      "name": "La Ruta Fortalece Pyme Araucanía",
+      "publisher": "Fortalece Pyme Araucanía, CORFO",
+      "genre_seen": "business",
+      "evidence": "https://podnews.net/podcast/ivd6u"
+    },
+    {
+      "name": "Canal de Noticias Malleco",
+      "publisher": "",
+      "genre_seen": "local news, Angol",
+      "evidence": "https://www.ivoox.com/en/podcast-podcast-canal-noticias-malleco_sq_f18118_1.html"
+    },
+    {
+      "name": "A río revuelto me paro y protesto",
+      "publisher": "",
+      "genre_seen": "community radio, Temuco",
+      "evidence": "https://www.ivoox.com/en/podcast-a-rio-revuelto-me-paro-protesto_sq_f1312274_1.html"
+    },
+    {
+      "name": "Efecto Ciencia",
+      "publisher": "Ufro Radio, Universidad de La Frontera",
+      "genre_seen": "science interviews",
+      "evidence": "https://rephonic.com/podcasts/efecto-ciencia"
+    },
+    {
+      "name": "Voces del Bosque",
+      "publisher": "",
+      "genre_seen": "nature",
+      "evidence": "https://www.lanalhuenoticias.cl/leenota.php?noti=15972"
+    }
+  ]
+}
