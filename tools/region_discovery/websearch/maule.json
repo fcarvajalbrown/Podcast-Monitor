@@ -1,0 +1,70 @@
+{
+  "region": "Maule",
+  "searched_on": "2026-11-03",
+  "queries": [
+    "podcast Talca Maule",
+    "podcast noticias región del Maule",
+    "podcast entrevistas Talca Curicó Linares",
+    "podcast cultura Talca Curicó",
+    "radio Talca Curicó podcast programa",
+    "podcast Spotify región del Maule Chile",
+    "podcast Universidad de Talca Universidad Católica del Maule",
+    "podcast agro vino campo Maule"
+  ],
+  "candidates": [
+    {
+      "name": "Frecuencia TRM",
+      "publisher": "Teatro Regional del Maule",
+      "genre_seen": "music and culture",
+      "evidence": "https://elmauleinforma.cl/teatro-regional-del-maule-lanza-su-nuevo-canal-podcast-frecuencia-trm"
+    },
+    {
+      "name": "Prefiero El Maule",
+      "publisher": "Radio FM+ 92.3 Talca",
+      "genre_seen": "community interviews",
+      "evidence": "https://podcastai.com/shows/qzb8yz-prefiero-el-maule"
+    },
+    {
+      "name": "La Nutri Cata en Radio FM+ 92.3 Talca",
+      "publisher": "Radio FM+ 92.3 Talca",
+      "genre_seen": "health",
+      "evidence": "https://rephonic.com/podcasts/la-nutri-cata-en-radio-fm-923-talca"
+    },
+    {
+      "name": "Herencia Rojinegra",
+      "publisher": "",
+      "genre_seen": "football club",
+      "evidence": "https://www.ivoox.com/en/podcast-herencia-rojinegra_sq_f1310678_1.html"
+    },
+    {
+      "name": "Podcast Radio Favorita Curicó",
+      "publisher": "Radio Favorita",
+      "genre_seen": "national and local current affairs",
+      "evidence": "https://podnews.net/podcast/i11sw"
+    },
+    {
+      "name": "Chile Futuro",
+      "publisher": "El Conquistador señal Maule",
+      "genre_seen": "interviews",
+      "evidence": "https://www.podengine.ai/podcasts/chile-futuro-2021"
+    },
+    {
+      "name": "Programa cultural de Curicó",
+      "publisher": "",
+      "genre_seen": "local culture",
+      "evidence": "https://podcastrepublic.net/podcast/1554421587"
+    },
+    {
+      "name": "Crónica Curió",
+      "publisher": "",
+      "genre_seen": "local satire",
+      "evidence": "https://www.ivoox.com/en/podcast-podcast-cronica-curio_sq_f175510_1.html"
+    },
+    {
+      "name": "El Agro En Línea",
+      "publisher": "Álvaro Seguel Valdés",
+      "genre_seen": "agriculture",
+      "evidence": "https://rephonic.com/podcasts/el-agro-en-linea"
+    }
+  ]
+}
