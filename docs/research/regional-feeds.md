@@ -63,20 +63,21 @@ qwen3-asr-flash and analysed by the model in the column. National reports are no
 results in `tools/region_discovery/region-costs.json`. Episodes and hours a week are the 60-day
 counts divided by 60/7.
 
-| Region | Shows | Episodes a week | Audio hours a week | OpenAI low | OpenAI medium | OpenAI high | Qwen low | Qwen medium | Qwen high | Kimi low |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Biobío | 2 | 18.8 | 12.3 | 8.58 | 18.06 | 112.90 | 7.86 | 11.96 | 28.13 | 39.14 |
-| Los Lagos | 2 | 13.4 | 3.4 | 2.82 | 9.67 | 78.16 | 2.31 | 5.26 | 16.89 | 24.89 |
-| Magallanes | 1 | 0.2 | 0.1 | 0.11 | 0.48 | 4.11 | 0.09 | 0.23 | 0.71 | 1.28 |
-| Metropolitana | 3 | 7.3 | 6.5 | 4.42 | 8.28 | 46.92 | 4.13 | 5.79 | 12.29 | 16.87 |
-| Ñuble | 2 | 0.7 | 0.2 | 0.18 | 0.77 | 6.71 | 0.13 | 0.37 | 1.25 | 2.09 |
-| O'Higgins | 2 | 2.7 | 2.4 | 1.66 | 3.23 | 18.91 | 1.54 | 2.21 | 4.76 | 6.71 |
-| Valparaíso | 2 | 10.7 | 8.0 | 5.51 | 11.04 | 66.30 | 5.10 | 7.48 | 16.84 | 23.32 |
-| Seven regions | 14 | 53.9 | 33.0 | 23.28 | 51.53 | 334.01 | 21.16 | 33.30 | 80.87 | 114.30 |
+| Region | Shows | Episodes a week | Audio hours a week | OpenAI low | OpenAI medium | OpenAI high | Qwen low | Qwen medium | Qwen high | Kimi low | Kimi high |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Biobío | 2 | 18.8 | 12.3 | 8.58 | 18.06 | 112.90 | 7.86 | 11.96 | 28.13 | 39.14 | 28.60 |
+| Los Lagos | 2 | 13.4 | 3.4 | 2.82 | 9.67 | 78.16 | 2.31 | 5.26 | 16.89 | 24.89 | 17.28 |
+| Magallanes | 1 | 0.2 | 0.1 | 0.11 | 0.48 | 4.11 | 0.09 | 0.23 | 0.71 | 1.28 | 0.88 |
+| Metropolitana | 3 | 7.3 | 6.5 | 4.42 | 8.28 | 46.92 | 4.13 | 5.79 | 12.29 | 16.87 | 12.58 |
+| Ñuble | 2 | 0.7 | 0.2 | 0.18 | 0.77 | 6.71 | 0.13 | 0.37 | 1.25 | 2.09 | 1.43 |
+| O'Higgins | 2 | 2.7 | 2.4 | 1.66 | 3.23 | 18.91 | 1.54 | 2.21 | 4.76 | 6.71 | 4.97 |
+| Valparaíso | 2 | 10.7 | 8.0 | 5.51 | 11.04 | 66.30 | 5.10 | 7.48 | 16.84 | 23.32 | 17.18 |
+| Seven regions | 14 | 53.9 | 33.0 | 23.28 | 51.53 | 334.01 | 21.16 | 33.30 | 80.87 | 114.30 | 82.92 |
 
 The models are gpt-6-luna, gpt-6.1-terra and gpt-6-astra for OpenAI; qwen3.7-flash, qwen3.7-plus
-and qwen3.8-max for Qwen; kimi-k3 for Kimi. Kimi has no medium tier in the price table, and its
-high tier, kimi-k3.1-pro, has no first-party price yet, so that column is missing; the kimi-k3
-figure uses an 8 October reading not re-confirmed. Transcription is the same in every column: 7.54 a month for Biobío and 20.20 for the
-seven regions together, on 33.0 audio hours a week. The nine regions with
-no live show cost nothing in this sample.
+and qwen3.8-max for Qwen; kimi-k3 and kimi-k3.1-pro for Kimi, which has no medium tier in the price
+table. Kimi's prices (k3 at 3.00 and 15.00, k3.1-pro at 2.00 and 10.00 per million tokens) were
+supplied by Felipe from a search-engine summary, since the official page renders its tables in the
+browser; k3.1-pro is cheaper than k3 at these prices. Transcription is the same in every column:
+7.54 a month for Biobío and 20.20 for the seven regions together, on 33.0 audio hours a week. The
+nine regions with no live show cost nothing in this sample.

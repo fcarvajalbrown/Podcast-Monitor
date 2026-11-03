@@ -76,12 +76,12 @@
           "low": {
             "model": "kimi-k3",
             "monthly_usd": 39.14,
-            "confirmed_price": false
+            "confirmed_price": true
           },
           "high": {
             "model": "kimi-k3.1-pro",
-            "monthly_usd": null,
-            "confirmed_price": false
+            "monthly_usd": 28.6,
+            "confirmed_price": true
           }
         }
       }
@@ -137,12 +137,12 @@
           "low": {
             "model": "kimi-k3",
             "monthly_usd": 24.89,
-            "confirmed_price": false
+            "confirmed_price": true
           },
           "high": {
             "model": "kimi-k3.1-pro",
-            "monthly_usd": null,
-            "confirmed_price": false
+            "monthly_usd": 17.28,
+            "confirmed_price": true
           }
         }
       }
@@ -198,12 +198,12 @@
           "low": {
             "model": "kimi-k3",
             "monthly_usd": 1.28,
-            "confirmed_price": false
+            "confirmed_price": true
           },
           "high": {
             "model": "kimi-k3.1-pro",
-            "monthly_usd": null,
-            "confirmed_price": false
+            "monthly_usd": 0.88,
+            "confirmed_price": true
           }
         }
       }
@@ -259,12 +259,12 @@
           "low": {
             "model": "kimi-k3",
             "monthly_usd": 16.87,
-            "confirmed_price": false
+            "confirmed_price": true
           },
           "high": {
             "model": "kimi-k3.1-pro",
-            "monthly_usd": null,
-            "confirmed_price": false
+            "monthly_usd": 12.58,
+            "confirmed_price": true
           }
         }
       }
@@ -314,12 +314,12 @@
           "low": {
             "model": "kimi-k3",
             "monthly_usd": 2.09,
-            "confirmed_price": false
+            "confirmed_price": true
           },
           "high": {
             "model": "kimi-k3.1-pro",
-            "monthly_usd": null,
-            "confirmed_price": false
+            "monthly_usd": 1.43,
+            "confirmed_price": true
           }
         }
       }
@@ -369,12 +369,12 @@
           "low": {
             "model": "kimi-k3",
             "monthly_usd": 6.71,
-            "confirmed_price": false
+            "confirmed_price": true
           },
           "high": {
             "model": "kimi-k3.1-pro",
-            "monthly_usd": null,
-            "confirmed_price": false
+            "monthly_usd": 4.97,
+            "confirmed_price": true
           }
         }
       }
@@ -430,12 +430,12 @@
           "low": {
             "model": "kimi-k3",
             "monthly_usd": 23.32,
-            "confirmed_price": false
+            "confirmed_price": true
           },
           "high": {
             "model": "kimi-k3.1-pro",
-            "monthly_usd": null,
-            "confirmed_price": false
+            "monthly_usd": 17.18,
+            "confirmed_price": true
           }
         }
       }

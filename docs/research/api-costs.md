@@ -46,6 +46,7 @@ year if nothing is deleted.
 | Qwen | medium | qwen3.7-plus | 0.4510 | 1.8037 |
 | Qwen | high | qwen3.8-max | 2.2547 | 6.7642 |
 | Kimi | low | kimi-k3 | 3.00 | 15.00 |
+| Kimi | high | kimi-k3.1-pro | 2.00 | 10.00 |
 
 USD per million tokens. Qwen is published in yuan for the Singapore deployment and converted at
 6.6475 CNY per USD, derived from the European Central Bank reference rates of 2 November 2026
@@ -54,9 +55,9 @@ from the SII table.
 
 Three cautions. OpenAI's middle model changed since an October reading: it is gpt-6.1-terra at 1.00
 and 5.00, where gpt-6.1-sol was 2.00 and 10.00. Qwen's plus tier is flagged on its own page as a
-limited-time 20 per cent discount. Kimi's prices could not be re-read, because its pricing tables
-render in the browser on every first-party page; the figures above are an 8 October reading and need
-confirming in the console. Kimi also closed the cheaper K2 series to new registrations on 31 October
+limited-time 20 per cent discount. Kimi's pricing tables render in the browser on every first-party
+page, so its figures were supplied by Felipe on 3 November from a search-engine summary; kimi-k3
+matches the 8 October reading. Kimi also closed the cheaper K2 series to new registrations on 31 October
 2026 and retires it at the end of December, and it sells no speech recognition at all.
 
 Speech to text, per minute of audio: qwen3-asr-flash 0.002347, gpt-4o-mini-transcribe 0.003,
