@@ -140,8 +140,9 @@ Asked by Felipe as future work: the app icon and a window design modelled on Cu�
 Asked by Felipe: a public download page at https://podcastmonitor.copiapolabs.cl/, modelled on Cuña-Cutter's (its ADR 0015). Chosen by Felipe:
 
 - Windows build at launch; the Apple Silicon button reads Próximamente until phase 5 has a build.
-- The app downloads the Whisper model on first run; the site offers only the exe.
-- Files on the Hostinger hosting next to the page, at the fixed name `/descargas/PodcastMonitor-windows.zip`.
+- The app downloads the Whisper model on first run, from a Descargar modelo button, SHA-256 checked, resumable (`docs/research/model-download.md`); the site offers only the app.
+- Windows is installed by an Inno Setup installer (exe, Start menu shortcut, uninstaller).
+- Files on the Hostinger hosting next to the page, at the fixed name `/descargas/PodcastMonitor-windows-setup.exe`.
 - The page and the app show the SemVer version; each release has a matching CHANGELOG entry and git tag.
 - Same layout and colours as Cuña-Cutter's page, in Spanish; guide steps set with Felipe when item 4 starts.
 - Out of search engines and AI crawlers: robots.txt, noindex meta tag, X-Robots-Tag header.
@@ -150,6 +151,6 @@ Asked by Felipe: a public download page at https://podcastmonitor.copiapolabs.cl
 |---|---|---|
 | 1 | Model download on first run: the window fetches `ggml-large-v3-turbo.bin` into the app-data folder, with progress | Not Started |
 | 2 | Version shown in the window | Not Started |
-| 3 | First release: CHANGELOG entry, git tag, Windows zip | Not Started |
+| 3 | First release: CHANGELOG entry, git tag, Windows installer built with Inno Setup | Not Started |
 | 4 | Page in Spanish with Cuña-Cutter's layout and colours, guide, out of indexes | Not Started |
 | 5 | Upload to podcastmonitor.copiapolabs.cl, every link checked | Not Started |
