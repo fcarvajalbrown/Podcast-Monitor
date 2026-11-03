@@ -6,7 +6,6 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 
 - Episode report not yet reshaped to the reader's comments: topics in minutes (she asked percent only), 28 topics, 41 people with 10 at 0, 4 pages for Ep. 34 (`docs/research/reader-feedback.md`). Scope to be set with Felipe.
 - The weekly report the reader approved (`work/sent/2026-10-29-semanal-semana-2026-10-26-cli-conclusiones.pdf`) stays as it is: Felipe set it as the report that matters most, read every Monday early morning.
-- Generar informe semanal covers the 7 days before the moment it is pressed, local time, set by Felipe: pressed on Monday it finds 0 episodes today. Shows posted Monday near 05:00 (El Shot, Democracia en LSD) then fall in both weeks; Felipe judged that minor.
 - Download site at https://podcastmonitor.copiapolabs.cl/, like Cuña-Cutter's at cunacutter.copiapolabs.cl (its ADR 0015 in the Cuña-Cutter repo). Requested by Felipe; scope not set.
 - Glossary improvements get a session of their own to study them, set by Felipe.
 - Preprint of the measured results (speech-to-text speed, heard-as name fix, quote checks) on TechRxiv and engrXiv, chosen by Felipe; arXiv is out for lack of a sponsor. A session for it is set for 30 October 10:00.
@@ -98,7 +97,7 @@ Chosen by Felipe:
 
 - The weekly run is built into the app first, then this week's episodes go through it.
 - Summarizer fallback: when Codex hits its limit the run switches on its own to Claude pinned to Sonnet 5, and the report says which assistant summarized each episode.
-- The week is Monday to now, in local time.
+- The week is the 7 days before Generar informe semanal is pressed (it was Monday to now, which found 0 episodes on a Monday). Shows posted Monday near 05:00 then fall in two reports; Felipe judged that minor. The PDF title reads "últimos 7 días al <date>"; `week --monday` keeps "semana del <monday>".
 - The weekly report has one block per show, covering that show's episodes of the week together.
 - Each block: a header line (show, publisher, episodes with their days, total duration), a 3 to 4 line summary of the week, and 5 to 8 grouped topics with percent of airtime only. No people, no quotes.
 - A closing line in the PDF says which assistant summarized which show, an exception Felipe made for this report. The weekly run starts on Codex.
