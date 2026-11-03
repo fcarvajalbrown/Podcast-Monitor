@@ -1,0 +1,20 @@
+{
+  "region": "Tarapacá",
+  "searched_on": "2026-11-03",
+  "queries": [
+    "podcast política Tarapacá Iquique",
+    "podcast noticias Iquique",
+    "podcast actualidad regional Tarapacá Chile",
+    "radio Iquique podcast entrevistas",
+    "podcast Iquique Spotify conversación política",
+    "Apple Podcasts Iquique noticias programa",
+    "programa de análisis político Iquique Alto Hospicio podcast",
+    "podcast diario regional Tarapacá medios Iquique"
+  ],
+  "candidates": [
+    {"name": "Iquiqueñas Podcast", "publisher": "Carolina Icarte", "genre_seen": "culture", "evidence": "https://rephonic.com/podcasts/iquiquenas-podcast"},
+    {"name": "¿Qué hacer en Iquique?", "publisher": "Erick Espinoza", "genre_seen": "travel", "evidence": "https://rephonic.com/podcasts/que-hacer-en-iquique"},
+    {"name": "Rock en Radio Súper", "publisher": "Radio Súper", "genre_seen": "music", "evidence": "https://www.ivoox.com/en/podcast-rock-radio-super_sq_f1309769_1.html"},
+    {"name": "Alto, Bien Alto", "publisher": "", "genre_seen": "society", "evidence": "https://rephonic.com/podcasts/alto-bien-alto"}
+  ]
+}
