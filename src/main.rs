@@ -92,13 +92,13 @@ enum Command {
         #[arg(required = true)]
         feeds: Vec<String>,
     },
-    #[command(about = "List this week's episodes, Monday to now in local time, across the saved show list")]
+    #[command(about = "List the episodes of the last 7 days up to now across the saved show list, or of one calendar week with --monday")]
     Week {
         #[arg(long, help = "run every listed episode through transcription, summary and PDF, skipping finished ones; uses the window's assistant choice")]
         run: bool,
-        #[arg(long, help = "build the weekly PDF from this week's finished episodes, one block per show")]
+        #[arg(long, help = "build the weekly PDF from the listed finished episodes, one block per show")]
         report: bool,
-        #[arg(long, help = "use the week starting on this Monday (YYYY-MM-DD), up to its Sunday 23:59, instead of the current week")]
+        #[arg(long, help = "use the week starting on this Monday (YYYY-MM-DD), up to its Sunday 23:59, instead of the last 7 days")]
         monday: Option<chrono::NaiveDate>,
         #[arg(long, requires = "monday", help = "with --monday, run up to now instead of stopping at that week's Sunday 23:59")]
         to_now: bool,
@@ -220,34 +220,35 @@ fn dispatch() -> Result<()> {
         Command::Week { run, report, monday, to_now } => {
             let saved = shows::load(&shows::list_path(&shows::data_dir()))?;
             let now = chrono::Local::now();
-            let week = match (monday, to_now) {
-                (Some(start), true) => week::collect_from(&saved, week::checked_monday(start)?, now),
-                _ => week::collect(&saved, week::end_of(monday, now)?),
+            let span = match (monday, to_now) {
+                (Some(start), true) => week::Span::calendar(start, &now)?,
+                (Some(start), false) => week::Span::calendar(start, &week::end_of(start, now)?)?,
+                (None, _) => week::Span::last_seven_days(&now),
             };
+            let mut week = week::collect(&saved, span);
             let mut seconds = 0;
             for request in &week.requests {
                 seconds += request.episode.duration_s;
                 let published = request.episode.published.map(|date| date.with_timezone(&chrono::Local).format("%a %d %H:%M").to_string()).unwrap_or_default();
                 println!("{published}  {:>4} min  {}  ·  {}", request.episode.duration_s / 60, request.show.title, request.episode.title);
             }
-            println!("{} episode(s), {:.1} h, since Monday {}", week.requests.len(), seconds as f64 / 3600.0, week.monday);
+            println!("{} episode(s), {:.1} h, from {} to {}", week.requests.len(), seconds as f64 / 3600.0, week.span.start().format("%Y-%m-%d %H:%M"), week.span.end().format("%Y-%m-%d %H:%M"));
             for show in &week.failed {
                 log::warn!("feed failed: {}", show.title);
             }
             if run {
                 let data = shows::data_dir();
                 let provider = job::settings(&data).provider;
-                let requests = match job::unfinished_week(&data)? {
-                    Some(stopped) => {
-                        log::info!("continuing the stopped queue of {} episode(s)", stopped.len());
-                        stopped
-                    }
-                    None => week.requests.clone(),
-                };
+                if let Some(stopped) = job::unfinished_week(&data)? {
+                    log::info!("continuing the stopped queue of {} episode(s), {}", stopped.requests.len(), stopped.span.key());
+                    week.span = stopped.span;
+                    week.requests = stopped.requests;
+                }
+                let requests = week.requests.clone();
                 let count = requests.len();
                 let stage: job::StageSink = std::sync::Arc::new(|_| {});
                 let fallback = summarize::Cli::fallback_for(provider);
-                let outcome = job::run_queue(&data, &requests, (provider, &summarize::Cli::new(provider)), fallback.as_ref().map(|cli| (cli.provider, cli as &dyn summarize::Assistant)), &|index, request| log::info!("[{}/{count}] {} · {}", index + 1, request.show.title, request.episode.title), stage);
+                let outcome = job::run_queue(&data, &week.span, &requests, (provider, &summarize::Cli::new(provider)), fallback.as_ref().map(|cli| (cli.provider, cli as &dyn summarize::Assistant)), &|index, request| log::info!("[{}/{count}] {} · {}", index + 1, request.show.title, request.episode.title), stage);
                 log::info!("{} report(s), {} failed", outcome.reports.len(), outcome.failed.len());
                 for (request, failure) in &outcome.failed {
                     log::warn!("failed: {} · {} ({failure:?})", request.show.title, request.episode.title);

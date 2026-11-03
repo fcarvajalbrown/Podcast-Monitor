@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, anyhow};
-use chrono::{DateTime, Datelike, FixedOffset, Local, NaiveDate};
+use chrono::{DateTime, Datelike, FixedOffset, Local};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
@@ -10,7 +10,7 @@ use crate::job::{Choice, Failure, Request, episode_folder};
 use crate::report::{self, Block};
 use crate::shows::SavedShow;
 use crate::summarize::LimitReached;
-use crate::week::Week;
+use crate::week::{Span, Week};
 use crate::run::{read_json, write_json};
 use crate::section::spanish_duration;
 use crate::summarize::{Assistant, Provider, Summary};
@@ -253,12 +253,12 @@ pub fn share_table(shares: &[(String, u32)]) -> Block {
     Block::Table(rows)
 }
 
-pub fn week_path(show_dir: &Path, monday: NaiveDate) -> PathBuf {
-    show_dir.join(format!("week-{monday}.json"))
+pub fn week_path(show_dir: &Path, key: &str) -> PathBuf {
+    show_dir.join(format!("week-{key}.json"))
 }
 
-pub fn summarize_week(show_dir: &Path, monday: NaiveDate, show: &str, episodes: &[EpisodeDigest], provider: Provider, assistant: &dyn Assistant) -> Result<SavedWeek> {
-    let path = week_path(show_dir, monday);
+pub fn summarize_week(show_dir: &Path, key: &str, show: &str, episodes: &[EpisodeDigest], provider: Provider, assistant: &dyn Assistant) -> Result<SavedWeek> {
+    let path = week_path(show_dir, key);
     let ids: Vec<String> = episodes.iter().map(|episode| episode.id.clone()).collect();
     if let Some(saved) = read_json::<SavedWeek>(&path)?.filter(|saved| saved.episodes == ids) {
         log::info!("  week summary already done for {show}");
@@ -358,8 +358,11 @@ pub fn closing(blocks: &[ShowBlock], quiet: &[String]) -> Vec<Block> {
     lines.into_iter().map(Block::Paragraph).collect()
 }
 
-pub fn title(monday: NaiveDate) -> String {
-    format!("Monitoreo de podcasts: semana del {}", crate::section::spanish_date(monday))
+pub fn title(span: &Span) -> String {
+    match span {
+        Span::Calendar { monday, .. } => format!("Monitoreo de podcasts: semana del {}", crate::section::spanish_date(*monday)),
+        Span::LastSevenDays { end, .. } => format!("Monitoreo de podcasts: últimos 7 días al {}", crate::section::spanish_date(end.date_naive())),
+    }
 }
 
 #[derive(Debug, Default)]
@@ -398,13 +401,13 @@ pub fn build(data: &Path, week: &Week, saved: &[SavedShow], first: Choice, mut f
             continue;
         }
         let show_dir = episode_folder(data, first_request).parent().map(Path::to_path_buf).unwrap_or_else(|| data.to_path_buf());
-        let mut result = summarize_week(&show_dir, week.monday, &show.title, &digests, provider, assistant);
+        let mut result = summarize_week(&show_dir, &week.span.key(), &show.title, &digests, provider, assistant);
         if result.as_ref().is_err_and(limited)
             && let Some((next, next_assistant)) = fallback.take()
         {
             log::warn!("{provider:?} hit its limit; switching to {next:?} for the rest of the week summaries");
             (provider, assistant) = (next, next_assistant);
-            result = summarize_week(&show_dir, week.monday, &show.title, &digests, provider, assistant);
+            result = summarize_week(&show_dir, &week.span.key(), &show.title, &digests, provider, assistant);
         }
         match result {
             Ok(saved_week) => blocks.push(block(&show.title, &show.publisher, &digests, &saved_week)),
@@ -422,7 +425,7 @@ pub fn build(data: &Path, week: &Week, saved: &[SavedShow], first: Choice, mut f
     if blocks.is_empty() {
         return Err(anyhow!("no finished episodes this week"));
     }
-    let folder = data.join("weeks").join(week.monday.to_string());
+    let folder = data.join("weeks").join(week.span.key());
     std::fs::create_dir_all(&folder).with_context(|| format!("creating {}", folder.display()))?;
     let mut themes = summarize_themes(&folder, &blocks, provider, assistant);
     if themes.as_ref().is_err_and(limited)
@@ -441,7 +444,7 @@ pub fn build(data: &Path, week: &Week, saved: &[SavedShow], first: Choice, mut f
         }
         Err(error) => return Err(error.context("week themes")),
     };
-    let mut pages = vec![Block::Heading { level: 1, text: title(week.monday) }];
+    let mut pages = vec![Block::Heading { level: 1, text: title(&week.span) }];
     let shares = week_shares(&blocks, &themes.groups);
     if !shares.is_empty() {
         pages.push(Block::Heading { level: 2, text: "Temas de la semana".into() });
@@ -564,7 +567,7 @@ mod tests {
         }
         let dir = std::env::temp_dir().join(format!("podcast-monitor-weekly-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
-        let monday = NaiveDate::from_ymd_opt(2026, 10, 26).unwrap();
+        let monday = "2026-10-26";
         let assistant = Counting(std::cell::Cell::new(0));
         summarize_week(&dir, monday, "Programa", &week(), Provider::Codex, &assistant).unwrap();
         summarize_week(&dir, monday, "Programa", &week(), Provider::Codex, &assistant).unwrap();
@@ -572,5 +575,13 @@ mod tests {
         summarize_week(&dir, monday, "Programa", &week()[..1], Provider::Codex, &assistant).unwrap();
         assert_eq!(assistant.0.get(), 2);
         std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn title_names_the_calendar_week_or_the_last_seven_days() {
+        let monday_morning = chrono::TimeZone::with_ymd_and_hms(&FixedOffset::west_opt(3 * 3600).unwrap(), 2026, 11, 9, 7, 0, 0).unwrap();
+        assert_eq!(title(&Span::last_seven_days(&monday_morning)), "Monitoreo de podcasts: últimos 7 días al 9 de noviembre de 2026");
+        let calendar = Span::calendar(chrono::NaiveDate::from_ymd_opt(2026, 10, 26).unwrap(), &monday_morning).unwrap();
+        assert_eq!(title(&calendar), "Monitoreo de podcasts: semana del 26 de octubre de 2026");
     }
 }

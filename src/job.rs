@@ -15,6 +15,7 @@ use crate::run::{self, ShowInfo, Transcription, read_json, write_json};
 use crate::shows::SavedShow;
 use crate::summarize::{self, Assistant, LimitReached, Provider};
 use crate::transcribe::{Progress, Transcriber};
+use crate::week::Span;
 
 pub const MODEL_FILE: &str = "ggml-large-v3-turbo.bin";
 pub const REPORT_FILE: &str = "informe.pdf";
@@ -99,13 +100,19 @@ pub fn clear_unfinished(data: &Path) -> Result<()> {
     }
 }
 
-pub fn unfinished_week(data: &Path) -> Result<Option<Vec<Request>>> {
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct UnfinishedWeek {
+    pub span: Span,
+    pub requests: Vec<Request>,
+}
+
+pub fn unfinished_week(data: &Path) -> Result<Option<UnfinishedWeek>> {
     read_json(&data.join(UNFINISHED_WEEK_FILE))
 }
 
-pub fn mark_unfinished_week(data: &Path, requests: &[Request]) -> Result<()> {
+pub fn mark_unfinished_week(data: &Path, span: &Span, requests: &[Request]) -> Result<()> {
     fs::create_dir_all(data)?;
-    write_json(&data.join(UNFINISHED_WEEK_FILE), &requests)
+    write_json(&data.join(UNFINISHED_WEEK_FILE), &UnfinishedWeek { span: *span, requests: requests.to_vec() })
 }
 
 pub fn clear_unfinished_week(data: &Path) -> Result<()> {
@@ -123,9 +130,9 @@ pub fn finished(data: &Path, request: &Request) -> bool {
 
 pub type Choice<'a> = (Provider, &'a dyn Assistant);
 
-pub fn run_queue(data: &Path, requests: &[Request], first: Choice, mut fallback: Option<Choice>, on_episode: &dyn Fn(usize, &Request), stage: StageSink) -> QueueOutcome {
+pub fn run_queue(data: &Path, span: &Span, requests: &[Request], first: Choice, mut fallback: Option<Choice>, on_episode: &dyn Fn(usize, &Request), stage: StageSink) -> QueueOutcome {
     let (mut provider, mut assistant) = first;
-    if let Err(error) = mark_unfinished_week(data, requests) {
+    if let Err(error) = mark_unfinished_week(data, span, requests) {
         log::error!("saving the unfinished week: {error:#}");
     }
     log::info!("queue of {} episode(s) with {provider:?}", requests.len());
@@ -336,6 +343,10 @@ mod tests {
         fs::remove_dir_all(&data).unwrap();
     }
 
+    fn span() -> Span {
+        Span::last_seven_days(&chrono::TimeZone::with_ymd_and_hms(&chrono::FixedOffset::west_opt(3 * 3600).unwrap(), 2026, 11, 2, 7, 0, 0).unwrap())
+    }
+
     fn second_request() -> Request {
         let mut second = request();
         second.episode.guid = "ep-2".into();
@@ -350,12 +361,12 @@ mod tests {
         requests.iter().for_each(|request| place_transcript(&data, request));
         let seen = Mutex::new(Vec::new());
         let (sink, _) = recorder();
-        let outcome = run_queue(&data, &requests, (Provider::Codex, &Reply(true)), None, &|index, _| seen.lock().unwrap().push(index), sink.clone());
+        let outcome = run_queue(&data, &span(), &requests, (Provider::Codex, &Reply(true)), None, &|index, _| seen.lock().unwrap().push(index), sink.clone());
         assert_eq!(outcome.reports.len(), 2);
         assert_eq!(outcome.stopped, None);
         assert_eq!(*seen.lock().unwrap(), [0, 1]);
         assert_eq!(unfinished_week(&data).unwrap(), None);
-        let rerun = run_queue(&data, &requests, (Provider::Codex, &Reply(false)), None, &|_, _| {}, sink);
+        let rerun = run_queue(&data, &span(), &requests, (Provider::Codex, &Reply(false)), None, &|_, _| {}, sink);
         assert_eq!(rerun.reports, outcome.reports);
         fs::remove_dir_all(&data).unwrap();
     }
@@ -366,10 +377,10 @@ mod tests {
         let requests = vec![request(), second_request()];
         requests.iter().for_each(|request| place_transcript(&data, request));
         let (sink, _) = recorder();
-        let outcome = run_queue(&data, &requests, (Provider::Codex, &Reply(false)), None, &|_, _| {}, sink);
+        let outcome = run_queue(&data, &span(), &requests, (Provider::Codex, &Reply(false)), None, &|_, _| {}, sink);
         assert_eq!(outcome.stopped, Some(Failure::Limit));
         assert!(outcome.reports.is_empty());
-        assert_eq!(unfinished_week(&data).unwrap(), Some(requests));
+        assert_eq!(unfinished_week(&data).unwrap(), Some(UnfinishedWeek { span: span(), requests }));
         fs::remove_dir_all(&data).unwrap();
     }
 
@@ -391,7 +402,7 @@ mod tests {
         let requests = [request(), second_request()];
         requests.iter().for_each(|request| place_transcript(&data, request));
         let (sink, _) = recorder();
-        let outcome = run_queue(&data, &requests, (Provider::Codex, &Reply(false)), Some((Provider::Claude, &Pinned)), &|_, _| {}, sink);
+        let outcome = run_queue(&data, &span(), &requests, (Provider::Codex, &Reply(false)), Some((Provider::Claude, &Pinned)), &|_, _| {}, sink);
         assert_eq!(outcome.stopped, None);
         assert_eq!(outcome.reports.len(), 2);
         for request in &requests {

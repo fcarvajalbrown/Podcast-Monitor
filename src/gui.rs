@@ -12,7 +12,7 @@ use crate::job::{self, Failure, Request, Settings, Stage};
 use crate::section::{spanish_date, spanish_duration};
 use crate::shows::{self, SavedShow};
 use crate::summarize::{self, Provider};
-use crate::week::{self, Week};
+use crate::week::{self, Span, Week};
 use crate::weekly;
 
 const TITLE: &str = "Podcast-Monitor";
@@ -316,14 +316,11 @@ fn idle(window: &Window) -> bool {
 
 fn week_to_run(data: &Path, saved: &[SavedShow]) -> Week {
     match job::unfinished_week(data) {
-        Ok(Some(stopped)) => {
-            let earliest = stopped.iter().filter_map(|request| request.episode.published).map(|date| date.with_timezone(&Local).date_naive()).min();
-            Week { monday: week::monday(earliest.unwrap_or_else(|| Local::now().date_naive())), requests: stopped, failed: Vec::new() }
-        }
-        Ok(None) => week::collect(saved, Local::now()),
+        Ok(Some(stopped)) => Week { span: stopped.span, requests: stopped.requests, failed: Vec::new() },
+        Ok(None) => week::collect(saved, Span::last_seven_days(&Local::now())),
         Err(error) => {
             log::error!("reading the unfinished week: {error:#}");
-            week::collect(saved, Local::now())
+            week::collect(saved, Span::last_seven_days(&Local::now()))
         }
     }
 }
@@ -341,7 +338,7 @@ fn week_job(data: &Path, saved: &[SavedShow], provider: Provider, sender: &mpsc:
     let on_episode = |index: usize, request: &Request| {
         let _ = sender.unbounded_send(WeekEvent::Episode(index, count, format!("{}  ·  «{}»", request.show.title, request.episode.title)));
     };
-    let queue = job::run_queue(data, &week.requests, (provider, &first), fallback_choice(), &on_episode, sink);
+    let queue = job::run_queue(data, &week.span, &week.requests, (provider, &first), fallback_choice(), &on_episode, sink);
     if let Some(stop) = queue.stopped {
         return Err(stop);
     }
@@ -968,13 +965,14 @@ mod tests {
         let dir = data_dir("week-stopped");
         let mut window = open(dir.clone());
         window.week = Some(WeekState::default());
-        job::mark_unfinished_week(&dir, &[Request { show: radio_duna(), episode: episode() }]).unwrap();
+        let span = Span::last_seven_days(&chrono::TimeZone::with_ymd_and_hms(&Local, 2026, 11, 2, 7, 0, 0).unwrap());
+        job::mark_unfinished_week(&dir, &span, &[Request { show: radio_duna(), episode: episode() }]).unwrap();
         let _ = update(&mut window, Message::Week(WeekEvent::Finished(Err(Failure::Limit))));
         assert!(window.unfinished_week);
         let window = open(dir.clone());
         assert!(window.unfinished_week);
         assert!(simulator(view(&window)).find(CONTINUE_WEEK).is_ok());
-        assert_eq!(week_to_run(&dir, &[]).monday, chrono::NaiveDate::from_ymd_opt(2026, 10, 26).unwrap());
+        assert_eq!(week_to_run(&dir, &[]).span, span);
         std::fs::remove_dir_all(&dir).unwrap();
     }
 
