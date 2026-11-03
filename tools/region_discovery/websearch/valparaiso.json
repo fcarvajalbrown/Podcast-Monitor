@@ -1,0 +1,28 @@
+{
+  "region": "Valparaíso",
+  "searched_on": "2026-11-03",
+  "queries": [
+    "podcast Valparaíso Viña del Mar",
+    "podcast noticias región de Valparaíso",
+    "podcast entrevistas Valparaíso Quilpué San Antonio",
+    "podcast cultura Valparaíso",
+    "radio Valparaíso podcast programa",
+    "podcast Spotify Valparaíso Chile política actualidad",
+    "podcast Universidad de Valparaíso PUCV Radio Valentín Letelier",
+    "podcast puerto Valparaíso ciudad patrimonio"
+  ],
+  "candidates": [
+    {"name": "Programas de ChilenaFM de San Antonio", "publisher": "ChilenaFM San Antonio", "genre_seen": "local interviews", "evidence": "https://rephonic.com/podcasts/programas-de-chilenafm-de-san-antonio"},
+    {"name": "Comenzando el Día", "publisher": "Radio Portales de Valparaíso", "genre_seen": "regional current affairs", "evidence": "https://www.ivoox.com/en/podcast-podcast-comenzando-dia_sq_f1302175_1.html"},
+    {"name": "Entrevistas Comenzando el Día", "publisher": "Radio Portales de Valparaíso", "genre_seen": "regional interviews", "evidence": "https://www.ivoox.com/en/podcast-entrevistas-comenzando-dia_sq_f1320040_1.html"},
+    {"name": "Tiro Al Aire", "publisher": "", "genre_seen": "society reporting", "evidence": "https://www.audible.com.au/podcast/Tiro-Al-Aire/episodes/B0FHRSDH6D"},
+    {"name": "Welcomedy", "publisher": "Casa Podcast", "genre_seen": "comedy interviews", "evidence": "https://g5noticias.cl/2026/08/05/podcast-welcomedy-humor-conversaciones-sin-filtro-y-nostalgia-desde-valparaiso/"},
+    {"name": "30 años, 30 voces", "publisher": "Fundación Superación de la Pobreza", "genre_seen": "regional stories", "evidence": "https://g5noticias.cl/2025/10/09/30-anos-30-voces-historias-desde-la-region-de-valparaiso/"},
+    {"name": "Diarios de Viña", "publisher": "", "genre_seen": "news and entertainment", "evidence": "https://rephonic.com/podcasts/diarios-de-vina"},
+    {"name": "El devenir de la comida extranjera en Valparaíso", "publisher": "", "genre_seen": "food culture", "evidence": "https://rephonic.com/podcasts/el-devenir-de-la-comida-extranjera-en-valparaiso"},
+    {"name": "Radio Ritoque", "publisher": "Radio Ritoque", "genre_seen": "local culture", "evidence": "https://www.ivoox.com/en/podcast-cuna-radio-placeres_sq_f1309646_1.html"},
+    {"name": "Valentiniando la Contingencia", "publisher": "Radio Valentín Letelier", "genre_seen": "current affairs", "evidence": "https://www.podengine.ai/podcasts/valentiniando-la-contingencia"},
+    {"name": "Conexión Creativa", "publisher": "UCV Radio, PUCV", "genre_seen": "culture", "evidence": "https://www.mediabanco.com/podcast-conexion-creativa-fortalece-la-vinculacion-entre-la-pucv-y-el-ecosistema-cultural-regional/"},
+    {"name": "Pensar la Comunicación", "publisher": "Escuela de Periodismo PUCV", "genre_seen": "media", "evidence": "https://rephonic.com/podcasts/pensar-la-comunicacion"}
+  ]
+}
