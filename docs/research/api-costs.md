@@ -106,9 +106,5 @@ checked every feed found.
 The directory is a poor instrument for finding local shows. Searching a city name returns national
 programmes and unrelated content: the Araucania searches found 75 live feeds, none naming Temuco or
 Araucania anywhere in their own metadata. Five regions returned no live source that names them.
-
-That is not an absence of local media. SUBTEL's register of current concessions, updated 2 October
-2026, counts 2,752 licensed radio stations across the sixteen regions, 271 of them in La Araucania
-and 118 in Aysen, including 499 community stations. Local radio in Chile broadcasts rather than
-publishing episodes, so reaching it means capturing streams, not reading feeds. At the cheapest
-confirmed rate an hour of captured radio costs 0.1408 to transcribe.
+Most regional Chilean media broadcasts rather than publishing RSS, which is why the regional podcast
+counts are low and those five regions return zero.
