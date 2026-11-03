@@ -9,6 +9,7 @@ use iced::{Alignment, Element, Length, Size, Task};
 use crate::directory;
 use crate::feed::{self, Episode};
 use crate::job::{self, Failure, Request, Settings, Stage};
+use crate::model;
 use crate::section::{spanish_date, spanish_duration};
 use crate::shows::{self, SavedShow};
 use crate::summarize::{self, Provider};
@@ -53,6 +54,13 @@ const START_WEEK: &str = "Generar informe semanal";
 const CONTINUE_WEEK: &str = "Continuar informe semanal";
 const COLLECTING: &str = "Buscando los episodios de esta semana…";
 const WEEK_SUMMARIES: &str = "Resumiendo la semana de cada programa y armando el PDF…";
+const MODEL_NEEDED: &str = "Para transcribir, la app necesita el modelo de voz (1,6 GB). Se descarga una sola vez.";
+const DOWNLOAD_MODEL: &str = "Descargar modelo";
+const MODEL_CHECKING: &str = "Revisando que el modelo esté completo…";
+const MODEL_READY: &str = "Modelo de voz listo.";
+const MODEL_INTERRUPTED: &str = "La descarga se interrumpió. Revisa la conexión a internet y usa Descargar modelo para seguir donde quedó.";
+const MODEL_DAMAGED: &str = "El modelo descargado llegó dañado y se borró. Usa Descargar modelo para bajarlo de nuevo.";
+const MISSING_MODEL: &str = "Falta el modelo de voz. Usa Descargar modelo y luego Continuar.";
 const EPISODE_COUNT: usize = 10;
 
 struct Window {
@@ -77,6 +85,9 @@ struct Window {
     report: Option<PathBuf>,
     unfinished_week: bool,
     week: Option<WeekState>,
+    model_ready: bool,
+    model_download: Option<model::Progress>,
+    model_notice: Option<&'static str>,
     opener: fn(&Path) -> std::io::Result<()>,
 }
 
@@ -100,6 +111,12 @@ enum WeekEvent {
     Stage(Stage),
     Building,
     Finished(Result<WeekDone, Failure>),
+}
+
+#[derive(Debug, Clone)]
+enum ModelEvent {
+    Progress(model::Progress),
+    Finished(Result<(), model::Failure>),
 }
 
 #[derive(Debug, Clone)]
@@ -131,6 +148,8 @@ enum Message {
     Week(WeekEvent),
     ResumeNow,
     OpenPdf,
+    DownloadModel,
+    Model(ModelEvent),
 }
 
 pub fn run() -> iced::Result {
@@ -156,6 +175,7 @@ fn open(data_dir: PathBuf) -> Window {
     });
     let provider = job::settings(&data_dir).provider;
     let unfinished_week = has_unfinished_week(&data_dir);
+    let model_ready = model::present(&data_dir);
     Window {
         data_dir,
         list_path,
@@ -178,6 +198,9 @@ fn open(data_dir: PathBuf) -> Window {
         report: None,
         unfinished_week,
         week: None,
+        model_ready,
+        model_download: None,
+        model_notice: None,
         opener: open_with_system,
     }
 }
@@ -260,11 +283,7 @@ fn stage_text(stage: Stage, provider: Provider) -> String {
 
 fn failure_text(failure: &Failure, provider: Provider) -> String {
     match failure {
-        Failure::MissingModel(path) => format!(
-            "Falta el modelo de transcripción. Copia {} en la carpeta {} y vuelve a intentarlo con Continuar.",
-            job::MODEL_FILE,
-            path.parent().map(|dir| dir.display().to_string()).unwrap_or_default()
-        ),
+        Failure::MissingModel(_) => MISSING_MODEL.into(),
         Failure::Limit => format!(
             "{} llegó a su límite de uso. Lo ya terminado quedó guardado; vuelve a intentarlo más tarde con Continuar.",
             provider_name(provider)
@@ -301,6 +320,64 @@ fn begin(window: &mut Window, request: Request) -> Task<Message> {
         let _ = sender.unbounded_send(RunEvent::Finished(outcome));
     });
     Task::run(receiver, Message::Run)
+}
+
+fn begin_model_download(window: &mut Window) -> Task<Message> {
+    if window.model_ready || window.model_download.is_some() {
+        return Task::none();
+    }
+    window.model_download = Some(model::Progress::Bytes(0, model::MODEL_SIZE));
+    window.model_notice = None;
+    let (sender, receiver) = mpsc::unbounded();
+    let target = job::model_path(&window.data_dir);
+    std::thread::spawn(move || {
+        let progress = sender.clone();
+        let outcome = model::fetch(&target, &model::HUGGING_FACE, &|step| {
+            let _ = progress.unbounded_send(ModelEvent::Progress(step));
+        });
+        let _ = sender.unbounded_send(ModelEvent::Finished(outcome));
+    });
+    Task::run(receiver, Message::Model)
+}
+
+fn megabytes(bytes: u64) -> String {
+    let digits = (bytes / 1_048_576).to_string();
+    let mut grouped = String::new();
+    for (index, digit) in digits.chars().enumerate() {
+        if index > 0 && (digits.len() - index).is_multiple_of(3) {
+            grouped.push('.');
+        }
+        grouped.push(digit);
+    }
+    grouped
+}
+
+fn model_progress_text(progress: model::Progress) -> String {
+    match progress {
+        model::Progress::Bytes(done, total) => format!("Descargando el modelo de voz: {} de {} MB ({} %)", megabytes(done), megabytes(total), done * 100 / total.max(1)),
+        model::Progress::Checking => MODEL_CHECKING.into(),
+    }
+}
+
+fn model_rows(window: &Window) -> Vec<Element<'_, Message>> {
+    let mut rows: Vec<Element<'_, Message>> = Vec::new();
+    match window.model_download {
+        Some(progress) => {
+            rows.push(text(model_progress_text(progress)).into());
+            if let model::Progress::Bytes(done, total) = progress {
+                rows.push(progress_bar(0.0..=100.0, (done as f64 * 100.0 / total.max(1) as f64) as f32).into());
+            }
+        }
+        None if !window.model_ready => {
+            rows.push(text(MODEL_NEEDED).into());
+            rows.push(button(DOWNLOAD_MODEL).on_press(Message::DownloadModel).into());
+        }
+        None => {}
+    }
+    if let Some(notice) = window.model_notice {
+        rows.push(text(notice).into());
+    }
+    rows
 }
 
 fn has_unfinished_week(data: &Path) -> bool {
@@ -397,7 +474,7 @@ fn week_stage_text(state: &WeekState, provider: Provider) -> Vec<String> {
 }
 
 fn update(window: &mut Window, message: Message) -> Task<Message> {
-    if !matches!(message, Message::SearchInput(_) | Message::FeedInput(_) | Message::Run(RunEvent::Stage(Stage::Transcribing(_))) | Message::Week(WeekEvent::Stage(Stage::Transcribing(_)))) {
+    if !matches!(message, Message::SearchInput(_) | Message::FeedInput(_) | Message::Run(RunEvent::Stage(Stage::Transcribing(_))) | Message::Week(WeekEvent::Stage(Stage::Transcribing(_))) | Message::Model(ModelEvent::Progress(_))) {
         log::debug!("window: {message:?}");
     }
     match message {
@@ -545,6 +622,17 @@ fn update(window: &mut Window, message: Message) -> Task<Message> {
                 Err(failure) => window.status = Some(failure_text(&failure, window.provider)),
             }
         }
+        Message::DownloadModel => return begin_model_download(window),
+        Message::Model(ModelEvent::Progress(progress)) => window.model_download = Some(progress),
+        Message::Model(ModelEvent::Finished(outcome)) => {
+            window.model_download = None;
+            window.model_ready = model::present(&window.data_dir);
+            window.model_notice = Some(match outcome {
+                Ok(()) => MODEL_READY,
+                Err(model::Failure::Interrupted) => MODEL_INTERRUPTED,
+                Err(model::Failure::Damaged) => MODEL_DAMAGED,
+            });
+        }
         Message::StartWeek => return begin_week(window),
         Message::ResumeNow => crate::memory::resume_now(),
         Message::Week(event) => {
@@ -676,12 +764,13 @@ fn run_panel(window: &Window) -> Element<'_, Message> {
     ]
     .spacing(16)
     .align_y(Alignment::Center);
-    let idle = idle(window);
+    let idle = idle(window) && window.model_ready;
     let start = button(START).on_press_maybe((idle && window.picked.is_some()).then_some(Message::Start));
     let week_label = if window.unfinished_week { CONTINUE_WEEK } else { START_WEEK };
     let start_week = button(week_label).on_press_maybe((idle && !window.shows.is_empty()).then_some(Message::StartWeek));
 
-    let mut panel = column![text(EPISODES_HEADING).size(22), boxed(list).height(Length::Fill), assistant, row![start, start_week].spacing(8)].spacing(10);
+    let mut panel = column(model_rows(window)).spacing(10);
+    panel = panel.push(text(EPISODES_HEADING).size(22)).push(boxed(list).height(Length::Fill)).push(assistant).push(row![start, start_week].spacing(8));
     if let Some(state) = &window.week {
         for line in week_stage_text(state, window.provider) {
             panel = panel.push(text(line));
@@ -860,6 +949,7 @@ mod tests {
     fn picked_episode_runs_stops_at_a_limit_and_continues_after_a_reopen() {
         let dir = data_dir("run");
         let mut window = open(dir.clone());
+        window.model_ready = true;
         let _ = update(&mut window, Message::Fetched(Ok(radio_duna())));
         let _ = update(&mut window, Message::Select(FEED.into()));
         let _ = update(&mut window, Message::Episodes(FEED.into(), Ok(vec![episode()])));
@@ -993,9 +1083,37 @@ mod tests {
     }
 
     #[test]
+    fn a_missing_model_offers_the_download_and_keeps_runs_off_until_it_is_ready() {
+        let dir = data_dir("model");
+        let mut window = open(dir.clone());
+        window.shows = vec![radio_duna()];
+        assert!(simulator(view(&window)).find(MODEL_NEEDED).is_ok());
+        assert!(simulator(view(&window)).find(DOWNLOAD_MODEL).is_ok());
+        drive(&mut window, |ui| {
+            let _ = ui.click(START_WEEK);
+        });
+        assert!(window.week.is_none());
+        let _ = update(&mut window, Message::Model(ModelEvent::Progress(model::Progress::Bytes(671_088_640, model::MODEL_SIZE))));
+        assert!(simulator(view(&window)).find("Descargando el modelo de voz: 640 de 1.549 MB (41 %)").is_ok());
+        assert!(simulator(view(&window)).find(DOWNLOAD_MODEL).is_err());
+        let _ = update(&mut window, Message::Model(ModelEvent::Progress(model::Progress::Checking)));
+        assert!(simulator(view(&window)).find(MODEL_CHECKING).is_ok());
+        let _ = update(&mut window, Message::Model(ModelEvent::Finished(Err(model::Failure::Damaged))));
+        assert!(simulator(view(&window)).find(MODEL_DAMAGED).is_ok());
+        assert!(simulator(view(&window)).find(DOWNLOAD_MODEL).is_ok());
+        std::fs::create_dir_all(job::model_path(&dir).parent().unwrap()).unwrap();
+        std::fs::write(job::model_path(&dir), b"model").unwrap();
+        let _ = update(&mut window, Message::Model(ModelEvent::Finished(Ok(()))));
+        assert!(window.model_ready);
+        assert!(simulator(view(&window)).find(MODEL_READY).is_ok());
+        assert!(simulator(view(&window)).find(DOWNLOAD_MODEL).is_err());
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
     fn failures_read_in_spanish() {
         let missing = failure_text(&Failure::MissingModel(PathBuf::from("datos").join("models").join(job::MODEL_FILE)), Provider::Claude);
-        assert!(missing.starts_with("Falta el modelo de transcripción. Copia ggml-large-v3-turbo.bin en la carpeta datos"));
+        assert_eq!(missing, "Falta el modelo de voz. Usa Descargar modelo y luego Continuar.");
         assert!(failure_text(&Failure::MissingCli, Provider::Claude).contains("programa claude."));
         assert!(failure_text(&Failure::Limit, Provider::Claude).starts_with("Claude llegó a su límite de uso."));
     }

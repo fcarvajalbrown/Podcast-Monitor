@@ -7,6 +7,7 @@ mod feed;
 mod gui;
 mod job;
 mod memory;
+mod model;
 mod names;
 mod quotes;
 mod report;
