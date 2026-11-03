@@ -6,7 +6,6 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 
 - Episode report not yet reshaped to the reader's comments: topics in minutes (she asked percent only), 28 topics, 41 people with 10 at 0, 4 pages for Ep. 34 (`docs/research/reader-feedback.md`). Scope to be set with Felipe.
 - The weekly report the reader approved (`work/sent/2026-10-29-semanal-semana-2026-10-26-cli-conclusiones.pdf`) stays as it is: Felipe set it as the report that matters most, read every Monday early morning.
-- Download site at https://podcastmonitor.copiapolabs.cl/, like Cuña-Cutter's at cunacutter.copiapolabs.cl (its ADR 0015 in the Cuña-Cutter repo). Requested by Felipe; scope not set.
 - Glossary improvements get a session of their own to study them, set by Felipe.
 - Preprint of the measured results (speech-to-text speed, heard-as name fix, quote checks) on TechRxiv and engrXiv, chosen by Felipe; arXiv is out for lack of a sponsor. A session for it is set for 30 October 10:00.
 - Preprint measurements set by Felipe before writing, on the 28 saved episodes of the week of 26 October: every quote checked against its transcript, every name-fix change judged by hand by Felipe, 10 episodes timed in both speed settings plus 3 repeats of one. No word error rate, so the paper claims names, quotes and speed only.
@@ -23,6 +22,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 | 6 | Free-AI path for a reader with no paid assistant | Not Started |
 | 7 | Weekly report across the show list | Done |
 | 8 | App icon and window design | Not Started |
+| 9 | Download site at podcastmonitor.copiapolabs.cl | Not Started |
 
 ## Phase 1: Pipeline as a Windows CLI
 
@@ -134,3 +134,22 @@ Asked by Felipe as future work: the app icon and a window design modelled on Cu�
 |---|---|---|
 | 1 | App icon: the icons in `assets/brand/` embedded in the Windows exe and shown on the window | Not Started |
 | 2 | Window design modelled on Cuña-Cutter's UX | Not Started |
+
+## Phase 9: Download site
+
+Asked by Felipe: a public download page at https://podcastmonitor.copiapolabs.cl/, modelled on Cuña-Cutter's (its ADR 0015). Chosen by Felipe:
+
+- Windows build at launch; the Apple Silicon button reads Próximamente until phase 5 has a build.
+- The app downloads the Whisper model on first run; the site offers only the exe.
+- Files on the Hostinger hosting next to the page, at the fixed name `/descargas/PodcastMonitor-windows.zip`.
+- The page and the app show the SemVer version; each release has a matching CHANGELOG entry and git tag.
+- Same layout and colours as Cuña-Cutter's page, in Spanish; guide steps set with Felipe when item 4 starts.
+- Out of search engines and AI crawlers: robots.txt, noindex meta tag, X-Robots-Tag header.
+
+| # | Item | Status |
+|---|---|---|
+| 1 | Model download on first run: the window fetches `ggml-large-v3-turbo.bin` into the app-data folder, with progress | Not Started |
+| 2 | Version shown in the window | Not Started |
+| 3 | First release: CHANGELOG entry, git tag, Windows zip | Not Started |
+| 4 | Page in Spanish with Cuña-Cutter's layout and colours, guide, out of indexes | Not Started |
+| 5 | Upload to podcastmonitor.copiapolabs.cl, every link checked | Not Started |
