@@ -128,7 +128,7 @@ Asked by Felipe: a reader without Claude or ChatGPT subscriptions can use ChatGP
 
 ## Phase 8: App icon and window design
 
-Asked by Felipe as future work, then pressed after seeing the model download in the window: "we really need a new UI and fucking favicon". The app icon and a window design modelled on Cuña-Cutter (`C:\Projects\Cuña-Cutter`: `assets/brand/`, PRD section 7, ADR 0008). Items are ordered when the phase starts.
+Asked by Felipe as future work, then pressed after seeing the model download in the window: "we really need a new UI and fucking favicon". Order set by Felipe: phase 9 releases first with today's window, this phase after. The app icon and a window design modelled on Cuña-Cutter (`C:\Projects\Cuña-Cutter`: `assets/brand/`, PRD section 7, ADR 0008). Items are ordered when the phase starts.
 
 | # | Item | Status |
 |---|---|---|
