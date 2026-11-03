@@ -324,7 +324,15 @@
         "apple_publisher": "RadioUdeC",
         "feed": "https://feed.podbean.com/radioudec/feed.xml",
         "name_agreement": 0.5,
-        "status": "no matching show in Apple directory"
+        "status": "ok, matched by eye",
+        "since_episodes": 150,
+        "since_hours": 103.8,
+        "episodes": 150,
+        "with_audio": 150,
+        "hours": 103.8,
+        "transcript_tags": 0,
+        "oldest": "2026-09-28",
+        "newest": "2026-11-02"
       },
       {
         "name": "Señales del Futuro",
@@ -715,7 +723,15 @@
         "apple_publisher": "Salmonexpert",
         "feed": "https://anchor.fm/s/e145de54/podcast/rss",
         "name_agreement": 0.5,
-        "status": "no matching show in Apple directory"
+        "status": "ok, matched by eye",
+        "since_episodes": 1,
+        "since_hours": 0.8,
+        "episodes": 55,
+        "with_audio": 55,
+        "hours": 39.7,
+        "transcript_tags": 0,
+        "oldest": "2023-05-11",
+        "newest": "2026-10-16"
       },
       {
         "name": "Paraíso Enjaulado",
@@ -1118,7 +1134,8 @@
         "transcript_tags": 0,
         "oldest": "2026-03-18",
         "newest": "2026-11-02",
-        "status": "ok"
+        "status": "ok",
+        "national": true
       },
       {
         "name": "Informe Chile",
@@ -1212,7 +1229,8 @@
         "transcript_tags": 0,
         "oldest": "2026-03-05",
         "newest": "2026-10-29",
-        "status": "ok"
+        "status": "ok",
+        "national": true
       },
       {
         "name": "El Café Diario",
@@ -1255,7 +1273,8 @@
         "transcript_tags": 3,
         "oldest": "2026-01-02",
         "newest": "2026-11-02",
-        "status": "ok"
+        "status": "ok",
+        "national": true
       },
       {
         "name": "Esa es la Idea",
@@ -1272,7 +1291,8 @@
         "transcript_tags": 0,
         "oldest": "2026-03-16",
         "newest": "2026-11-02",
-        "status": "ok"
+        "status": "ok",
+        "national": true
       },
       {
         "name": "Santiago Adicto",
@@ -1375,7 +1395,8 @@
         "transcript_tags": 0,
         "oldest": "2024-06-18",
         "newest": "2026-10-31",
-        "status": "ok"
+        "status": "ok",
+        "national": true
       },
       {
         "name": "Actualidad Latinoamericana",
@@ -1401,7 +1422,8 @@
         "transcript_tags": 0,
         "oldest": "2021-10-26",
         "newest": "2026-11-02",
-        "status": "ok"
+        "status": "ok",
+        "national": true
       },
       {
         "name": "Money Talks",
@@ -1418,7 +1440,8 @@
         "transcript_tags": 0,
         "oldest": "2024-05-04",
         "newest": "2026-11-03",
-        "status": "ok"
+        "status": "ok",
+        "national": true
       },
       {
         "name": "Con Peras y Finanzas",
@@ -1435,7 +1458,8 @@
         "transcript_tags": 290,
         "oldest": "2022-06-20",
         "newest": "2026-10-30",
-        "status": "ok"
+        "status": "ok",
+        "national": true
       },
       {
         "name": "Código Chile",
@@ -1469,7 +1493,8 @@
         "transcript_tags": 0,
         "oldest": "2019-06-06",
         "newest": "2026-11-01",
-        "status": "ok"
+        "status": "ok",
+        "national": true
       },
       {
         "name": "Expertas en Nada",
@@ -1486,7 +1511,8 @@
         "transcript_tags": 0,
         "oldest": "2022-06-29",
         "newest": "2026-10-29",
-        "status": "ok"
+        "status": "ok",
+        "national": true
       },
       {
         "name": "Media Semana",

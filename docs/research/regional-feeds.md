@@ -1,7 +1,12 @@
 # Which regional podcasts publish today
 
 Question: of the RSS podcasts found by eight web searches per region, how many still publish, and
-how much audio do they put out each week?
+how much audio do they put out each week, and what would each region's own reports cost?
+
+This is not the final podcast selection. The shows below are a sample used only to size the budget
+of SYNCOAI's daily and weekly regional reports for content creators, priced on the three API
+providers (OpenAI, Qwen, Kimi) at the low, medium and high tiers of their models. Which shows are
+monitored is decided separately.
 
 Checked 3 November 2026 with `tools/region_discovery/check_candidates.py` over the 146 candidates
 in `tools/region_discovery/websearch/`. Each candidate was looked up in Apple's Chilean directory,
@@ -43,9 +48,35 @@ La Araucanía, Los Ríos and Aysén.
 
 ## Regional fit
 
-Felipe confirmed all 14 shows as regional on 3 November ("they are what people are talking on the
+Felipe confirmed all 14 shows as regional ("they are what people are talking on the
 region, everything is politics"). Four were in doubt from their own feed descriptions: Voces de
 Alianza, a Schoenstatt talk show on faith and national topics; Traficantes de Cultura, interviews
 with authors and filmmakers; Nación X, a comics talk show; and FUSAT Contigo, a Rancagua hospital's
 weekly health interviews on Radio Rancagua 99.5. A show counts for the region where the web search
 found it, whatever its genre.
+
+## Budget per region
+
+USD a month for each region's own daily and weekly report, every episode transcribed with
+qwen3-asr-flash and analysed by the model in the column. National reports are not included. Run with
+`tools/region_discovery/cost_regions.py` (scenario `high` of `tools/token_cost/scenarios.json`);
+results in `tools/region_discovery/region-costs.json`. Episodes and hours a week are the 60-day
+counts divided by 60/7.
+
+| Region | Shows | Episodes a week | Audio hours a week | OpenAI low | OpenAI medium | OpenAI high | Qwen low | Qwen medium | Qwen high | Kimi low |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Biobío | 2 | 18.8 | 12.3 | 8.58 | 18.06 | 112.90 | 7.86 | 11.96 | 28.13 | 39.14 |
+| Los Lagos | 2 | 13.4 | 3.4 | 2.82 | 9.67 | 78.16 | 2.31 | 5.26 | 16.89 | 24.89 |
+| Magallanes | 1 | 0.2 | 0.1 | 0.11 | 0.48 | 4.11 | 0.09 | 0.23 | 0.71 | 1.28 |
+| Metropolitana | 3 | 7.3 | 6.5 | 4.42 | 8.28 | 46.92 | 4.13 | 5.79 | 12.29 | 16.87 |
+| Ñuble | 2 | 0.7 | 0.2 | 0.18 | 0.77 | 6.71 | 0.13 | 0.37 | 1.25 | 2.09 |
+| O'Higgins | 2 | 2.7 | 2.4 | 1.66 | 3.23 | 18.91 | 1.54 | 2.21 | 4.76 | 6.71 |
+| Valparaíso | 2 | 10.7 | 8.0 | 5.51 | 11.04 | 66.30 | 5.10 | 7.48 | 16.84 | 23.32 |
+| Seven regions | 14 | 53.9 | 33.0 | 23.28 | 51.53 | 334.01 | 21.16 | 33.30 | 80.87 | 114.30 |
+
+The models are gpt-6-luna, gpt-6.1-terra and gpt-6-astra for OpenAI; qwen3.7-flash, qwen3.7-plus
+and qwen3.8-max for Qwen; kimi-k3 for Kimi. Kimi has no medium tier in the price table, and its
+high tier, kimi-k3.1-pro, has no first-party price yet, so that column is missing; the kimi-k3
+figure uses an 8 October reading not re-confirmed. Transcription is the same in every column: 7.54 a month for Biobío and 20.20 for the
+seven regions together, on 33.0 audio hours a week. The nine regions with
+no live show cost nothing in this sample.

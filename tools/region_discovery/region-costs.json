@@ -1,0 +1,444 @@
+{
+  "scenario": "high",
+  "regions": [
+    {
+      "region": "Antofagasta",
+      "shows": 0,
+      "episodes_per_week": 0.0,
+      "audio_hours_per_week": 0.0
+    },
+    {
+      "region": "La Araucanía",
+      "shows": 0,
+      "episodes_per_week": 0.0,
+      "audio_hours_per_week": 0.0
+    },
+    {
+      "region": "Arica y Parinacota",
+      "shows": 0,
+      "episodes_per_week": 0.0,
+      "audio_hours_per_week": 0.0
+    },
+    {
+      "region": "Atacama",
+      "shows": 0,
+      "episodes_per_week": 0.0,
+      "audio_hours_per_week": 0.0
+    },
+    {
+      "region": "Aysén del General Carlos Ibáñez del Campo",
+      "shows": 0,
+      "episodes_per_week": 0.0,
+      "audio_hours_per_week": 0.0
+    },
+    {
+      "region": "Biobío",
+      "shows": 2,
+      "episodes_per_week": 18.78,
+      "audio_hours_per_week": 12.33,
+      "transcription_monthly_usd": 7.54,
+      "monthly_usd_by_provider_and_tier": {
+        "OpenAI": {
+          "low": {
+            "model": "gpt-6-luna",
+            "monthly_usd": 8.58,
+            "confirmed_price": true
+          },
+          "medium": {
+            "model": "gpt-6.1-terra",
+            "monthly_usd": 18.06,
+            "confirmed_price": true
+          },
+          "high": {
+            "model": "gpt-6-astra",
+            "monthly_usd": 112.9,
+            "confirmed_price": true
+          }
+        },
+        "Alibaba Qwen": {
+          "low": {
+            "model": "qwen3.7-flash",
+            "monthly_usd": 7.86,
+            "confirmed_price": true
+          },
+          "medium": {
+            "model": "qwen3.7-plus",
+            "monthly_usd": 11.96,
+            "confirmed_price": true
+          },
+          "high": {
+            "model": "qwen3.8-max",
+            "monthly_usd": 28.13,
+            "confirmed_price": true
+          }
+        },
+        "Moonshot": {
+          "low": {
+            "model": "kimi-k3",
+            "monthly_usd": 39.14,
+            "confirmed_price": false
+          },
+          "high": {
+            "model": "kimi-k3.1-pro",
+            "monthly_usd": null,
+            "confirmed_price": false
+          }
+        }
+      }
+    },
+    {
+      "region": "Coquimbo",
+      "shows": 0,
+      "episodes_per_week": 0.0,
+      "audio_hours_per_week": 0.0
+    },
+    {
+      "region": "Los Lagos",
+      "shows": 2,
+      "episodes_per_week": 13.42,
+      "audio_hours_per_week": 3.38,
+      "transcription_monthly_usd": 2.08,
+      "monthly_usd_by_provider_and_tier": {
+        "OpenAI": {
+          "low": {
+            "model": "gpt-6-luna",
+            "monthly_usd": 2.82,
+            "confirmed_price": true
+          },
+          "medium": {
+            "model": "gpt-6.1-terra",
+            "monthly_usd": 9.67,
+            "confirmed_price": true
+          },
+          "high": {
+            "model": "gpt-6-astra",
+            "monthly_usd": 78.16,
+            "confirmed_price": true
+          }
+        },
+        "Alibaba Qwen": {
+          "low": {
+            "model": "qwen3.7-flash",
+            "monthly_usd": 2.31,
+            "confirmed_price": true
+          },
+          "medium": {
+            "model": "qwen3.7-plus",
+            "monthly_usd": 5.26,
+            "confirmed_price": true
+          },
+          "high": {
+            "model": "qwen3.8-max",
+            "monthly_usd": 16.89,
+            "confirmed_price": true
+          }
+        },
+        "Moonshot": {
+          "low": {
+            "model": "kimi-k3",
+            "monthly_usd": 24.89,
+            "confirmed_price": false
+          },
+          "high": {
+            "model": "kimi-k3.1-pro",
+            "monthly_usd": null,
+            "confirmed_price": false
+          }
+        }
+      }
+    },
+    {
+      "region": "Los Ríos",
+      "shows": 0,
+      "episodes_per_week": 0.0,
+      "audio_hours_per_week": 0.0
+    },
+    {
+      "region": "Magallanes y de la Antártica Chilena",
+      "shows": 1,
+      "episodes_per_week": 0.23,
+      "audio_hours_per_week": 0.12,
+      "transcription_monthly_usd": 0.09,
+      "monthly_usd_by_provider_and_tier": {
+        "OpenAI": {
+          "low": {
+            "model": "gpt-6-luna",
+            "monthly_usd": 0.11,
+            "confirmed_price": true
+          },
+          "medium": {
+            "model": "gpt-6.1-terra",
+            "monthly_usd": 0.48,
+            "confirmed_price": true
+          },
+          "high": {
+            "model": "gpt-6-astra",
+            "monthly_usd": 4.11,
+            "confirmed_price": true
+          }
+        },
+        "Alibaba Qwen": {
+          "low": {
+            "model": "qwen3.7-flash",
+            "monthly_usd": 0.09,
+            "confirmed_price": true
+          },
+          "medium": {
+            "model": "qwen3.7-plus",
+            "monthly_usd": 0.23,
+            "confirmed_price": true
+          },
+          "high": {
+            "model": "qwen3.8-max",
+            "monthly_usd": 0.71,
+            "confirmed_price": true
+          }
+        },
+        "Moonshot": {
+          "low": {
+            "model": "kimi-k3",
+            "monthly_usd": 1.28,
+            "confirmed_price": false
+          },
+          "high": {
+            "model": "kimi-k3.1-pro",
+            "monthly_usd": null,
+            "confirmed_price": false
+          }
+        }
+      }
+    },
+    {
+      "region": "Maule",
+      "shows": 0,
+      "episodes_per_week": 0.0,
+      "audio_hours_per_week": 0.0
+    },
+    {
+      "region": "Metropolitana de Santiago",
+      "shows": 3,
+      "episodes_per_week": 7.35,
+      "audio_hours_per_week": 6.54,
+      "transcription_monthly_usd": 3.99,
+      "monthly_usd_by_provider_and_tier": {
+        "OpenAI": {
+          "low": {
+            "model": "gpt-6-luna",
+            "monthly_usd": 4.42,
+            "confirmed_price": true
+          },
+          "medium": {
+            "model": "gpt-6.1-terra",
+            "monthly_usd": 8.28,
+            "confirmed_price": true
+          },
+          "high": {
+            "model": "gpt-6-astra",
+            "monthly_usd": 46.92,
+            "confirmed_price": true
+          }
+        },
+        "Alibaba Qwen": {
+          "low": {
+            "model": "qwen3.7-flash",
+            "monthly_usd": 4.13,
+            "confirmed_price": true
+          },
+          "medium": {
+            "model": "qwen3.7-plus",
+            "monthly_usd": 5.79,
+            "confirmed_price": true
+          },
+          "high": {
+            "model": "qwen3.8-max",
+            "monthly_usd": 12.29,
+            "confirmed_price": true
+          }
+        },
+        "Moonshot": {
+          "low": {
+            "model": "kimi-k3",
+            "monthly_usd": 16.87,
+            "confirmed_price": false
+          },
+          "high": {
+            "model": "kimi-k3.1-pro",
+            "monthly_usd": null,
+            "confirmed_price": false
+          }
+        }
+      }
+    },
+    {
+      "region": "Ñuble",
+      "shows": 2,
+      "episodes_per_week": 0.7,
+      "audio_hours_per_week": 0.18,
+      "transcription_monthly_usd": 0.13,
+      "monthly_usd_by_provider_and_tier": {
+        "OpenAI": {
+          "low": {
+            "model": "gpt-6-luna",
+            "monthly_usd": 0.18,
+            "confirmed_price": true
+          },
+          "medium": {
+            "model": "gpt-6.1-terra",
+            "monthly_usd": 0.77,
+            "confirmed_price": true
+          },
+          "high": {
+            "model": "gpt-6-astra",
+            "monthly_usd": 6.71,
+            "confirmed_price": true
+          }
+        },
+        "Alibaba Qwen": {
+          "low": {
+            "model": "qwen3.7-flash",
+            "monthly_usd": 0.13,
+            "confirmed_price": true
+          },
+          "medium": {
+            "model": "qwen3.7-plus",
+            "monthly_usd": 0.37,
+            "confirmed_price": true
+          },
+          "high": {
+            "model": "qwen3.8-max",
+            "monthly_usd": 1.25,
+            "confirmed_price": true
+          }
+        },
+        "Moonshot": {
+          "low": {
+            "model": "kimi-k3",
+            "monthly_usd": 2.09,
+            "confirmed_price": false
+          },
+          "high": {
+            "model": "kimi-k3.1-pro",
+            "monthly_usd": null,
+            "confirmed_price": false
+          }
+        }
+      }
+    },
+    {
+      "region": "Libertador General Bernardo O'Higgins",
+      "shows": 2,
+      "episodes_per_week": 2.68,
+      "audio_hours_per_week": 2.44,
+      "transcription_monthly_usd": 1.47,
+      "monthly_usd_by_provider_and_tier": {
+        "OpenAI": {
+          "low": {
+            "model": "gpt-6-luna",
+            "monthly_usd": 1.66,
+            "confirmed_price": true
+          },
+          "medium": {
+            "model": "gpt-6.1-terra",
+            "monthly_usd": 3.23,
+            "confirmed_price": true
+          },
+          "high": {
+            "model": "gpt-6-astra",
+            "monthly_usd": 18.91,
+            "confirmed_price": true
+          }
+        },
+        "Alibaba Qwen": {
+          "low": {
+            "model": "qwen3.7-flash",
+            "monthly_usd": 1.54,
+            "confirmed_price": true
+          },
+          "medium": {
+            "model": "qwen3.7-plus",
+            "monthly_usd": 2.21,
+            "confirmed_price": true
+          },
+          "high": {
+            "model": "qwen3.8-max",
+            "monthly_usd": 4.76,
+            "confirmed_price": true
+          }
+        },
+        "Moonshot": {
+          "low": {
+            "model": "kimi-k3",
+            "monthly_usd": 6.71,
+            "confirmed_price": false
+          },
+          "high": {
+            "model": "kimi-k3.1-pro",
+            "monthly_usd": null,
+            "confirmed_price": false
+          }
+        }
+      }
+    },
+    {
+      "region": "Tarapacá",
+      "shows": 0,
+      "episodes_per_week": 0.0,
+      "audio_hours_per_week": 0.0
+    },
+    {
+      "region": "Valparaíso",
+      "shows": 2,
+      "episodes_per_week": 10.73,
+      "audio_hours_per_week": 8.03,
+      "transcription_monthly_usd": 4.9,
+      "monthly_usd_by_provider_and_tier": {
+        "OpenAI": {
+          "low": {
+            "model": "gpt-6-luna",
+            "monthly_usd": 5.51,
+            "confirmed_price": true
+          },
+          "medium": {
+            "model": "gpt-6.1-terra",
+            "monthly_usd": 11.04,
+            "confirmed_price": true
+          },
+          "high": {
+            "model": "gpt-6-astra",
+            "monthly_usd": 66.3,
+            "confirmed_price": true
+          }
+        },
+        "Alibaba Qwen": {
+          "low": {
+            "model": "qwen3.7-flash",
+            "monthly_usd": 5.1,
+            "confirmed_price": true
+          },
+          "medium": {
+            "model": "qwen3.7-plus",
+            "monthly_usd": 7.48,
+            "confirmed_price": true
+          },
+          "high": {
+            "model": "qwen3.8-max",
+            "monthly_usd": 16.84,
+            "confirmed_price": true
+          }
+        },
+        "Moonshot": {
+          "low": {
+            "model": "kimi-k3",
+            "monthly_usd": 23.32,
+            "confirmed_price": false
+          },
+          "high": {
+            "model": "kimi-k3.1-pro",
+            "monthly_usd": null,
+            "confirmed_price": false
+          }
+        }
+      }
+    }
+  ]
+}
