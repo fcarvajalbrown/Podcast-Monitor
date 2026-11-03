@@ -1,0 +1,88 @@
+{
+  "region": "Los Ríos",
+  "searched_on": "2026-11-03",
+  "queries": [
+    "podcast Valdivia Los Ríos",
+    "podcast noticias región de Los Ríos Valdivia",
+    "podcast entrevistas Valdivia La Unión Panguipulli",
+    "podcast cultura Valdivia",
+    "radio Valdivia podcast programa política Sin Anestesia",
+    "podcast Spotify Valdivia Chile",
+    "podcast Universidad Austral de Chile UACh",
+    "podcast medio ambiente humedales Valdivia ciencia sur de Chile"
+  ],
+  "candidates": [
+    {
+      "name": "Explora Los Ríos Podcast",
+      "publisher": "Explora Los Ríos, Universidad Austral de Chile",
+      "genre_seen": "science",
+      "evidence": "https://podnews.net/podcast/i4ghl"
+    },
+    {
+      "name": "Memorias Valdivianas",
+      "publisher": "Eduardo Galaz and Cristóbal McIntosh",
+      "genre_seen": "local history",
+      "evidence": "https://www.australvaldivia.cl/impresa/2025/04/25/full/cuerpo-principal/19"
+    },
+    {
+      "name": "Puelche Comunicaciones",
+      "publisher": "Puelche Comunicaciones",
+      "genre_seen": "community current affairs",
+      "evidence": "https://www.ivoox.com/player_ej_170722440_6_1.html?c1=008080"
+    },
+    {
+      "name": "Sin Anestesia: En Valdivia hablamos de política",
+      "publisher": "",
+      "genre_seen": "local and national politics",
+      "evidence": "https://www.ivoox.com/en/podcast-sin-anestesia-en-valdivia-hablamos-de-politica_sq_f1316461_1.html"
+    },
+    {
+      "name": "Radio 18 de octubre",
+      "publisher": "",
+      "genre_seen": "community conversation, Panguipulli",
+      "evidence": "https://www.podengine.ai/podcasts/radio-18-de-octubre"
+    },
+    {
+      "name": "Podcast Casona Cultural Panguipulli",
+      "publisher": "Casona Cultural Panguipulli",
+      "genre_seen": "culture interviews",
+      "evidence": "https://www.ivoox.com/en/podcast-podcast-casona-cultural-panguipulli_sq_f171943_1.html"
+    },
+    {
+      "name": "Comunidad Creativa Los Ríos",
+      "publisher": "Comunidad Creativa Los Ríos",
+      "genre_seen": "culture interviews",
+      "evidence": "https://eldesconcierto.cl/2022/10/05/plataforma-comunidad-creativa-los-rios-estrena-podcast-con-entrevistas-a-agentes-culturales"
+    },
+    {
+      "name": "Territorios Creadores",
+      "publisher": "",
+      "genre_seen": "literature",
+      "evidence": "https://www.diariosostenible.cl/noticias/peliculas-documentales-y-podcast/1"
+    },
+    {
+      "name": "Pequeños valdivianos",
+      "publisher": "",
+      "genre_seen": "nature, children",
+      "evidence": "https://www.diariosostenible.cl/noticias/peliculas-documentales-y-podcast/1"
+    },
+    {
+      "name": "Voces del Humedal",
+      "publisher": "",
+      "genre_seen": "art, science and community",
+      "evidence": "https://www.diariosostenible.cl/noticias/peliculas-documentales-y-podcast/1"
+    },
+    {
+      "name": "Café Austral",
+      "publisher": "Radio UACh",
+      "genre_seen": "university interviews",
+      "evidence": "https://diario.uach.cl/cafe-austral-arte-y-cultura-en-la-uach/"
+    },
+    {
+      "name": "Ciencia en OFF",
+      "publisher": "Consorcio Ci2030 Sur-Subantártico",
+      "genre_seen": "science",
+      "evidence": "https://www.audible.in/podcast/Clima-de-cambio/episodes/B0CJZ5DSS4"
+    }
+  ]
+}
