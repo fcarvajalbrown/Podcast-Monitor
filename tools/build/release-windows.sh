@@ -14,7 +14,7 @@ if [ ! -f work/redist/vc_redist.x64.exe ]; then
   curl -sSL -o work/redist/vc_redist.x64.exe https://aka.ms/vs/17/release/vc_redist.x64.exe
 fi
 
-"$iscc" /Q "/DAppVersion=$version" "/DAppExe=$(cygpath -w "$exe")" "$(cygpath -w tools/build/installer.iss)"
+MSYS2_ARG_CONV_EXCL="*" "$iscc" /Q "/DAppVersion=$version" "/DAppExe=$(cygpath -w "$exe")" "$(cygpath -w tools/build/installer.iss)"
 setup=work/installer/PodcastMonitor-windows-setup.exe
 echo "version $version"
 echo "$setup $(stat -c %s "$setup") bytes"
