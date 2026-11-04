@@ -10,5 +10,5 @@
 
 ## Flags
 
-- Opened: subdomain podcastmonitor.copiapolabs.cl missing, blocks item 5; Codex install from the window unconfirmed (first try failed under Git Bash's tar, retry denied by the permission system); browser sign-in not run for either assistant; installer 0.2.0 not installed; Hub deploy.log holds 13 earlier publickey failures; a Hub clone now also sits at `C:\Projects\Flujos-Eventos-Hub` beside the one in `Desktop\PROVI\2. REPOS`.
+- Opened: subdomain podcastmonitor.copiapolabs.cl missing, blocks item 5; Codex install from the window unconfirmed (first try failed under Git Bash's tar, retry denied by the permission system); browser sign-in not run for either assistant; installer 0.2.0 not installed; Hub deploy.log holds 13 earlier publickey failures.
 - Closed: phase 9 item 4; CHANGELOG shown through `cambios.html`.
