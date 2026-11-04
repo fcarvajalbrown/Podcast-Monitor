@@ -3,8 +3,9 @@
 Current state: phases 1, 3, 4 and 7 done; the reader liked the weekly report with the week-wide topic table and conclusion summaries (`work/sent/2026-10-29-semanal-semana-2026-10-26-cli-conclusiones.pdf`). Platforms are Windows and macOS on Apple Silicon M1 and later; phase 5 (macOS) is next. The app transcribes greedy with flash attention (334 s to 158 s on Ep. 34, `docs/research/stt-speed-ep34-rtx2050.md`); `tools/stt_speed/bench.sh` compares variants, `tools/resummarize/resummarize.sh <monday>` redoes a week's summaries from saved transcripts. The window has a Generar / Continuar informe semanal button covering the 7 days before the press; `podcast-monitor week [--run] [--report]` does the same from a terminal, `--monday <date>` for a calendar week. Week of 26 October through Monday 2 November 07:00: `podcast-monitor week --monday 2026-10-26 --to-now --run --report` (release build, Codex): 58 episodes, 0 failed, El Shot and El Villegas of 2 November added at Felipe's request; Codex never hit its limit, so the Claude fallback was not tested. PDF at `%APPDATA%\Podcast-Monitor\weeks\2026-10-26\informe-semanal.pdf` (16 shows, 5 pages), copy `work/sent/2026-11-02-semanal-semana-2026-10-26-cli-hasta-lunes-2.pdf`. Debug logs in `%APPDATA%\Podcast-Monitor\logs\`; `tools/log_stages/stages.py <log>` times each stage. Build with `tools/build/cargo-windows.cmd <args> -j 2` from bash. See `ROADMAP.md`, `docs/ROADMAP-HISTORY.md`, `docs/research/weekly-run.md`.
 
 Open flags:
-- Phase 9 (download site): items 1 (model download) and 2 (version in the title, 0.1.0) done; item 3 next, the first CHANGELOG (0.1.0), tag v0.1.0 and the Inno Setup installer. Phase 8 (new UI and icon) after the release, set by Felipe.
-- Version in the title not yet seen in a running window; a full model download from nothing not timed.
+- Phase 9 (download site): items 1 to 3 done, tag v0.1.0 at 5f76125; installer built by `tools/build/release-windows.sh` into `work/installer/PodcastMonitor-windows-setup.exe` (45.8 MB, sha256 in ROADMAP). Item 4 next: the Spanish page, guide steps set with Felipe; whether the page shows the CHANGELOG is to be set then. Phase 8 (new UI and icon) after the release, set by Felipe.
+- Installer's VC++ runtime step not yet seen on a PC without the runtime; transcription speed on integrated graphics not measured (this laptop has none). A full model download from nothing not timed.
+- Readers mostly have integrated graphics (Felipe); Intel chips before 6th-gen Core have no Vulkan and transcribe on the CPU, about real time (Ep. 34: 4,295 s).
 - Window text "Buscando los episodios de esta semana…" still says "esta semana" with the 7-day span.
 - Codex limit message still not seen: if the Claude fallback misses it, Felipe chose to fix the matching first, then rerun.
 - Preprint session set for 30 October 10:00 (Windows popup task `PreprintReminder`); venues TechRxiv and engrXiv, ROADMAP open item.
@@ -20,5 +21,4 @@ Open flags:
 - Rerunning an episode with another provider overwrites its summary.
 - Boric 6 on Ep. 34 with context off (target 7); do not change the target.
 - whisper-rs 424 s against whisper-cli 354 s on the RTX 2050, not investigated.
-- No CPU-only or integrated-GPU speed measured.
 - Older run folders without `show.json` fall back to the folder name.
