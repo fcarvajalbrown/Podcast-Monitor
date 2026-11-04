@@ -11,7 +11,8 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 - Preprint measurements set by Felipe before writing, on the 28 saved episodes of the week of 26 October: every quote checked against its transcript, every name-fix change judged by hand by Felipe, 10 episodes timed in both speed settings plus 3 repeats of one. No word error rate, so the paper claims names, quotes and speed only.
 
 - Release exe (114 MB, one file) needs the Visual C++ runtime (MSVCP140, VCRUNTIME140, VCRUNTIME140_1), not present on every Windows; Felipe chose to bundle Microsoft's vc_redist.x64.exe in the installer, run silently only when the runtime is missing.
-- Release exe links vulkan-1.dll, which only a GPU driver with Vulkan installs; a PC without it may not start the app. Not tested on such a PC.
+- Release exe links vulkan-1.dll, which only a GPU driver with Vulkan installs; a PC without it may not start the app. Felipe: most readers have integrated graphics, the release must be ready for them. Intel added Vulkan on Windows from 6th-gen Core (Skylake) on, per 2017-2018 reports; older chips have none.
+- Integrated-graphics plan chosen by Felipe: the installer ships Khronos's vulkan-1.dll next to the exe; check transcription falls back to the CPU when no Vulkan driver works; time Ep. 34 on integrated graphics. This laptop (Ryzen 7 7435HS, RTX 2050) has no integrated GPU, so that timing needs another PC; the CPU timing runs here.
 - Release exe carries no icon (no Windows resource is embedded); the `.ico` exists in `assets/brand/`.
 
 ## Phases
