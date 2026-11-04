@@ -152,8 +152,32 @@ enum Message {
     Model(ModelEvent),
 }
 
+const ICON_PNG: &[u8] = include_bytes!("../assets/brand/windows/podcast-monitor-icon-256.png");
+
 pub fn run() -> iced::Result {
-    iced::application(boot, update, view).title(TITLE).window_size(Size::new(1000.0, 640.0)).run()
+    let settings = iced::window::Settings { size: Size::new(1000.0, 640.0), icon: window_icon(), ..Default::default() };
+    iced::application(boot, update, view).title(TITLE).window(settings).run()
+}
+
+fn window_icon() -> Option<iced::window::Icon> {
+    match decode_rgba(ICON_PNG) {
+        Ok((rgba, width, height)) => iced::window::icon::from_rgba(rgba, width, height).ok(),
+        Err(error) => {
+            log::warn!("window icon not decoded: {error}");
+            None
+        }
+    }
+}
+
+fn decode_rgba(png_bytes: &[u8]) -> anyhow::Result<(Vec<u8>, u32, u32)> {
+    let mut decoder = png::Decoder::new(std::io::Cursor::new(png_bytes));
+    decoder.set_transformations(png::Transformations::ALPHA | png::Transformations::EXPAND);
+    let mut reader = decoder.read_info()?;
+    let mut rgba = vec![0; reader.output_buffer_size().ok_or_else(|| anyhow::anyhow!("icon too large"))?];
+    let frame = reader.next_frame(&mut rgba)?;
+    anyhow::ensure!(frame.color_type == png::ColorType::Rgba && frame.bit_depth == png::BitDepth::Eight, "icon is not 8-bit RGBA");
+    rgba.truncate(frame.buffer_size());
+    Ok((rgba, frame.width, frame.height))
 }
 
 fn boot() -> Window {
@@ -850,6 +874,14 @@ mod tests {
             audio_url: "https://example.com/np-1.mp3".into(),
             description: String::new(),
         }
+    }
+
+    #[test]
+    fn window_icon_decodes_to_256_square_rgba() {
+        let (rgba, width, height) = decode_rgba(ICON_PNG).unwrap();
+        assert_eq!((width, height), (256, 256));
+        assert_eq!(rgba.len(), 256 * 256 * 4);
+        assert!(window_icon().is_some());
     }
 
     #[test]
