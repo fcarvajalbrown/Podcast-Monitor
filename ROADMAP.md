@@ -21,6 +21,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 - App looks only for `claude.cmd` and `codex.cmd` (`src/summarize.rs` line 170). The native Windows installers, now the ones both vendors recommend, install no `.cmd` per their docs, confirmed by reading both install scripts: they install `claude.exe` and `codex.exe`. Fixed by phase 9 item 6.
 - `podcastmonitor.copiapolabs.cl` does not exist yet (Google DNS NXDOMAIN, no folder under `public_html`); item 5 needs the subdomain created first.
 - Assistant setup, tested in a throwaway home folder: Claude installer exit 0, `.local/bin/claude.exe`, status exit 1 signed out. Codex installer failed under Git Bash at its `tar` step, likely Git's GNU tar; not retried. Browser sign-in not run for either.
+- Installer 0.2.0 built: 45828849 bytes, sha256 8e3da25b75a5c2a5e20f39e35fe44943308c836e67ea399702dd3f8f65805c0e. Not yet installed or tagged.
 - vulkan-1.dll source chosen by Felipe: built from Khronos's open-source Vulkan-Loader (Apache 2.0), since the SDK only has it inside LunarG's Qt installer VulkanRT.exe, which 7-Zip cannot unpack.
 - Release exe carries no icon (no Windows resource is embedded); the `.ico` exists in `assets/brand/`. Felipe chose to embed the current icon in 0.1.0 (exe resource through winresource, window icon from the 256 px PNG); phase 8 swaps the image.
 
@@ -167,6 +168,6 @@ Asked by Felipe: a public download page at https://podcastmonitor.copiapolabs.cl
 | 1 | Model download on first run: the window fetches `ggml-large-v3-turbo.bin` into the app-data folder, with progress | Done |
 | 2 | Version shown in the window title, "Podcast-Monitor 0.1.0" from Cargo.toml; first public release is 0.1.0, set by Felipe | Done |
 | 3 | First release: CHANGELOG entry, git tag, Windows installer built with Inno Setup | Done |
-| 4 | Page in Spanish with Cuña-Cutter's layout and colours, guide, out of indexes | Not Started |
+| 4 | Page in Spanish with Cuña-Cutter's layout and colours, guide, out of indexes | In Progress |
 | 5 | Upload to podcastmonitor.copiapolabs.cl, every link checked | Not Started |
 | 6 | Assistant setup in the window, version 0.2.0; goes before items 4 and 5 | In Progress |

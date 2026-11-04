@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, noai, noimageai">
+<title>Podcast-Monitor</title>
+<link rel="icon" href="icono.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --papel: #FFFFFF;
+  --tinta: #23232A;
+  --suave: #6B6B76;
+  --linea: #E4E4EA;
+  --fondo-paso: #F4F4F7;
+  --rojo: #B70002;
+  --rojo-claro: #D11416;
+  --apagado: #C9C9D1;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --papel: #18181C;
+    --tinta: #E6E6EB;
+    --suave: #9A9AA5;
+    --linea: #33333B;
+    --fondo-paso: #222228;
+    --apagado: #45454E;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: "Archivo", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 19px;
+  line-height: 1.6;
+  caret-color: transparent;
+}
+main { max-width: 720px; margin: 0 auto; padding: 40px 16px 80px; }
+a { color: var(--rojo); }
+a:focus-visible, .boton:focus-visible { outline: 3px solid var(--rojo); outline-offset: 3px; }
+
+.marca { display: flex; align-items: center; gap: 12px; }
+.marca img { width: 40px; height: 40px; }
+h1 {
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: clamp(40px, 9vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.lead { font-size: 22px; line-height: 1.5; max-width: 34em; margin: 20px 0 0; }
+
+.corte { margin: 40px 0 8px; }
+.pista {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  height: 4em;
+  font-size: clamp(7px, 1.9vw, 16px);
+  border-bottom: 2px solid var(--linea);
+  overflow: hidden;
+}
+.pista i { display: block; height: 0.75em; border-radius: 0.375em; background: var(--apagado); flex: none; }
+.pista i.dentro { background: var(--tinta); }
+.aguja { position: relative; flex: none; align-self: stretch; width: 4px; margin-top: 6px; background: var(--rojo); border-radius: 2px; }
+.aguja::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: -5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--rojo);
+}
+.corte p { margin: 10px 0 0; color: var(--suave); font-size: 16px; }
+
+h2 {
+  font-stretch: 112%;
+  font-weight: 750;
+  font-size: 28px;
+  line-height: 1.2;
+  margin: 64px 0 16px;
+}
+h3 { font-weight: 700; font-size: 21px; margin: 36px 0 8px; }
+.suave { color: var(--suave); }
+
+.descargas { display: grid; gap: 12px; margin: 24px 0 20px; }
+@media (min-width: 640px) { .descargas { grid-template-columns: 1.4fr 1fr; } }
+.boton {
+  display: block;
+  background: var(--rojo);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 21px;
+  line-height: 1.25;
+  padding: 18px 20px;
+  border-radius: 8px;
+}
+.boton:hover { background: var(--rojo-claro); }
+.boton span { display: block; font-weight: 400; font-size: 15px; margin-top: 4px; }
+.boton.apagado, .boton.apagado:hover { background: var(--fondo-paso); color: var(--suave); }
+
+.indice { list-style: none; padding: 0; margin: 28px 0 0; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 17px; }
+
+ol.pasos { list-style: none; counter-reset: paso; padding: 0; margin: 0; }
+ol.pasos > li {
+  counter-increment: paso;
+  position: relative;
+  padding: 14px 16px 14px 60px;
+  margin: 8px 0;
+  background: var(--fondo-paso);
+  border-radius: 8px;
+}
+ol.pasos > li::before {
+  content: counter(paso);
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--rojo);
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 30px;
+  text-align: center;
+}
+.nota { border-left: 4px solid var(--rojo); padding: 4px 0 4px 16px; margin: 20px 0; }
+b.ui {
+  font-weight: 650;
+  background: var(--papel);
+  border: 1px solid var(--linea);
+  padding: 0 7px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.nota b.ui { background: var(--fondo-paso); }
+footer { margin-top: 96px; padding-top: 16px; border-top: 1px solid var(--linea); color: var(--suave); font-size: 15px; }
+@media (max-width: 480px) { b.ui { white-space: normal; } main { overflow-wrap: break-word; } }
+.aviso { background: var(--fondo-paso); border-radius: 8px; padding: 14px 16px; margin: 20px 0; }
+.aviso p { margin: 0; }
+.aviso p + p { margin-top: 8px; }
+.version { font-size: 17px; margin: 0; }
+figure { margin: 28px 0; }
+figure img { display: block; width: 100%; height: auto; border: 1px solid var(--linea); border-radius: 8px; }
+figcaption { margin-top: 10px; }
+</style>
+</head>
+<body>
+<main>
+<div class="marca">
+  <img src="icono.svg" alt="">
+  <h1>Podcast-Monitor</h1>
+</div>
+<p class="lead">Convierte episodios de podcasts chilenos en un informe PDF para leer en vez de escuchar: el resumen, los temas por tiempo al aire, las personas mencionadas y citas textuales con su minuto.</p>
+
+<ul class="indice">
+  <li><a href="#descargar">Descargar</a></li>
+  <li><a href="#windows">Instalar en Windows</a></li>
+  <li><a href="#primera-vez">La primera vez</a></li>
+  <li><a href="#informe">Hacer un informe</a></li>
+  <li><a href="#demora">Cuánto se demora</a></li>
+</ul>
+
+<h2 id="descargar">Descargar</h2>
+<div class="aviso">
+  <p><b>Antes de descargar: necesitas una cuenta de pago de Claude o de ChatGPT.</b></p>
+  <p>Podcast-Monitor transcribe en tu computador, pero los resúmenes los escribe uno de esos asistentes con tu cuenta. El programa instala lo que falta y te pide iniciar sesión. Si ya usas la app de escritorio de Claude o de ChatGPT, sirve la misma cuenta.</p>
+</div>
+<div class="descargas">
+  <a class="boton" href="descargas/PodcastMonitor-windows-setup.exe">Descargar para Windows<span>Versión 0.2.0, Windows 10 u 11, 46 MB</span></a>
+  <span class="boton apagado">Mac con chip Apple<span>Próximamente</span></span>
+</div>
+<p class="version"><a href="cambios.html">Qué cambió en esta versión</a></p>
+
+<h2 id="windows">Instalar en Windows</h2>
+<ol class="pasos">
+  <li>Abre la carpeta <b class="ui">Descargas</b> y haz doble clic en <b>PodcastMonitor-windows-setup</b>.</li>
+  <li>Puede aparecer una ventana azul que dice <b>Windows protegió su PC</b>. Windows la muestra con los programas nuevos que todavía no conoce. Haz clic en <b class="ui">Más información</b> y después en <b class="ui">Ejecutar de todas formas</b>.</li>
+  <li>Windows pregunta si permites que el programa haga cambios en el equipo. Presiona <b class="ui">Sí</b>.</li>
+  <li>En el instalador presiona <b class="ui">Siguiente</b> y después <b class="ui">Instalar</b>.</li>
+  <li>Deja marcada la casilla <b class="ui">Abrir Podcast-Monitor</b> y presiona <b class="ui">Finalizar</b>.</li>
+</ol>
+<p class="suave">Las próximas veces lo abres desde el menú Inicio. Para desinstalarlo, busca <b class="ui">Desinstalar Podcast-Monitor</b> en el mismo menú.</p>
+
+<h2 id="primera-vez">La primera vez que lo abres</h2>
+<p>Arriba a la derecha de la ventana hay dos cosas por hacer, una sola vez:</p>
+<ol class="pasos">
+  <li>Presiona <b class="ui">Descargar modelo</b>. Es el modelo de voz, pesa 1,6 GB y se queda en tu computador. Si se corta internet, vuelve a presionar el botón y sigue donde quedó.</li>
+  <li>Presiona <b class="ui">Instalar y conectar</b>. El programa instala el asistente elegido y abre el navegador para que inicies sesión con tu cuenta. Si ya lo tienes instalado, no lo vuelve a instalar y el botón dice <b class="ui">Iniciar sesión</b>; si ya iniciaste sesión, este paso no aparece.</li>
+</ol>
+<p class="suave">Mientras falte alguno de los dos, los botones para generar informes quedan apagados.</p>
+
+<h2 id="informe">Cómo hacer un informe</h2>
+<figure>
+  <img src="tour/agregar.png" alt="Ventana del programa con la pregunta Agregar Nada Personal, de Radio Duna, y el botón Sí, agregar" loading="lazy">
+  <figcaption>1. Busca el programa por su nombre y presiona <b class="ui">Sí, agregar</b>.</figcaption>
+</figure>
+<figure>
+  <img src="tour/episodios.png" alt="Ventana del programa con un episodio elegido y el botón Generar informe" loading="lazy">
+  <figcaption>2. Elige un episodio y presiona <b class="ui">Generar informe</b>.</figcaption>
+</figure>
+<figure>
+  <img src="tour/listo.png" alt="Ventana del programa con el aviso Informe listo y el botón Abrir PDF" loading="lazy">
+  <figcaption>3. Cuando termine, presiona <b class="ui">Abrir PDF</b>.</figcaption>
+</figure>
+
+<h2 id="demora">Cuánto se demora</h2>
+<p>La transcripción es la parte lenta y depende de tu computador. Con un episodio de 78 minutos:</p>
+<ul>
+  <li>Con tarjeta de video dedicada (medido con una RTX 2050): menos de 3 minutos.</li>
+  <li>Solo con el procesador (medido): cerca de 72 minutos, más o menos lo que dura el episodio.</li>
+  <li>Con gráficos integrados recientes, como Radeon 680M o Intel Arc (estimación, todavía sin medir): entre 18 y 24 minutos. Los gráficos integrados más antiguos deberían quedar entre esa cifra y la del procesador.</li>
+</ul>
+<p>Si tienes gráficos integrados y quieres ayudar, cuéntanos cuánto te demoró.</p>
+<footer>© Felipe Carvajal Brown 2026</footer>
+</main>
+</body>
+</html>
