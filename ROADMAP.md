@@ -13,6 +13,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 - Release exe (114 MB, one file) needs the Visual C++ runtime (MSVCP140, VCRUNTIME140, VCRUNTIME140_1), not present on every Windows; Felipe chose to bundle Microsoft's vc_redist.x64.exe in the installer, run silently only when the runtime is missing.
 - Release exe links vulkan-1.dll, which only a GPU driver with Vulkan installs; a PC without it may not start the app. Felipe: most readers have integrated graphics, the release must be ready for them. Intel added Vulkan on Windows from 6th-gen Core (Skylake) on, per 2017-2018 reports; older chips have none.
 - Integrated-graphics plan chosen by Felipe: the installer ships Khronos's vulkan-1.dll next to the exe; check transcription falls back to the CPU when no Vulkan driver works; time Ep. 34 on integrated graphics. This laptop (Ryzen 7 7435HS, RTX 2050) has no integrated GPU, so that timing needs another PC; the CPU timing runs here.
+- CPU fallback checked: with Vulkan's loader pointed at a missing driver file (VK_DRIVER_FILES), whisper.cpp logs "no GPU found", loads the model on the CPU and the run goes on (log `2026-11-04_10-09-57_29212.log`).
 - Release exe carries no icon (no Windows resource is embedded); the `.ico` exists in `assets/brand/`.
 
 ## Phases
