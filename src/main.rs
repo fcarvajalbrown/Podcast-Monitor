@@ -1,4 +1,5 @@
 mod assemble;
+mod assistant;
 mod audio;
 mod chunk;
 mod debug_log;

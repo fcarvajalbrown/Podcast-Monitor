@@ -1,11 +1,13 @@
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use chrono::Local;
 use iced::futures::channel::mpsc;
 use iced::widget::{button, column, container, progress_bar, radio, row, rule, scrollable, text, text_input};
 use iced::{Alignment, Element, Length, Size, Task};
 
+use crate::assistant;
 use crate::directory;
 use crate::feed::{self, Episode};
 use crate::job::{self, Failure, Request, Settings, Stage};
@@ -61,6 +63,10 @@ const MODEL_READY: &str = "Modelo de voz listo.";
 const MODEL_INTERRUPTED: &str = "La descarga se interrumpió. Revisa la conexión a internet y usa Descargar modelo para seguir donde quedó.";
 const MODEL_DAMAGED: &str = "El modelo descargado llegó dañado y se borró. Usa Descargar modelo para bajarlo de nuevo.";
 const MISSING_MODEL: &str = "Falta el modelo de voz. Usa Descargar modelo y luego Continuar.";
+const SET_UP_ASSISTANT: &str = "Instalar y conectar";
+const SIGN_IN: &str = "Iniciar sesión";
+const SIGN_IN_NOW: &str = "Inicia sesión en la ventana del navegador que se abrió.";
+const SIGN_IN_FAILED: &str = "No se completó el inicio de sesión. Vuelve a intentarlo con Iniciar sesión.";
 const EPISODE_COUNT: usize = 10;
 
 struct Window {
@@ -88,6 +94,10 @@ struct Window {
     model_ready: bool,
     model_download: Option<model::Progress>,
     model_notice: Option<&'static str>,
+    assistant: Option<assistant::Status>,
+    assistant_step: Option<assistant::Step>,
+    assistant_notice: Option<String>,
+    assistant_cancel: Arc<AtomicBool>,
     opener: fn(&Path) -> std::io::Result<()>,
 }
 
@@ -117,6 +127,12 @@ enum WeekEvent {
 enum ModelEvent {
     Progress(model::Progress),
     Finished(Result<(), model::Failure>),
+}
+
+#[derive(Debug, Clone)]
+enum AssistantEvent {
+    Step(assistant::Step),
+    Finished(assistant::Status, Result<(), assistant::Failure>),
 }
 
 #[derive(Debug, Clone)]
@@ -150,6 +166,10 @@ enum Message {
     OpenPdf,
     DownloadModel,
     Model(ModelEvent),
+    AssistantChecked(Provider, assistant::Status),
+    SetUpAssistant,
+    CancelAssistant,
+    Assistant(AssistantEvent),
 }
 
 const ICON_PNG: &[u8] = include_bytes!("../assets/brand/windows/podcast-monitor-icon-256.png");
@@ -180,8 +200,14 @@ fn decode_rgba(png_bytes: &[u8]) -> anyhow::Result<(Vec<u8>, u32, u32)> {
     Ok((rgba, frame.width, frame.height))
 }
 
-fn boot() -> Window {
-    open(shows::data_dir())
+fn boot() -> (Window, Task<Message>) {
+    let window = open(shows::data_dir());
+    let check = check_assistant(window.provider);
+    (window, check)
+}
+
+fn check_assistant(provider: Provider) -> Task<Message> {
+    Task::perform(async move { assistant::status(provider) }, move |status| Message::AssistantChecked(provider, status))
 }
 
 fn open(data_dir: PathBuf) -> Window {
@@ -225,6 +251,10 @@ fn open(data_dir: PathBuf) -> Window {
         model_ready,
         model_download: None,
         model_notice: None,
+        assistant: None,
+        assistant_step: None,
+        assistant_notice: None,
+        assistant_cancel: Arc::new(AtomicBool::new(false)),
         opener: open_with_system,
     }
 }
@@ -274,13 +304,6 @@ fn provider_name(provider: Provider) -> &'static str {
     }
 }
 
-fn program_name(provider: Provider) -> &'static str {
-    match provider {
-        Provider::Claude => "claude",
-        Provider::Codex => "codex",
-    }
-}
-
 fn gigabytes(megabytes: u64) -> String {
     format!("{:.1}", megabytes as f64 / 1024.0).replace('.', ",")
 }
@@ -305,6 +328,21 @@ fn stage_text(stage: Stage, provider: Provider) -> String {
     }
 }
 
+fn assistant_needed_text(provider: Provider) -> &'static str {
+    match provider {
+        Provider::Claude => "Para los resúmenes, la app necesita Claude. Se instala una sola vez y después inicias sesión con tu cuenta en el navegador. La app de escritorio de Claude no sirve para esto, pero la cuenta es la misma.",
+        Provider::Codex => "Para los resúmenes, la app necesita Codex, de ChatGPT. Se instala una sola vez y después inicias sesión con tu cuenta de ChatGPT en el navegador. La app de escritorio de ChatGPT no sirve para esto, pero la cuenta es la misma.",
+    }
+}
+
+fn assistant_failure_text(failure: assistant::Failure, provider: Provider) -> Option<String> {
+    match failure {
+        assistant::Failure::Install => Some(format!("No se pudo instalar {}. Revisa la conexión a internet y vuelve a intentarlo.", provider_name(provider))),
+        assistant::Failure::SignIn => Some(SIGN_IN_FAILED.into()),
+        assistant::Failure::Cancelled => None,
+    }
+}
+
 fn failure_text(failure: &Failure, provider: Provider) -> String {
     match failure {
         Failure::MissingModel(_) => MISSING_MODEL.into(),
@@ -313,8 +351,8 @@ fn failure_text(failure: &Failure, provider: Provider) -> String {
             provider_name(provider)
         ),
         Failure::MissingCli => format!(
-            "No se encontró el programa {}. Instálalo e inicia sesión una vez en la Terminal; luego usa Continuar.",
-            program_name(provider)
+            "No se encontró {}. Usa Instalar y conectar y luego Continuar.",
+            provider_name(provider)
         ),
         Failure::LowMemory => LOW_MEMORY.into(),
         Failure::Other => FAILED.into(),
@@ -344,6 +382,54 @@ fn begin(window: &mut Window, request: Request) -> Task<Message> {
         let _ = sender.unbounded_send(RunEvent::Finished(outcome));
     });
     Task::run(receiver, Message::Run)
+}
+
+fn begin_assistant_setup(window: &mut Window) -> Task<Message> {
+    if window.assistant_step.is_some() {
+        return Task::none();
+    }
+    let provider = window.provider;
+    window.assistant_notice = None;
+    window.assistant_step = Some(if window.assistant == Some(assistant::Status::Missing) { assistant::Step::Installing } else { assistant::Step::SigningIn });
+    window.assistant_cancel = Arc::new(AtomicBool::new(false));
+    let cancel = window.assistant_cancel.clone();
+    let (sender, receiver) = mpsc::unbounded();
+    std::thread::spawn(move || {
+        let steps = sender.clone();
+        let outcome = assistant::set_up(provider, &cancel, &|step| {
+            let _ = steps.unbounded_send(AssistantEvent::Step(step));
+        });
+        let _ = sender.unbounded_send(AssistantEvent::Finished(assistant::status(provider), outcome));
+    });
+    Task::run(receiver, Message::Assistant)
+}
+
+fn assistant_rows(window: &Window) -> Vec<Element<'_, Message>> {
+    let mut rows: Vec<Element<'_, Message>> = Vec::new();
+    let name = provider_name(window.provider);
+    match (window.assistant_step, window.assistant) {
+        (Some(step), _) => {
+            let line = match step {
+                assistant::Step::Installing => format!("Instalando {name}…"),
+                assistant::Step::SigningIn => SIGN_IN_NOW.to_string(),
+            };
+            rows.push(text(line).into());
+            rows.push(button(CANCEL).style(button::secondary).on_press(Message::CancelAssistant).into());
+        }
+        (None, Some(assistant::Status::Missing)) => {
+            rows.push(text(assistant_needed_text(window.provider)).into());
+            rows.push(button(SET_UP_ASSISTANT).on_press(Message::SetUpAssistant).into());
+        }
+        (None, Some(assistant::Status::SignedOut)) => {
+            rows.push(text(format!("Falta iniciar sesión en {name} con tu cuenta. Se hace una sola vez, en el navegador.")).into());
+            rows.push(button(SIGN_IN).on_press(Message::SetUpAssistant).into());
+        }
+        (None, _) => {}
+    }
+    if let Some(notice) = &window.assistant_notice {
+        rows.push(text(notice.clone()).into());
+    }
+    rows
 }
 
 fn begin_model_download(window: &mut Window) -> Task<Message> {
@@ -608,11 +694,17 @@ fn update(window: &mut Window, message: Message) -> Task<Message> {
         }
         Message::PickEpisode(id) => window.picked = Some(id),
         Message::Provider(provider) => {
+            if window.assistant_step.is_some() {
+                return Task::none();
+            }
             window.provider = provider;
+            window.assistant = None;
+            window.assistant_notice = None;
             log::info!("provider set to {provider:?}");
             if let Err(error) = job::save_settings(&window.data_dir, &Settings { provider, ..job::settings(&window.data_dir) }) {
                 log::error!("saving settings: {error:#}");
             }
+            return check_assistant(provider);
         }
         Message::Start => {
             let show = window.shows.iter().find(|show| window.selected.as_deref() == Some(show.feed.as_str())).cloned();
@@ -656,6 +748,23 @@ fn update(window: &mut Window, message: Message) -> Task<Message> {
                 Err(model::Failure::Interrupted) => MODEL_INTERRUPTED,
                 Err(model::Failure::Damaged) => MODEL_DAMAGED,
             });
+        }
+        Message::AssistantChecked(provider, status) => {
+            if provider == window.provider {
+                log::info!("{provider:?} status {status:?}");
+                window.assistant = Some(status);
+            }
+        }
+        Message::SetUpAssistant => return begin_assistant_setup(window),
+        Message::CancelAssistant => window.assistant_cancel.store(true, Ordering::Relaxed),
+        Message::Assistant(AssistantEvent::Step(step)) => window.assistant_step = Some(step),
+        Message::Assistant(AssistantEvent::Finished(status, outcome)) => {
+            window.assistant_step = None;
+            window.assistant = Some(status);
+            window.assistant_notice = match outcome {
+                Ok(()) => Some(format!("{} listo.", provider_name(window.provider))),
+                Err(failure) => assistant_failure_text(failure, window.provider),
+            };
         }
         Message::StartWeek => return begin_week(window),
         Message::ResumeNow => crate::memory::resume_now(),
@@ -788,12 +897,13 @@ fn run_panel(window: &Window) -> Element<'_, Message> {
     ]
     .spacing(16)
     .align_y(Alignment::Center);
-    let idle = idle(window) && window.model_ready;
+    let idle = idle(window) && window.model_ready && window.assistant == Some(assistant::Status::Ready);
     let start = button(START).on_press_maybe((idle && window.picked.is_some()).then_some(Message::Start));
     let week_label = if window.unfinished_week { CONTINUE_WEEK } else { START_WEEK };
     let start_week = button(week_label).on_press_maybe((idle && !window.shows.is_empty()).then_some(Message::StartWeek));
 
-    let mut panel = column(model_rows(window)).spacing(10);
+    let setup_rows = model_rows(window).into_iter().chain(assistant_rows(window));
+    let mut panel = column(setup_rows).spacing(10);
     panel = panel.push(text(EPISODES_HEADING).size(22)).push(boxed(list).height(Length::Fill)).push(assistant).push(row![start, start_week].spacing(8));
     if let Some(state) = &window.week {
         for line in week_stage_text(state, window.provider) {
@@ -992,6 +1102,7 @@ mod tests {
         });
         assert_eq!(window.provider, Provider::Codex);
         assert_eq!(window.picked, Some(episode().id()));
+        let _ = update(&mut window, Message::AssistantChecked(Provider::Codex, assistant::Status::Ready));
         drive(&mut window, |ui| {
             ui.click(START).unwrap();
         });
@@ -1115,6 +1226,47 @@ mod tests {
     }
 
     #[test]
+    fn a_missing_assistant_offers_setup_and_keeps_runs_off_until_it_is_ready() {
+        let dir = data_dir("assistant");
+        std::fs::create_dir_all(job::model_path(&dir).parent().unwrap()).unwrap();
+        std::fs::write(job::model_path(&dir), b"model").unwrap();
+        let mut window = open(dir.clone());
+        window.shows = vec![radio_duna()];
+        window.provider = Provider::Claude;
+        let _ = update(&mut window, Message::AssistantChecked(Provider::Claude, assistant::Status::Missing));
+        assert!(simulator(view(&window)).find(assistant_needed_text(Provider::Claude)).is_ok());
+        drive(&mut window, |ui| {
+            let _ = ui.click(START_WEEK);
+        });
+        assert!(window.week.is_none());
+
+        window.assistant_step = Some(assistant::Step::Installing);
+        assert!(simulator(view(&window)).find("Instalando Claude…").is_ok());
+        let _ = update(&mut window, Message::Assistant(AssistantEvent::Step(assistant::Step::SigningIn)));
+        assert!(simulator(view(&window)).find(SIGN_IN_NOW).is_ok());
+        let _ = update(&mut window, Message::Provider(Provider::Codex));
+        assert_eq!(window.provider, Provider::Claude);
+
+        let _ = update(&mut window, Message::Assistant(AssistantEvent::Finished(assistant::Status::SignedOut, Err(assistant::Failure::SignIn))));
+        assert!(simulator(view(&window)).find(SIGN_IN_FAILED).is_ok());
+        assert!(simulator(view(&window)).find(SIGN_IN).is_ok());
+
+        window.assistant_step = Some(assistant::Step::SigningIn);
+        let _ = update(&mut window, Message::Assistant(AssistantEvent::Finished(assistant::Status::Ready, Ok(()))));
+        assert!(simulator(view(&window)).find("Claude listo.").is_ok());
+        assert!(simulator(view(&window)).find(SET_UP_ASSISTANT).is_err());
+        assert_eq!(window.assistant, Some(assistant::Status::Ready));
+    }
+
+    #[test]
+    fn a_status_for_another_assistant_is_ignored() {
+        let mut window = open(data_dir("assistant-switch"));
+        window.provider = Provider::Codex;
+        let _ = update(&mut window, Message::AssistantChecked(Provider::Claude, assistant::Status::Ready));
+        assert_eq!(window.assistant, None);
+    }
+
+    #[test]
     fn a_missing_model_offers_the_download_and_keeps_runs_off_until_it_is_ready() {
         let dir = data_dir("model");
         let mut window = open(dir.clone());
@@ -1152,7 +1304,7 @@ mod tests {
     fn failures_read_in_spanish() {
         let missing = failure_text(&Failure::MissingModel(PathBuf::from("datos").join("models").join(job::MODEL_FILE)), Provider::Claude);
         assert_eq!(missing, "Falta el modelo de voz. Usa Descargar modelo y luego Continuar.");
-        assert!(failure_text(&Failure::MissingCli, Provider::Claude).contains("programa claude."));
+        assert_eq!(failure_text(&Failure::MissingCli, Provider::Claude), "No se encontró Claude. Usa Instalar y conectar y luego Continuar.");
         assert!(failure_text(&Failure::Limit, Provider::Claude).starts_with("Claude llegó a su límite de uso."));
     }
 

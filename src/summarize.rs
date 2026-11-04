@@ -13,13 +13,13 @@ use crate::names::Glossary;
 use crate::run::{read_json, write_json};
 
 #[cfg(windows)]
-fn hide_console(command: &mut Command) {
+pub fn hide_console(command: &mut Command) {
     use std::os::windows::process::CommandExt;
     command.creation_flags(windows_sys::Win32::System::Threading::CREATE_NO_WINDOW);
 }
 
 #[cfg(not(windows))]
-fn hide_console(_command: &mut Command) {}
+pub fn hide_console(_command: &mut Command) {}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, ValueEnum)]
 #[serde(rename_all = "lowercase")]
@@ -166,13 +166,12 @@ pub struct Cli {
 }
 
 impl Cli {
-    fn program(&self) -> &'static str {
-        match (self.provider, cfg!(windows)) {
-            (Provider::Claude, true) => "claude.cmd",
-            (Provider::Claude, false) => "claude",
-            (Provider::Codex, true) => "codex.cmd",
-            (Provider::Codex, false) => "codex",
-        }
+    fn program(&self) -> PathBuf {
+        let name = match self.provider {
+            Provider::Claude => "claude",
+            Provider::Codex => "codex",
+        };
+        crate::assistant::locate(self.provider).unwrap_or_else(|| PathBuf::from(name))
     }
 
     fn scratch(&self) -> Result<PathBuf> {
@@ -182,9 +181,10 @@ impl Cli {
     }
 
     fn call(&self, args: &[String], dir: &Path, prompt: &str) -> Result<String> {
-        log::debug!("calling {} with {args:?}, prompt {} chars", self.program(), prompt.chars().count());
+        let program = self.program();
+        log::debug!("calling {} with {args:?}, prompt {} chars", program.display(), prompt.chars().count());
         let started = std::time::Instant::now();
-        let mut command = Command::new(self.program());
+        let mut command = Command::new(&program);
         hide_console(&mut command);
         let mut child = command
             .args(args)
@@ -193,7 +193,7 @@ impl Cli {
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
-            .with_context(|| format!("starting {}", self.program()))?;
+            .with_context(|| format!("starting {}", program.display()))?;
         child.stdin.take().ok_or_else(|| anyhow!("no stdin"))?.write_all(prompt.as_bytes())?;
         let output = child.wait_with_output()?;
         let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
@@ -201,14 +201,14 @@ impl Cli {
             "{} exited with {} after {:.1} s
 stdout: {stdout}
 stderr: {}",
-            self.program(),
+            program.display(),
             output.status,
             started.elapsed().as_secs_f64(),
             String::from_utf8_lossy(&output.stderr)
         );
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(failure(format!("{} exited with {}: {}", self.program(), output.status, tail(&format!("{stdout}\n{stderr}"), 800))));
+            return Err(failure(format!("{} exited with {}: {}", program.display(), output.status, tail(&format!("{stdout}\n{stderr}"), 800))));
         }
         Ok(stdout)
     }
