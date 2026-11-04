@@ -10,7 +10,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 - Preprint of the measured results (speech-to-text speed, heard-as name fix, quote checks) on TechRxiv and engrXiv, chosen by Felipe; arXiv is out for lack of a sponsor. A session for it is set for 30 October 10:00.
 - Preprint measurements set by Felipe before writing, on the 28 saved episodes of the week of 26 October: every quote checked against its transcript, every name-fix change judged by hand by Felipe, 10 episodes timed in both speed settings plus 3 repeats of one. No word error rate, so the paper claims names, quotes and speed only.
 
-- Release exe (114 MB, one file) needs the Visual C++ runtime (MSVCP140, VCRUNTIME140, VCRUNTIME140_1), not present on every Windows; how the installer provides it is to be set with Felipe.
+- Release exe (114 MB, one file) needs the Visual C++ runtime (MSVCP140, VCRUNTIME140, VCRUNTIME140_1), not present on every Windows; Felipe chose to bundle Microsoft's vc_redist.x64.exe in the installer, run silently only when the runtime is missing.
 - Release exe links vulkan-1.dll, which only a GPU driver with Vulkan installs; a PC without it may not start the app. Not tested on such a PC.
 - Release exe carries no icon (no Windows resource is embedded); the `.ico` exists in `assets/brand/`.
 
