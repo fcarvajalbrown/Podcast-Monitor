@@ -15,7 +15,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 - Integrated-graphics plan chosen by Felipe: the installer ships Khronos's vulkan-1.dll next to the exe; check transcription falls back to the CPU when no Vulkan driver works; time Ep. 34 on integrated graphics. This laptop (Ryzen 7 7435HS, RTX 2050) has no integrated GPU, so that timing needs another PC; the CPU timing runs here.
 - CPU fallback checked: with Vulkan's loader pointed at a missing driver file (VK_DRIVER_FILES), whisper.cpp logs "no GPU found", loads the model on the CPU and the run goes on (log `2026-11-04_10-09-57_29212.log`).
 - vulkan-1.dll source chosen by Felipe: built from Khronos's open-source Vulkan-Loader (Apache 2.0), since the SDK only has it inside LunarG's Qt installer VulkanRT.exe, which 7-Zip cannot unpack.
-- Release exe carries no icon (no Windows resource is embedded); the `.ico` exists in `assets/brand/`.
+- Release exe carries no icon (no Windows resource is embedded); the `.ico` exists in `assets/brand/`. Felipe chose to embed the current icon in 0.1.0 (exe resource through winresource, window icon from the 256 px PNG); phase 8 swaps the image.
 
 ## Phases
 
