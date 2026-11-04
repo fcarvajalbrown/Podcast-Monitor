@@ -1341,6 +1341,39 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "writes the window images for the download page"]
+    fn writes_tour_images() {
+        let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("site").join("tour");
+        std::fs::create_dir_all(&dir).unwrap();
+        let data = std::env::temp_dir().join("podcast-monitor-gui-tour");
+        let _ = std::fs::remove_dir_all(&data);
+        let mut window = open(data);
+        window.model_ready = true;
+        window.assistant = Some(assistant::Status::Ready);
+        let size = Size::new(1000.0, 640.0);
+        let theme = iced::Theme::Light;
+        let snapshot = |window: &Window, name: &str| {
+            let path = dir.join(name);
+            let _ = std::fs::remove_file(&path);
+            let mut ui = iced_test::Simulator::with_size(Default::default(), size, view(window));
+            ui.snapshot(&theme).unwrap().matches_image(path).unwrap();
+        };
+        window.search_input = "nada personal".into();
+        window.confirming = Some(radio_duna());
+        snapshot(&window, "agregar.png");
+        window.search_input.clear();
+        window.confirming = None;
+        window.shows = vec![radio_duna()];
+        window.selected = Some(FEED.into());
+        window.episodes = vec![episode()];
+        window.picked = Some(episode().id());
+        snapshot(&window, "episodios.png");
+        window.status = Some(format!("Informe listo: «{}».", episode().title));
+        window.report = Some(PathBuf::from("informe.pdf"));
+        snapshot(&window, "listo.png");
+    }
+
+    #[test]
     #[ignore = "fetches the Nada Personal and Animales Politicos feeds over the network"]
     fn fetches_title_and_publisher_from_real_feeds() {
         let nada = fetch_show(FEED.into()).unwrap();
