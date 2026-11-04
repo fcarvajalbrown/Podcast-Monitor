@@ -2,6 +2,18 @@
 
 Todos los cambios de Podcast-Monitor, la app de escritorio que convierte episodios de podcasts chilenos en un informe PDF para leer en vez de escuchar. Formato de Keep a Changelog, versiones según SemVer 2.0.0.
 
+## [0.2.0]
+
+El programa prepara por sí mismo el asistente que escribe los resúmenes.
+
+### Añadido
+
+- Instalar y conectar instala Claude o Codex si falta y abre el navegador para iniciar sesión; si ya está instalado, no lo vuelve a instalar.
+
+### Corregido
+
+- El programa encuentra Claude y Codex instalados con el instalador oficial de cada uno.
+
 ## [0.1.0]
 
 Primera versión pública, para Windows. Transcribe en el propio computador cada episodio de los programas guardados y entrega un PDF con el resumen, los temas por tiempo al aire, las personas mencionadas y citas textuales con su minuto.
