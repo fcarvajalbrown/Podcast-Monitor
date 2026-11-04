@@ -15,7 +15,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 - Integrated-graphics plan chosen by Felipe: the installer ships Khronos's vulkan-1.dll next to the exe; check transcription falls back to the CPU when no Vulkan driver works; time Ep. 34 on integrated graphics. This laptop (Ryzen 7 7435HS, RTX 2050) has no integrated GPU, so that timing needs another PC; the CPU timing runs here.
 - CPU fallback checked: with Vulkan's loader pointed at a missing driver file (VK_DRIVER_FILES), whisper.cpp logs "no GPU found", loads the model on the CPU and the run goes on (log `2026-11-04_10-09-57_29212.log`).
 - CPU-only speed: Ep. 34 (78 min) in 4,295 s compute, 1.1x real time, greedy with flash attention, Ryzen 7 7435HS, release exe with no Vulkan driver visible (`tools/stt_speed/bench.sh` into `work/cpu-fallback`); the RTX 2050 takes 158 s. A reader on the CPU waits about as long as the episode lasts.
-- Installer 0.1.0 built by `tools/build/release-windows.sh` at a2efd0e: `work/installer/PodcastMonitor-windows-setup.exe`, 45,809,576 bytes, sha256 e5023f8c0aa821264129a3c97d7cb792c98a6ec8ddf8db6e37940f424f65b048; the exe carries the icon, vulkan-1.dll built from Khronos tag vulkan-sdk-1.4.363.0 (its version field reads "Dev Build"). Not yet installed on any PC.
+- Installer 0.1.0 built by `tools/build/release-windows.sh` at a2efd0e: `work/installer/PodcastMonitor-windows-setup.exe`, 45,809,576 bytes, sha256 e5023f8c0aa821264129a3c97d7cb792c98a6ec8ddf8db6e37940f424f65b048; the exe carries the icon, vulkan-1.dll built from Khronos tag vulkan-sdk-1.4.363.0 (its version field reads "Dev Build"). Installed on this PC: files in `C:\Program Files\Podcast-Monitor`, both Start menu shortcuts, window title "Podcast-Monitor 0.1.0", logo in title bar and taskbar (seen by Felipe); the silent uninstall removed the folder and shortcuts and kept the app-data folder. The VC++ runtime step was skipped here, the runtime being present, so it is not yet seen running on a PC without it.
 - vulkan-1.dll source chosen by Felipe: built from Khronos's open-source Vulkan-Loader (Apache 2.0), since the SDK only has it inside LunarG's Qt installer VulkanRT.exe, which 7-Zip cannot unpack.
 - Release exe carries no icon (no Windows resource is embedded); the `.ico` exists in `assets/brand/`. Felipe chose to embed the current icon in 0.1.0 (exe resource through winresource, window icon from the 256 px PNG); phase 8 swaps the image.
 
@@ -160,6 +160,6 @@ Asked by Felipe: a public download page at https://podcastmonitor.copiapolabs.cl
 |---|---|---|
 | 1 | Model download on first run: the window fetches `ggml-large-v3-turbo.bin` into the app-data folder, with progress | Done |
 | 2 | Version shown in the window title, "Podcast-Monitor 0.1.0" from Cargo.toml; first public release is 0.1.0, set by Felipe | Done |
-| 3 | First release: CHANGELOG entry, git tag, Windows installer built with Inno Setup | Not Started |
+| 3 | First release: CHANGELOG entry, git tag, Windows installer built with Inno Setup | Done |
 | 4 | Page in Spanish with Cuña-Cutter's layout and colours, guide, out of indexes | Not Started |
 | 5 | Upload to podcastmonitor.copiapolabs.cl, every link checked | Not Started |
