@@ -4,6 +4,7 @@ Scope and decisions: `docs/PRD.md`. Findings: `docs/research/`. Finished items: 
 
 ## Open items
 
+- Project horizon set by Felipe on 2026-11-04: 0.1.0 goes out to beta testers; if nobody uses it within a couple of months (around January 2027), the project is released as open source and closed. Integrated-GPU timing and the VC++ runtime step on a clean PC wait on those testers.
 - Episode report not yet reshaped to the reader's comments: topics in minutes (she asked percent only), 28 topics, 41 people with 10 at 0, 4 pages for Ep. 34 (`docs/research/reader-feedback.md`). Scope to be set with Felipe.
 - The weekly report the reader approved (`work/sent/2026-10-29-semanal-semana-2026-10-26-cli-conclusiones.pdf`) stays as it is: Felipe set it as the report that matters most, read every Monday early morning.
 - Glossary improvements get a session of their own to study them, set by Felipe.
